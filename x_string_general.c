@@ -245,34 +245,39 @@ int32_t	xstrindex(char * key, char * array[], bool Exact) {
 
 /**
  * xStringParseEncoded()
- * @brief	parse an encoded string in-place to the non-encoded string
+ * @brief	parse an encoded string (optionally in-place) to a non-encoded string
  * @return	erFAILURE if illegal/unexpected characters encountered
  * 			erSUCCESS if a zero length string encountered
  * 			1 or greater = length of the parsed string
  */
-int32_t	xStringParseEncoded(char * pStr) {
-	char * pRead	= pStr ;
+int32_t	xStringParseEncoded(char * pStr, char * pDst) {
+	IF_myASSERT(debugPARAM, INRANGE_SRAM(pStr)) ;
 	int32_t iRetVal = 0 ;
+	if (pDst == NULL) {
+		pDst	= pStr ;
+	} else {
+		IF_myASSERT(debugPARAM, INRANGE_SRAM(pDst)) ;
+	}
 	IF_PRINT(debugPARSE_ENCODED, "%s  ", pStr) ;
-	while(*pRead != 0) {
-		if (*pRead == CHR_PERCENT) {					// escape char?
-			int32_t Val1 = xHexCharToValue(*++pRead) ;
+	while(*pStr != 0) {
+		if (*pStr == CHR_PERCENT) {						// escape char?
+			int32_t Val1 = xHexCharToValue(*++pStr) ;	// yes, parse 1st value
 			if (Val1 == erFAILURE) {
 				return erFAILURE ;
 			}
-			int32_t Val2 = xHexCharToValue(*++pRead) ;
+			int32_t Val2 = xHexCharToValue(*++pStr) ;	// parse 2nd value
 			if (Val2 == erFAILURE) {
 				return erFAILURE ;
 			}
 			IF_PRINT(debugPARSE_ENCODED, "[%d+%d=%d]  ", Val1, Val2, (Val1 << 4) + Val2) ;
-			*pStr++ = (Val1 << 4) + Val2 ;
-			++pRead ;									// no, skip over source
+			*pDst++ = (Val1 << 4) + Val2 ;				// calc & store final value
+			++pStr ;									// step to next char
 		} else {
-			*pStr++ = *pRead++ ;						// copy as is to (new) position
+			*pDst++ = *pStr++ ;							// copy as is to (new) position
 		}
 		++iRetVal ;										// & adjust count...
 	}
-	*pStr = CHR_NUL ;								// terminate
+	*pDst = CHR_NUL ;									// terminate
 	IF_PRINT(debugPARSE_ENCODED, "%s\n", pStr-iRetVal) ;
 	return iRetVal ;
 }

@@ -84,7 +84,7 @@ int32_t xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) ;
 int32_t	xstrcmp(const char * s1, const char * s2, bool Exact) ;
 int32_t	xstrindex(char * key, char * array[], bool Exact) ;
 
-int32_t	xStringParseEncoded(char * pStr) ;
+int32_t	xStringParseEncoded(char * pStr, char * pDst) ;
 int32_t	xStringSkipDelim(char * pSrc, const char * pDel, int32_t MaxLen) ;
 char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int32_t flag, int32_t MaxLen) ;
 char *	pcStringParseDateTime(char * buf, uint64_t * pTStamp, struct tm *ptm) ;
