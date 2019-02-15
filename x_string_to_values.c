@@ -32,7 +32,7 @@
 
 #include	<math.h>
 
-#define	debugFLAG				0x0000
+#define	debugFLAG				0x4000
 #define	debugPARSE_U64			(debugFLAG & 0x0001)
 #define	debugPARSE_F64			(debugFLAG & 0x0002)
 #define	debugPARSE_X64			(debugFLAG & 0x0004)
@@ -81,8 +81,8 @@ int32_t	xHexCharToValue(uint8_t cChr) {
 	} else 	if (INRANGE(CHR_a, cChr, CHR_f, uint8_t)) {
 		return cChr - CHR_a + 10 ;
 	}
-	SL_ERR("chr='%c'", cChr) ;
-	myASSERT(0) ;
+	SL_ERR("chr= 0x%x '%c'", cChr, cChr) ;		// TODO: CHECK !!!!
+//	IF_myASSERT(debugPARAM, 0) ;
 	return erFAILURE ;
 }
 
@@ -94,6 +94,7 @@ uint64_t xStringParseX64(char *pSrc, uint8_t * pDst, uint32_t xLen) {
 	while (xLen) {
 		iRetVal = xHexCharToValue(*pSrc) ;
 		if (iRetVal == erFAILURE) {						// invalid char
+			SL_ERR("Invalid source Src=%s  Dst=%s", pSrc, pDst) ;
 			break ;										// yes, stop parsing
 		}
 		x8Value += iRetVal ;							// nope, add to value
@@ -108,7 +109,6 @@ uint64_t xStringParseX64(char *pSrc, uint8_t * pDst, uint32_t xLen) {
 		++pSrc ;
 		--xLen ;
 	}
-	IF_PRINT(debugPARSE_X64, " -> 0x%llx\n", xTemp) ;
 	return xTemp ;
 }
 
@@ -252,20 +252,11 @@ char *	pcStringParseValue(char * pSrc, p32_t p32Pntr, varform_t VarForm, varsize
 		x64Val	= xValuesScaleX64(x64Val, VarForm, VarSize) ;
 	}
 	switch(VarSize) {
-	case vs08B:
-		*p32Pntr.pu8	= x64Val.u8[0] ;
-		break ;
-	case vs16B:
-		*p32Pntr.pu16	= x64Val.u16[0] ;
-		break ;
-	case vs32B:
-		*p32Pntr.pu32	= x64Val.u32[0] ;
-		break ;
-	case vs64B:
-		*p32Pntr.pu64	= x64Val.u64 ;
-		break ;
-	default:
-		myASSERT(0) ;
+	case vs08B:	*p32Pntr.pu8	= x64Val.u8[0] ;		break ;
+	case vs16B:	*p32Pntr.pu16	= x64Val.u16[0] ;		break ;
+	case vs32B:	*p32Pntr.pu32	= x64Val.u32[0] ;		break ;
+	case vs64B:	*p32Pntr.pu64	= x64Val.u64 ;			break ;
+	default:	SL_ERR(debugAPPL_PLACE) ;
 	}
 	IF_EXEC_4(debugPARSE_VALUE, vValuesReportXxx, NULL, p32Pntr, VarForm, VarSize) ;
 	return ptr1 ;
@@ -307,9 +298,9 @@ char *	pcStringParseValueRange(char * pSrc, p32_t p32Pntr, varform_t VarForm, va
 		}
 		break ;
 	case vfSXX:
-		myASSERT(0) ;
+	default:
+		SL_ERR(debugAPPL_PLACE) ;
 		return pcFAILURE ;
-		break ;
 	}
 	vValuesStoreX64_Xxx(x64Val, p32Pntr, VarForm, VarSize) ;
 	return ptr1 ;
@@ -321,20 +312,11 @@ char *	 ptr1 ;
 		ptr1	= pcStringParseValue(pSrc, p32Pntr, VarForm, VarSize, pDel) ;
 		CHECK_RETURN(ptr1, pcFAILURE)
 		switch(VarSize) {								// adjust the pointer based on the size of the destination storage
-		case vs08B:
-			++p32Pntr.px8 ;
-			break ;
-		case vs16B:
-			++p32Pntr.px16 ;
-			break ;
-		case vs32B:
-			++p32Pntr.px32 ;
-			break ;
-		case vs64B:
-			++p32Pntr.px64 ;
-			break ;
-		default:
-			myASSERT(0) ;
+		case vs08B:	++p32Pntr.px8 ;				break ;
+		case vs16B:	++p32Pntr.px16 ;			break ;
+		case vs32B:	++p32Pntr.px32 ;			break ;
+		case vs64B:	++p32Pntr.px64 ;			break ;
+		default:	SL_ERR(debugAPPL_PLACE) ;
 		}
 		pSrc	= ptr1 ;								// set starting pointer ready for the next
 	}

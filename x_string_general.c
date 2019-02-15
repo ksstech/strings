@@ -30,7 +30,7 @@
 
 #include	<string.h>
 
-#define	debugFLAG						0x4000
+#define	debugFLAG						0xC000
 
 #define	debugXSTRCMP					(debugFLAG & 0x0001)
 #define	debugPARSE_U64					(debugFLAG & 0x0002)
@@ -91,7 +91,7 @@ int32_t l = 0;
 		l++ ;
 	}
 	PRINT("  l=%d\n", l) ;
-	myASSERT(l < len) ;
+	IF_myASSERT(debugRESULT, l < len) ;
 	return l ;
 }
 
@@ -298,7 +298,7 @@ int32_t	xStringSkipDelim(char * pSrc, const char * pDel, int32_t MaxLen) {
 // If no length supplied
 	if (MaxLen == 0) {
 		MaxLen = xstrnlen(pSrc, stringGENERAL_MAX_LEN) ;// assume NULL terminated and calculate length
-		myASSERT(MaxLen < stringGENERAL_MAX_LEN) ;		// just a check to verify not understated
+		IF_myASSERT(debugRESULT, MaxLen < stringGENERAL_MAX_LEN) ;		// just a check to verify not understated
 	}
 
 // continue skipping over valid terminator characters
@@ -364,9 +364,7 @@ char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int32_t f
  *					Fri Dec 31 23:59:59 1999
  */
 char *	pcStringParseDateTime(char * pBuf, uint64_t * pTStamp, struct tm * psTM) {
-	IF_myASSERT(debugPARAM, INRANGE_MEM(psTM)) ;
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(pTStamp)) ;
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(psTM)) ;
+	IF_myASSERT(debugPARAM, INRANGE_MEM(psTM) && INRANGE_SRAM(pTStamp) && INRANGE_SRAM(psTM)) ;
 	memset(psTM, 0, sizeof(struct tm)) ;				// ensure all start as 0
 // make sure no leading spaces ....
 	while (*pBuf == CHR_SPACE) {
@@ -582,35 +580,37 @@ int32_t	xBitMapDecode(uint32_t Value, uint32_t Mask, const char * pMesArray[], c
 	return BufLen ;
 }
 
-/*
+/**
  * vBitMapDecode() - decodes a bitmapped value using a bit-mapped mask
  * @brief
- * @param[in]		Value - 32bit value to the decoded
- * @param[in]		Mask - 32bit mask to be applied
- * @param[in]		pMesArray - pointer to array of messages (1 per bit SET in the mask)
- * return			none
+ * @param	Value - 32bit value to the decoded
+ * @param	Mask - 32bit mask to be applied
+ * @param	pMesArray - pointer to array of messages (1 per bit SET in the mask)
+ * return	none
  */
 void	vBitMapDecode(uint32_t Value, uint32_t Mask, const char * pMesArray[]) {
-int32_t	pos, idx ;
-uint32_t	CurMask ;
-	for (pos = 31, idx = 0, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, pos--) {
-		if (CurMask & Mask & Value) {
-			PRINT(" |%02d|%s|", pos, pMesArray[idx]) ;
-		}
-		if (CurMask & Mask) {
-			idx++ ;
+	int32_t	pos, idx ;
+	uint32_t	CurMask ;
+	if (Mask) {
+		for (pos = 31, idx = 0, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos) {
+			if (CurMask & Mask & Value) {
+				PRINT(" |%02d|%s|", pos, pMesArray[idx]) ;
+			}
+			if (CurMask & Mask) {
+				idx++ ;
+			}
 		}
 	}
 }
 
-/*
+/**
  * vBitMapReport() - decodes a bitmapped value using a bitmapped mask
- * @brief			if pName is 0, the hex value will not be displayed and lo postpend CR/LF will be added
- * @param[in]		pName - Pointer to the name/label prefixed to the decoded starting output
- * @param[in]		Value - 32bit value to the decoded
- * @param[in]		Mask - 32bit mask to be applied
- * @param[in]		pMesArray - pointer to array of messages (1 per bit SET in the mask)
- * return			none
+ * @brief	if pName is 0, the hex value will not be displayed and no postpend CR/LF will be added
+ * @param	pName - Pointer to the name/label prefixed to the decoded starting output
+ * @param	Value - 32bit value to the decoded
+ * @param	Mask - 32bit mask to be applied
+ * @param	pMesArray - pointer to array of messages (1 per bit SET in the mask)
+ * return	none
  */
 void	vBitMapReport(char * pName, uint32_t Value, uint32_t Mask, const char * pMesArray[]) {
 	IF_myASSERT(debugPARAM, INRANGE_MEM(pMesArray)) ;
@@ -623,6 +623,15 @@ void	vBitMapReport(char * pName, uint32_t Value, uint32_t Mask, const char * pMe
 	}
 }
 
+/**
+ * xStringValueMap() - build an output string using bit-mapped mask to select characters from a source string
+ * @brief	with source string "ABCDEFGHIJKLMNOPQRST" and value 0x000AAAAA will build "A-C-E-G-I-K-M-O-Q-S-"
+ * @param	pString
+ * @param	pBuf
+ * @param	uValue
+ * @param	iWidth
+ * @return
+ */
 int32_t	xStringValueMap(const char * pString, char * pBuf, uint32_t uValue, int32_t iWidth) {
 	IF_myASSERT(debugPARAM, INRANGE_FLASH(pString) && INRANGE_SRAM(pBuf) && (iWidth <= 32) && (strnlen(pString, 33) <= iWidth)) ;
 	uint32_t uMask = 0x8000 >> (32 - iWidth) ;
