@@ -80,9 +80,10 @@ int32_t	xHexCharToValue(uint8_t cChr) {
 		return cChr - CHR_A + 10 ;
 	} else 	if (INRANGE(CHR_a, cChr, CHR_f, uint8_t)) {
 		return cChr - CHR_a + 10 ;
+	} else if (cChr == CHR_O || cChr == CHR_o) {		// MUST EVENTUALLY REMOVE
+		return 0 ;										// TEMP fix for capture error
 	}
 	SL_ERR("chr= 0x%x '%c'", cChr, cChr) ;		// TODO: CHECK !!!!
-//	IF_myASSERT(debugPARAM, 0) ;
 	return erFAILURE ;
 }
 
