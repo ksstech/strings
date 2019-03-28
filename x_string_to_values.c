@@ -53,25 +53,23 @@
  * 				If only converted value required as return, *d can be made NULL ;
  */
 uint64_t char2u64(uint8_t * pSrc, uint64_t * pDst, uint32_t Len) {
-uint64_t	v = 0ULL ;
 	IF_myASSERT(debugPARAM, pSrc && INRANGE(1, Len, 8, uint32_t)) ;
+	uint64_t	x64Val = 0ULL ;
 	while (Len--) {
-		v <<= 8 ;
-		v += (uint64_t) *pSrc++ ;
+		x64Val <<= 8 ;
+		x64Val += (uint64_t) *pSrc++ ;
 	}
 	if (pDst) {
-		*pDst = v ;
+		*pDst = x64Val ;
 	}
-	return v ;
+	return x64Val ;
 }
 
-/*
- *	xHexCharToValue()
- *  \brief  	Convert ASCI character to hexadecimal value
- *  			Handle both upper and lower case input
- *  \param  	cChr is the ASCII data
- *	\return 	if valid value, 0x00 -> 0x0F
- *				if invalid rreturns (-1)
+/**
+ * xHexCharToValue() - Convert ASCI character to [hexa]decimal value, both upper and lower case input
+ * @param cChr		ASCII data
+ * @param xBase		base to handle 10/16
+ * @return			if valid value, 0x00 -> 0x09 [0x0F] else -1
  */
 int32_t	xHexCharToValue(uint8_t cChr, int32_t xBase) {
 	if (INRANGE(CHR_0, cChr, CHR_9, uint8_t)) {
@@ -227,7 +225,7 @@ char *	pcStringParseF64(char *pSrc, double * pDst, int32_t * pSign, const char *
 	if (*pSign < 0) {
 		*pDst *= -1.0 ;
 	}
-	IF_SL_DBG(debugPARSE_F64, "Input: %*s dInt=%f dFrac=%f Scale=%d SubScale=%d F64=%f", pTmp - pSrc, pSrc, dVal, dFrac, scale, subscale, *pDst) ;
+	IF_PRINT(debugPARSE_F64, "Input: %*s dInt=%f dFrac=%f Scale=%d SubScale=%d F64=%f\n", pTmp - pSrc, pSrc, dVal, dFrac, scale, subscale, *pDst) ;
 	return pTmp ;
 }
 
@@ -248,10 +246,11 @@ char *	pcStringParseX64(char * pSrc, x64_t * px64Val, varform_t VarForm, const c
 		ptr1	= pcStringParseU64(pSrc, p32Pntr.pu64, &Sign, pDel) ;
 	}
 	CHECK_RETURN(ptr1, pcFAILURE)
-// ensure NO SIGN is specified if unsigned is requested, and no error returned
-	if ((Sign != 0) && (VarForm == vfUXX)) {
+
+	// ensure NO SIGN is specified if unsigned is requested, and no error returned
+	if (Sign && (VarForm == vfUXX)) {
 		*p32Pntr.pu64	= 0ULL ;
-		SL_ERR("+/- found") ;
+		SL_ERR("Uxx cannot have +/- sign") ;
 		return pcFAILURE ;
 	}
 	if ((VarForm == vfIXX) && (Sign == -1)) {
@@ -261,13 +260,17 @@ char *	pcStringParseX64(char * pSrc, x64_t * px64Val, varform_t VarForm, const c
 }
 
 char *	pcStringParseValue(char * pSrc, p32_t p32Pntr, varform_t VarForm, varsize_t VarSize, const char * pDel) {
+	// assume we might find a 64bit value, so plan accordingly
 	x64_t	x64Val ;
 	char * ptr1	= pcStringParseX64(pSrc, &x64Val, VarForm, pDel) ;
 	CHECK_RETURN(ptr1, pcFAILURE)
 
+	// if what we were asked to scan is less than 64bit in size, scale it up/down...
 	if (VarSize < vs64B) {
 		x64Val	= xValuesScaleX64(x64Val, VarForm, VarSize) ;
 	}
+
+	// store at destination based on size
 	switch(VarSize) {
 	case vs08B:	*p32Pntr.pu8	= x64Val.u8[0] ;		break ;
 	case vs16B:	*p32Pntr.pu16	= x64Val.u16[0] ;		break ;
@@ -294,10 +297,11 @@ char *	pcStringParseValueRange(char * pSrc, p32_t p32Pntr, varform_t VarForm, va
 	x64_t	x64Val ;
 	char * ptr1	= pcStringParseX64(pSrc, &x64Val, VarForm, pDel) ;
 	CHECK_RETURN(ptr1, pcFAILURE)
-// Lo & Hi values MUST be full 32bit width..
+
+	// Lo & Hi values MUST be full 32bit width..
 	x64_t x64Lo = xValuesUpscaleX32_X64(x32Lo, VarForm) ;
 	x64_t x64Hi = xValuesUpscaleX32_X64(x32Hi, VarForm) ;
-	IF_SL_DBG(debugPARSE_VALUE, "%.*s=%lld Lo=%lld Hi=%lld", ptr1 - pSrc, pSrc, x64Val, x64Lo, x64Hi) ;
+	IF_PRINT(debugPARSE_VALUE, " %.*s=%lld Lo=%lld Hi=%lld", ptr1 - pSrc, pSrc, x64Val, x64Lo, x64Hi) ;
 	switch(VarForm) {
 	case vfUXX:
 		if ((x64Val.u64 < x64Lo.u64) || (x64Val.u64 > x64Hi.u64)) {
@@ -324,9 +328,8 @@ char *	pcStringParseValueRange(char * pSrc, p32_t p32Pntr, varform_t VarForm, va
 }
 
 char *	pcStringParseValues(char * pSrc, p32_t p32Pntr, varform_t VarForm, varsize_t VarSize, const char * pDel, int32_t Count) {
-char *	 ptr1 ;
 	while(Count--) {
-		ptr1	= pcStringParseValue(pSrc, p32Pntr, VarForm, VarSize, pDel) ;
+		char * ptr1	= pcStringParseValue(pSrc, p32Pntr, VarForm, VarSize, pDel) ;
 		CHECK_RETURN(ptr1, pcFAILURE)
 		switch(VarSize) {								// adjust the pointer based on the size of the destination storage
 		case vs08B:	++p32Pntr.px8 ;				break ;
@@ -341,7 +344,7 @@ char *	 ptr1 ;
 }
 
 char *	pcStringParseNumber(int32_t * i32Ptr, char * pSrc) {
-char * pTmp = pSrc ;
+	char * pTmp = pSrc ;
 	*i32Ptr = 0 ;
 	while (*pSrc && INRANGE(CHR_0, *pSrc, CHR_9, int32_t)) {
 		*i32Ptr	*= 10 ;
@@ -361,7 +364,7 @@ char *	pcStringParseIpAddr(char * pStr, uint32_t * pVal) {
 	for(int32_t Idx = 0; Idx < 4; ++Idx) {
 		uint32_t u32Val = 0 ;
 		pStr = pcStringParseValueRange(pStr, (p32_t) &u32Val, vfUXX, vs32B, (Idx < 3) ? "." : "\0", (x32_t) 0, (x32_t) 255) ;
-//		CPRINT("Idx=%d  '%s'  0x%08x  %-I  ", Idx, pStr, u32Val, u32Val) ;
+//		PRINT("Idx=%d  '%s'  0x%08x  %-I  ", Idx, pStr, u32Val, u32Val) ;
 		if (pStr == pcFAILURE) {
 			return pStr ;
 		}

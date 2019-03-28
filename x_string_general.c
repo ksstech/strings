@@ -296,18 +296,22 @@ int32_t	xStringParseEncoded(char * pStr, char * pDst) {
  */
 int32_t	xStringSkipDelim(char * pSrc, const char * pDel, int32_t MaxLen) {
 	IF_myASSERT(debugPARAM, INRANGE_MEM(pSrc) && INRANGE_MEM(pDel)) ;
-// If no length supplied
+
+	// If no length supplied
 	if (MaxLen == 0) {
 		MaxLen = xstrnlen(pSrc, stringGENERAL_MAX_LEN) ;// assume NULL terminated and calculate length
 		IF_myASSERT(debugRESULT, MaxLen < stringGENERAL_MAX_LEN) ;		// just a check to verify not understated
 	}
 
-// continue skipping over valid terminator characters
+	IF_PRINT(debugDELIM, " '%.4s'", pSrc) ;
+	// continue skipping over valid terminator characters
 	int32_t	CurLen = 0 ;
 	while ((xinstring(pDel, *pSrc) != erFAILURE) && (CurLen < MaxLen)) {
-		pSrc++ ;
-		CurLen++ ;
+		++pSrc ;
+		++CurLen ;
 	}
+
+	IF_PRINT(debugDELIM, "->'%.4s'", pSrc) ;
 	return CurLen ;								// number of delimiters skipped over
 }
 
@@ -333,7 +337,7 @@ char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int32_t f
 	MaxLen	-= CurLen ;
 	pSrc	+= CurLen ;
 
-	while ((*pSrc != CHR_NUL) && MaxLen--) {			// while not separator/terminator char or end of string
+	while (*pSrc && MaxLen--) {							// while not separator/terminator char or end of string
 		if (xinstring(pDel, *pSrc) != erFAILURE)	{	// check if current char a delim
 			break ;										// yes, all done...
 		}
