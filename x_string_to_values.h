@@ -34,7 +34,7 @@ extern "C" {
 
 uint64_t char2u64(uint8_t *, uint64_t *, uint32_t) ;
 uint64_t xStringParseX64(char *pSrc, uint8_t * pDst, uint32_t xLen) ;
-int32_t	xHexCharToValue(uint8_t) ;
+int32_t	xHexCharToValue(uint8_t, int32_t) ;
 
 char *	pcStringParseU64(char * pSrc, uint64_t * pVal, int32_t * pSign, const char * pDel) ;
 char *	pcStringParseF64(char *str, double * pDst, int32_t * pSign, const char * pDel) ;

@@ -73,17 +73,22 @@ uint64_t	v = 0ULL ;
  *	\return 	if valid value, 0x00 -> 0x0F
  *				if invalid rreturns (-1)
  */
-int32_t	xHexCharToValue(uint8_t cChr) {
+int32_t	xHexCharToValue(uint8_t cChr, int32_t xBase) {
 	if (INRANGE(CHR_0, cChr, CHR_9, uint8_t)) {
 		return cChr - CHR_0 ;
-	} else 	if (INRANGE(CHR_A, cChr, CHR_F, uint8_t)) {
-		return cChr - CHR_A + 10 ;
-	} else 	if (INRANGE(CHR_a, cChr, CHR_f, uint8_t)) {
-		return cChr - CHR_a + 10 ;
-	} else if (cChr == CHR_O || cChr == CHR_o) {		// MUST EVENTUALLY REMOVE
-		return 0 ;										// TEMP fix for capture error
 	}
-	SL_ERR("chr= 0x%x '%c'", cChr, cChr) ;		// TODO: CHECK !!!!
+	if (xBase == BASE16) {
+		if (INRANGE(CHR_A, cChr, CHR_F, uint8_t)) {
+			return cChr - CHR_A + 10 ;
+		}
+		if (INRANGE(CHR_a, cChr, CHR_f, uint8_t)) {
+			return cChr - CHR_a + 10 ;
+		}
+		if (cChr == CHR_O || cChr == CHR_o) {		// AMM TEMP fix for capture error
+			SL_ERR("chr= 0x%x '%c'", cChr, cChr) ;
+			return 0 ;
+		}
+	}
 	return erFAILURE ;
 }
 
@@ -91,14 +96,14 @@ uint64_t xStringParseX64(char *pSrc, uint8_t * pDst, uint32_t xLen) {
 	IF_PRINT(debugPARSE_X64, "%.*s", xLen, pSrc) ;
 	uint64_t xTemp = 0 ;
 	uint8_t	x8Value = 0 ;
-	int32_t iRetVal ;
-	while (xLen) {
-		iRetVal = xHexCharToValue(*pSrc) ;
-		if (iRetVal == erFAILURE) {						// invalid char
+	int32_t iRV ;
+	while (xLen && *pSrc) {
+		iRV = xHexCharToValue(*pSrc, BASE16) ;
+		if (iRV == erFAILURE) {						// invalid char
 			SL_ERR("Invalid source Src=%s  Dst=%s", pSrc, pDst) ;
 			break ;										// yes, stop parsing
 		}
-		x8Value += iRetVal ;							// nope, add to value
+		x8Value += iRV ;							// nope, add to value
 		if (xLen % 2) {									// odd length boundary?
 			xTemp	<<= 8 ;
 			xTemp += x8Value ;
@@ -127,28 +132,39 @@ uint64_t xStringParseX64(char *pSrc, uint8_t * pDst, uint32_t xLen) {
  */
 char *	pcStringParseU64(char * pSrc, uint64_t * pDst, int32_t * pSign, const char * pDel) {
 	IF_myASSERT(debugPARAM, INRANGE_SRAM(pSign) && INRANGE_SRAM(pDst) && INRANGE_MEM(pSrc) && INRANGE_MEM(pDel)) ;
+	*pSign 	= 0 ;						// set sign as not provided
+	uint64_t	Base = 10 ;				// default to decimal
 	pSrc += xStringSkipDelim(pSrc, pDel, sizeof("+18,446,744,073,709,551,615")) ;
-// check for sign at start
+
+	// check for sign at start
 	if (*pSrc == CHR_MINUS) {			// NEGative sign?
 		*pSign = -1 ;					// yes, flag accordingly
-		pSrc++ ;						// & skip over sign
+		++pSrc ;						// & skip over sign
 
 	} else if (*pSrc == CHR_PLUS) {		// POSitive sign?
 		*pSign = 1 ;					// yes, flag accordingly
-		pSrc++ ;						// & skip over sign
+		++pSrc ;						// & skip over sign
 
-	} else {
-		*pSign = 0 ;					// set sign as not provided
+	} else if (*pSrc == CHR_X || *pSrc == CHR_x) {	// HEXadecimal format ?
+		Base = 16 ;
+		++pSrc ;						// & skip over hex format
 	}
-// ensure something there to parse
-	if (INRANGE(CHR_0, *pSrc, CHR_9, uint8_t) == 0) {
+
+	// ensure something there to parse
+	if (xHexCharToValue(*pSrc, Base) == erFAILURE) {
 		return pcFAILURE ;
 	}
-// now scan string and convert to value
+
+	// now scan string and convert to value
 	*pDst = 0ULL ;						// set default value as ZERO
-	while (*pSrc && INRANGE(CHR_0, *pSrc, CHR_9, uint8_t)) {
-		*pDst *= 10 ;
-		*pDst += *pSrc++ - CHR_0 ;
+	int32_t		Value ;
+	while (*pSrc) {
+		if ((Value = xHexCharToValue(*pSrc, Base)) == erFAILURE) {
+			break ;
+		}
+		*pDst *= Base ;
+		*pDst += Value ;
+		++pSrc ;
 	}
 	return pSrc ;
 }

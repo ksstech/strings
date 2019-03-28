@@ -43,6 +43,7 @@
 #define	debugPARSE_TRACK				(debugFLAG & 0x0080)
 
 #define	debugPARSE_ENCODED				(debugFLAG & 0x0100)
+#define	debugDELIM						(debugFLAG & 0x0200)
 
 #define	debugPARAM						(debugFLAG & 0x4000)
 #define	debugRESULT						(debugFLAG & 0x8000)
@@ -261,11 +262,11 @@ int32_t	xStringParseEncoded(char * pStr, char * pDst) {
 	IF_PRINT(debugPARSE_ENCODED, "%s  ", pStr) ;
 	while(*pStr != 0) {
 		if (*pStr == CHR_PERCENT) {						// escape char?
-			int32_t Val1 = xHexCharToValue(*++pStr) ;	// yes, parse 1st value
+			int32_t Val1 = xHexCharToValue(*++pStr, BASE16) ;	// yes, parse 1st value
 			if (Val1 == erFAILURE) {
 				return erFAILURE ;
 			}
-			int32_t Val2 = xHexCharToValue(*++pStr) ;	// parse 2nd value
+			int32_t Val2 = xHexCharToValue(*++pStr, BASE16) ;	// parse 2nd value
 			if (Val2 == erFAILURE) {
 				return erFAILURE ;
 			}
