@@ -324,7 +324,7 @@ int32_t	xStringSkipDelim(char * pSrc, const char * pDel, int32_t MaxLen) {
  * @return		pointer to next character to be processed...
  */
 char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int32_t flag, int32_t MaxLen) {
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(pDst) && INRANGE_SRAM(pSrc) && INRANGE_MEM(pDel)) ;
+	IF_myASSERT(debugPARAM, INRANGE_SRAM(pDst) && INRANGE_MEM(pSrc) && INRANGE_MEM(pDel)) ;
 	// If no length supplied
 	if (MaxLen == 0) {
 		MaxLen = strlen((const char *) pSrc) ;	// assume NULL terminated and calculate length
