@@ -52,7 +52,7 @@ extern "C" {
 
 #define	sepSPACE_COMMA_TAB_EOL		" ,\t\n"
 #define	sepSPACE_COMMA_TAB			" ,\t"
-#define	sepCOMMA_SPACE				", "
+#define	sepSPACE_COMMA				" ,"
 #define	sepSPACE					" "
 
 // ##################################### string operations #########################################
