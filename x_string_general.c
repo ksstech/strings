@@ -64,9 +64,6 @@ int32_t	xstrverify(char * pStr, char cMin, char cMax, char cNum) {
 	return erSUCCESS ;
 }
 
-char	xToUpper(char val) { if ((val >= CHR_a) && (val <= CHR_z)) { val -= 0x20 ; } return val ; }
-char	xToLower(char val) { if ((val >= CHR_A) && (val <= CHR_Z)) { val += 0x20 ; } return val ; }
-
 /**
  * xstrnlen() - calculate the length of the string up to max len specified
  * @param[in]	s		pointer to the string
@@ -168,19 +165,19 @@ int32_t	xinstring(const char * pStr, char cChr) {
 int32_t	xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) {
 	IF_myASSERT(debugPARAM, INRANGE_MEM(s1) && INRANGE_MEM(s2) && (xLen < 1024)) ;
 	IF_SL_DBG(debugXSTRCMP, " S1=%s:S2=%s ", s1, s2) ;
-	while ((*s1 != CHR_NUL) && (*s2 != CHR_NUL) && xLen) {
+	while (*s1 && *s2 && xLen) {
 		if (Exact == true) {
 			if (*s1 != *s2) {
 				break ;
 			}
 		} else {
-			if (xToUpper(*s1) != xToUpper(*s2)) {
+			if (toupper((int)*s1) != toupper((int)*s2)) {
 				break ;
 			}
 		}
-		s1++ ;
-		s2++ ;
-		xLen-- ;
+		++s1 ;
+		++s2 ;
+		--xLen ;
 	}
 	return ((*s1 == CHR_NUL) && (*s2 == CHR_NUL)) ? true : (xLen == 0) ? true : false ;
 }
@@ -195,18 +192,18 @@ int32_t	xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) {
 int32_t	xstrcmp(const char * s1, const char * s2, bool Exact) {
 	IF_myASSERT(debugPARAM, INRANGE_MEM(s1) && INRANGE_MEM(s2)) ;
 	IF_SL_DBG(debugXSTRCMP, " S1=%s:S2=%s ", s1, s2) ;
-	while ((*s1 != CHR_NUL) && (*s2 != CHR_NUL)) {
+	while (*s1 && *s2) {
 		if (Exact) {
 			if (*s1 != *s2) {
 				break ;
 			}
 		} else {
-			if (xToUpper(*s1) != xToUpper(*s2)) {
+			if (toupper((int)*s1) != toupper((int)*s2)) {
 				break ;
 			}
 		}
 		s1++ ;
-		s2++ ;
+		++s1 ;
 	}
 	return ((*s1 == CHR_NUL) && (*s2 == CHR_NUL)) ? true : false ;
 }
@@ -220,13 +217,13 @@ int32_t	xstrcmp(const char * s1, const char * s2, bool Exact) {
  * 			flag - true for exact match, else upper/lower case difference ignored
  * @return	if match found, index into array else FAILURE
  */
-int32_t	xstrindex(char * key, char * array[], bool Exact) {
+int32_t	xstrindex(char * key, char * array[]) {
 	int32_t	i = 0 ;
 	while (array[i]) {
-		if (xstrcmp(key, array[i], Exact)) {
-			return i ;
+		if (strcasecmp(key, array[i]) == 0) {			// strings match?
+			return i ;									// yes, return the index
 		}
-		i++ ;
+		++i ;
 	}
 	return erFAILURE ;
 }
@@ -330,12 +327,13 @@ char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int32_t f
 		if (xinstring(pDel, *pSrc) != erFAILURE)	{	// check if current char a delim
 			break ;										// yes, all done...
 		}
-		*pDst = (flag < 0) ? xToLower(*pSrc) : (flag == 0) ? *pSrc : xToUpper(*pSrc) ;
-		pDst++ ;
-		pSrc++ ;
+		*pDst = (flag < 0) ? tolower((int)*pSrc) :
+				(flag > 0) ? toupper((int)*pSrc) : *pSrc ;
+		++pDst ;
+		++pSrc ;
 	}
-	*pDst = CHR_NUL ;				// terminate destination string
-	return pSrc ;					// pointer to NULL or next char to be processed..
+	*pDst = CHR_NUL ;									// terminate destination string
+	return pSrc ;										// pointer to NULL or next char to be processed..
 }
 
 /*
