@@ -363,7 +363,7 @@ char *	pcStringParseNumber(int32_t * i32Ptr, char * pSrc) {
 
 char *	pcStringParseNumberRange(int32_t * i32Ptr, char * pSrc, int32_t Min, int32_t Max) {
 	pSrc = pcStringParseNumber(i32Ptr, pSrc) ;
-	return INRANGE(Min, *i32Ptr, Max, int32_t) ? pSrc : pcFAILURE ;
+	return (INRANGE(Min, *i32Ptr, Max, int32_t) == true) ? pSrc : pcFAILURE ;
 }
 
 char *	pcStringParseIpAddr(char * pStr, uint32_t * pVal) {
