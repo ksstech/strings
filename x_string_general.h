@@ -84,6 +84,7 @@ int32_t	xstrindex(char *, char * *) ;
 
 int32_t	xStringParseEncoded(char * pStr, char * pDst) ;
 int32_t	xStringSkipDelim(char * pSrc, const char * pDel, int32_t MaxLen) ;
+int32_t	xStringFindDelim(char * pSrc, const char * pDlm, int32_t xMax) ;
 char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int32_t flag, int32_t MaxLen) ;
 char *	pcStringParseDateTime(char * buf, uint64_t * pTStamp, struct tm *ptm) ;
 

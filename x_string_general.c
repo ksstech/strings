@@ -302,6 +302,29 @@ int32_t	xStringSkipDelim(char * pSrc, const char * pDel, int32_t MaxLen) {
 	return CurLen ;								// number of delimiters skipped over
 }
 
+int32_t	xStringFindDelim(char * pSrc, const char * pDlm, int32_t xMax) {
+	IF_myASSERT(debugPARAM, INRANGE_MEM(pSrc) && INRANGE_FLASH(pDlm)) ;
+	int32_t xPos = 0 ;
+	if (xMax == 0) {
+		xMax = strlen(pSrc) ;
+	}
+	while (*pSrc && xMax) {
+		int32_t	xSrc = isupper((int) *pSrc) ? tolower((int) *pSrc) : (int) *pSrc ;
+		const char * pTmp = pDlm ;
+		while (*pTmp) {
+			int32_t	xDlm = isupper((int) *pTmp) ? tolower((int) *pTmp) : (int) *pTmp ;
+			if (xSrc == xDlm) {
+				return xPos ;
+			}
+			++pTmp ;
+		}
+		++xPos ;
+		++pSrc ;
+		--xMax ;
+	}
+	return erFAILURE ;
+}
+
 /**
  * pcStringParseToken() - copies next single token from source buffer to destination buffer
  * @brief		does NOT automatically work on assuption that string is NULL terminated, hence requires MaxLen
