@@ -29,8 +29,9 @@
 #include	"x_syslog.h"
 
 #include	<string.h>
+#include	<ctype.h>
 
-#define	debugFLAG						0xC000
+#define	debugFLAG						0xC040
 
 #define	debugXSTRCMP					(debugFLAG & 0x0001)
 #define	debugPARSE_U64					(debugFLAG & 0x0002)
@@ -202,8 +203,8 @@ int32_t	xstrcmp(const char * s1, const char * s2, bool Exact) {
 				break ;
 			}
 		}
-		s1++ ;
 		++s1 ;
+		++s2 ;
 	}
 	return ((*s1 == CHR_NUL) && (*s2 == CHR_NUL)) ? true : false ;
 }
@@ -336,7 +337,6 @@ char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int32_t f
 	return pSrc ;										// pointer to NULL or next char to be processed..
 }
 
-/*
  * pcStringParseDateTime()
  * @brief		parse a string with format	2015-04-01T12:34:56.789Z or
  * 											2015/04/01T23:34:45.678Z or
