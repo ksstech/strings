@@ -48,7 +48,7 @@
 #define	debugPARAM						(debugFLAG & 0x4000)
 #define	debugRESULT						(debugFLAG & 0x8000)
 
-/*
+/**
  * xstrverify() - verify to a maximum number of characters that each character is within a range
  * @return	erSUCCESS if cNum or fewer chars tested OK and a CHR_NUL is reached
  */
@@ -64,19 +64,8 @@ int32_t	xstrverify(char * pStr, char cMin, char cMax, char cNum) {
 	return erSUCCESS ;
 }
 
-char	xToUpper(char val) {
-	if ((val >= CHR_a) && (val <= CHR_z)) {
-		val -= 0x20 ;
-	}
-	return val ;
-}
-
-char	xToLower(char val) {
-	if ((val >= CHR_A) && (val <= CHR_Z)) {
-		val += 0x20 ;
-	}
-	return val ;
-}
+char	xToUpper(char val) { if ((val >= CHR_a) && (val <= CHR_z)) { val -= 0x20 ; } return val ; }
+char	xToLower(char val) { if ((val >= CHR_A) && (val <= CHR_Z)) { val += 0x20 ; } return val ; }
 
 /**
  * xstrnlen() - calculate the length of the string up to max len specified
@@ -85,7 +74,7 @@ char	xToLower(char val) {
  * @return		length of the string excl the terminating '\0'
  */
 int32_t	xstrnlen(char * s, int32_t len) {
-int32_t l = 0;
+	int32_t l = 0;
 	PRINT("s=%s  len=%d", s, len) ;
 	while ((*s != CHR_NUL) && (l < len)) {
 		s++ ;
@@ -133,11 +122,11 @@ int32_t	xstrncpy(char * pDst, char * pSrc, int32_t xLen ) {
  * @brief  perform 'in-place' start <-> end charater reversal
  */
 void	xstrrev(char * pStr) {
-char *p1, *p2 ;
 	IF_myASSERT(debugPARAM, INRANGE_SRAM(pStr)) ;
 	if ((pStr == NULL) || (*pStr == CHR_NUL)) {
 		return ;
 	}
+	char *p1, *p2 ;
 	for (p1 = pStr, p2 = pStr + xstrlen(pStr) - 1; p2 > p1; ++p1, --p2) {
 		*p1 ^= *p2 ;
 		*p2 ^= *p1 ;
@@ -222,7 +211,7 @@ int32_t	xstrcmp(const char * s1, const char * s2, bool Exact) {
 	return ((*s1 == CHR_NUL) && (*s2 == CHR_NUL)) ? true : false ;
 }
 
-/*
+/**
  * xstrindex
  * @brief	determine array index of specified string in specified string array
  * 			expects the array to be null terminated
@@ -285,7 +274,7 @@ int32_t	xStringParseEncoded(char * pStr, char * pDst) {
 
 #define	stringGENERAL_MAX_LEN		2048
 
-/*
+/**
  * xStringSkipDelim() - skips specified delimiters (if any)
  * @brief		does NOT automatically work on assumption that string is NULL terminated, hence requires MaxLen
  * @brief		ONLY if MaxLen specified as NULL, assume string is terminated and calculate length.
@@ -331,7 +320,7 @@ char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int32_t f
 	IF_myASSERT(debugPARAM, INRANGE_SRAM(pDst) && INRANGE_MEM(pSrc) && INRANGE_MEM(pDel)) ;
 	// If no length supplied
 	if (MaxLen == 0) {
-		MaxLen = strlen((const char *) pSrc) ;	// assume NULL terminated and calculate length
+		MaxLen = strlen((const char *) pSrc) ;			// assume NULL terminated and calculate length
 	}
 	int32_t CurLen = xStringSkipDelim(pSrc, pDel, MaxLen) ;
 	MaxLen	-= CurLen ;
@@ -547,7 +536,7 @@ char *	pcStringParseDateTime(char * pBuf, uint64_t * pTStamp, struct tm * psTM) 
  * @return		pointer to correct/matched or default (not found) message
  */
 char * pcCodeToMessage(int32_t eCode, const eTable_t * eTable) {
-int32_t	i = 0 ;
+	int32_t	i = 0 ;
 	while ((eTable[i].uVal1 != 0xFFFFFFFF) && (eTable[i].uVal2 != 0xFFFFFFFF)) {
 	// If an exact match with 1st value in table, return pointer to the message
 		if (eCode == eTable[i].iVal1) {
