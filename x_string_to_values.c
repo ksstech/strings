@@ -300,8 +300,8 @@ char *	pcStringParseValue(char * pSrc, p32_t p32Pntr, varform_t VarForm, varsize
  */
 char *	pcStringParseValueRange(char * pSrc, p32_t p32Pntr, varform_t VarForm, varsize_t VarSize, const char * pDel, x32_t x32Lo, x32_t x32Hi) {
 	x64_t	x64Val ;
-	char * ptr1	= pcStringParseX64(pSrc, &x64Val, VarForm, pDel) ;
-	CHECK_RETURN(ptr1, pcFAILURE)
+	char * pTmp	= pcStringParseX64(pSrc, &x64Val, VarForm, pDel) ;
+	CHECK_RETURN(pTmp, pcFAILURE)
 
 	// Lo & Hi values MUST be full 32bit width..
 	x64_t x64Lo = xValuesUpscaleX32_X64(x32Lo, VarForm) ;
@@ -329,7 +329,7 @@ char *	pcStringParseValueRange(char * pSrc, p32_t p32Pntr, varform_t VarForm, va
 		return pcFAILURE ;
 	}
 	vValuesStoreX64_Xxx(x64Val, p32Pntr, VarForm, VarSize) ;
-	return ptr1 ;
+	return pTmp ;
 }
 
 char *	pcStringParseValues(char * pSrc, p32_t p32Pntr, varform_t VarForm, varsize_t VarSize, const char * pDel, int32_t Count) {
