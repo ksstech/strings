@@ -306,7 +306,10 @@ char *	pcStringParseValueRange(char * pSrc, p32_t p32Pntr, varform_t VarForm, va
 	// Lo & Hi values MUST be full 32bit width..
 	x64_t x64Lo = xValuesUpscaleX32_X64(x32Lo, VarForm) ;
 	x64_t x64Hi = xValuesUpscaleX32_X64(x32Hi, VarForm) ;
-	IF_PRINT(debugPARSE_VALUE, " %.*s=%lld Lo=%lld Hi=%lld", ptr1 - pSrc, pSrc, x64Val, x64Lo, x64Hi) ;
+	IF_PRINT(debugPARSE_VALUE, " '%.*s'", pTmp - pSrc, pSrc) ;
+	IF_EXEC_4(debugPARSE_VALUE, xCompValueReport, " Val=", x64Val, VarForm, VarSize) ;
+	IF_EXEC_4(debugPARSE_VALUE, xCompValueReport, " Lo=", x64Lo, VarForm, VarSize) ;
+	IF_EXEC_4(debugPARSE_VALUE, xCompValueReport, " Hi=", x64Hi, VarForm, VarSize) ;
 	switch(VarForm) {
 	case vfUXX:
 		if ((x64Val.u64 < x64Lo.u64) || (x64Val.u64 > x64Hi.u64)) {
