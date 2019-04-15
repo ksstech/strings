@@ -360,10 +360,19 @@ char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int32_t f
 	return pSrc ;										// pointer to NULL or next char to be processed..
 }
 
+#define	delimDATE1	"-/"
+#define	delimDATE2	"t "
+#define	delimTIME1	"h:"
+#define	delimTIME2	"m:"
+#define	delimTIME3	"s.z "
+
+/**
  * pcStringParseDateTime()
- * @brief		parse a string with format	2015-04-01T12:34:56.789Z or
- * 											2015/04/01T23:34:45.678Z or
+ * @brief		parse a string with format	2015-04-01T12:34:56.789Z
+ * 											2015/04/01T23:34:45.678Z
+ * 											2015-04-01T12h34m56s789Z
  * 											2015/04/01T23h12m54s123Z
+ * 											CCYY?MM?DD?hh?mm?ss?uuuuuu?
  * 				to extract the date/time components x.789Z mSec components are parsed and stored if found.
  * @param[in]	buf - pointer to the string to be parsed
  * @param[out]	pTStamp - pointer to structure for epoch seconds [+millisec]
@@ -378,161 +387,133 @@ char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int32_t f
  *					Friday, 31-Dec-99 23:59:59 GMT
  *					Fri Dec 31 23:59:59 1999
  */
-char *	pcStringParseDateTime(char * pBuf, uint64_t * pTStamp, struct tm * psTM) {
+char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) {
 	IF_myASSERT(debugPARAM, INRANGE_MEM(psTM) && INRANGE_SRAM(pTStamp) && INRANGE_SRAM(psTM)) ;
-	memset(psTM, 0, sizeof(struct tm)) ;				// ensure all start as 0
-// make sure no leading spaces ....
-	while (*pBuf == CHR_SPACE) {
-		pBuf++ ;
-	}
-	int32_t xLen = strlen((const char *)pBuf) ;					// and then get length of remainder...
-
-// what about specifying [2]101-MM-DD and nothing else ?
-	int32_t idx = 	((pBuf[4] == CHR_MINUS) || (pBuf[4] == CHR_FWDSLASH)) ? 4 :
-					((pBuf[3] == CHR_MINUS) || (pBuf[3] == CHR_FWDSLASH)) ? 3 :
-					((pBuf[2] == CHR_MINUS) || (pBuf[2] == CHR_FWDSLASH)) ? 2 :
-					((pBuf[1] == CHR_MINUS) || (pBuf[1] == CHR_FWDSLASH)) ? 1 : 0 ;
-
-	IF_SL_DBG(debugPARSE_DTIME, "[CCYY?] Parsing '%s'", pBuf) ;
-	// check CCYY-MM-DD ahead
 	uint32_t	flag = 0 ;
-	int32_t	Value ;
-	if ((xLen >= (idx + 6)) &&
-		(pBuf[idx]   == CHR_MINUS	|| pBuf[idx]	== CHR_FWDSLASH) &&
-		(pBuf[idx+3] == CHR_MINUS	|| pBuf[idx+3]	== CHR_FWDSLASH)) {
-		pBuf = pcStringParseNumberRange(&Value, pBuf, 0, YEAR_BASE_MAX) ;
-		CHECK_RETURN(pBuf, pcFAILURE) ;
-		if (INRANGE(YEAR_BASE_MIN, Value, YEAR_BASE_MAX, int32_t)) {
-			psTM->tm_year = Value - YEAR_BASE_MIN ;
-			flag |= DATETIME_YEAR_OK ;					// mark as done
-		} else {
-			psTM->tm_year = Value ;						// save as elapsed
-		}
-		xLen -= (idx + 1) ;
-		pBuf++ ;										// skip over separator
-		idx = 2 ;
-	} else {
-		idx = 0 ;
-	}
-// what about specifying [M]M-DD and nothing else ?
-	if (idx < 2) {
-		idx =	(pBuf[2] == CHR_MINUS  || pBuf[2] == CHR_FWDSLASH) &&
-				(pBuf[5] == CHR_T || pBuf[5] == CHR_t || pBuf[5] == CHR_NUL) ? 2 : 1 ;
+	int32_t		Value, iD1, iD2 ;
+	memset(psTM, 0, sizeof(struct tm)) ;				// ensure all start as 0
+	while (*pSrc == CHR_SPACE) ++pSrc ;					// make sure no leading spaces ....
+
+	// check CCYY?MM? ahead
+	iD1 = xStringFindDelim(pSrc, delimDATE1, 5) ;
+	iD2 = (iD1 > 0) ? xStringFindDelim(pSrc+iD1+1, delimDATE1, 3) : 0 ;
+	IF_PRINT(debugPARSE_DTIME, " C: iD1=%d  iD2=%d", iD1, iD2) ;
+	if (iD2 >= 1) {
+		IF_PRINT(debugPARSE_DTIME, " Yr '%.*s'", iD1, pSrc) ;
+		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) YEAR_BASE_MAX) ;
+		CHECK_RETURN(pSrc, pcFAILURE) ;
+		// Cater for CCYY vs YY form
+		psTM->tm_year = INRANGE(YEAR_BASE_MIN, Value, YEAR_BASE_MAX, int32_t) ? Value - YEAR_BASE_MIN : Value ;
+		flag |= DATETIME_YEAR_OK ;						// mark as done
+		++pSrc ;										// skip over separator
 	}
 
-// check for MM-DD ahead
-	IF_SL_DBG(debugPARSE_DTIME, "[MM?DD?] Parsing '%s'", pBuf) ;
-	if ((xLen >= (idx + 3)) &&
-		(pBuf[2] == CHR_MINUS || pBuf[2] == CHR_FWDSLASH) &&
-		(pBuf[5] == CHR_T || pBuf[5] == CHR_t || pBuf[5] == CHR_NUL)) {
-		pBuf = pcStringParseNumberRange(&Value, pBuf, 1, MONTHS_IN_YEAR) ;
-		CHECK_RETURN(pBuf, pcFAILURE) ;
+	// check for MM?DD? ahead
+	iD1 = xStringFindDelim(pSrc, delimDATE1, 3) ;
+	iD2 = (iD1 > 0) ? xStringFindDelim(pSrc+iD1+1, delimDATE2, 3) : 0 ;
+	IF_PRINT(debugPARSE_DTIME, " M: iD1=%d  iD2=%d", iD1, iD2) ;
+	if ((flag & DATETIME_YEAR_OK) ||
+		(iD2 == 2) ||
+		(iD2 == 0 && iD1 > 0 && pSrc[iD1+3] == CHR_NUL)) {
+		IF_PRINT(debugPARSE_DTIME, " Mon '%.*s'", iD1, pSrc) ;
+		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 1, (x32_t) MONTHS_IN_YEAR) ;
+		CHECK_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_mon = Value - 1 ;						// make 0 relative
 		flag |= DATETIME_MON_OK ;						// mark as done
-		xLen -= (idx + 1) ;
-		pBuf++ ;										// skip over separator
+		++pSrc ;										// skip over separator
 	}
 
-// what about specifying [D]D and nothing else ?
-	if (idx < 2) {
-		idx = (pBuf[2] == CHR_T || pBuf[2] == CHR_t  || pBuf[2] == CHR_NUL) ? 2 : 1 ;
-	}
-
-// check for DD[T] ahead
-	IF_SL_DBG(debugPARSE_DTIME, "[DD?] Parsing '%s'", pBuf) ;
-	if ((xLen >= idx) && (pBuf[2] == CHR_T || pBuf[2] == CHR_t || pBuf[2] == CHR_NUL)) {
-		pBuf = pcStringParseNumberRange(&Value, pBuf, 1, xTime_CalcDaysInMonth(psTM)) ;
-		CHECK_RETURN(pBuf, pcFAILURE) ;
+	// DD? or xxt or xxT or xx
+	iD1 = xStringFindDelim(pSrc, delimDATE2, 3) ;
+	iD2 = (iD1 <= 0) && pSrc[1] == CHR_NUL ? 1 : (iD1 <= 0 && pSrc[2] == CHR_NUL) ? 2 : 0 ;
+	IF_PRINT(debugPARSE_DTIME, " D: iD1=%d  iD2=%d", iD1, iD2) ;
+	if ((flag & DATETIME_MON_OK) ||
+		(iD1 > 0 && tolower((int) pSrc[iD1]) == CHR_t)) {
+		IF_PRINT(debugPARSE_DTIME, " Day '%.*s'", iD1, pSrc) ;
+		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 1, (x32_t) xTime_CalcDaysInMonth(psTM)) ;
+		CHECK_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_mday = Value ;
 		flag |= DATETIME_MDAY_OK ;						// mark as done
-		xLen -= idx ;
 	}
 
-// calculate day of year ONLY if yyyy-mm-dd read in...
+	// calculate day of year ONLY if yyyy-mm-dd read in...
 	if (flag == (DATETIME_YEAR_OK | DATETIME_MON_OK | DATETIME_MDAY_OK)) {
 		psTM->tm_yday = xTime_CalcDaysYTD(psTM) ;
 		flag |= DATETIME_YDAY_OK ;
 	}
-// skip over 'T' if there
-	if ((*pBuf == CHR_T) || (*pBuf == CHR_t)) {
-		pBuf++ ;
-		xLen-- ;
+	// skip over 'T' if there
+	if (*pSrc == CHR_T || *pSrc == CHR_t || *pSrc == CHR_SPACE) {
+		++pSrc ;
 	}
 
-// what about specifying [0]9:59:59 and nothing else ?
-	if (idx < 2) {
-		idx = ((pBuf[2] == CHR_COLON) && (pBuf[5] == CHR_COLON)) ? 2 : 1 ;
-	}
-
-// check for hh:mm:ss
-	IF_SL_DBG(debugPARSE_DTIME, "[HH?MM?SS?] Parsing '%s'", pBuf) ;
-	if ((xLen >= (idx + 6)) && pBuf[idx] == CHR_COLON && pBuf[idx+3] == CHR_COLON) {
-		pBuf = pcStringParseNumberRange(&Value, pBuf, 0, HOURS_IN_DAY - 1) ;
-		CHECK_RETURN(pBuf, pcFAILURE) ;
+	// check for HH?MM?
+	iD1 = xStringFindDelim(pSrc, delimTIME1, 3) ;
+	iD2 = (iD1 > 0) ? xStringFindDelim(pSrc+iD1+1, delimTIME2, 3) : 0 ;
+	IF_PRINT(debugPARSE_DTIME, " H: iD1=%d  iD2=%d", iD1, iD2) ;
+	if (iD2 >= 1) {
+		IF_PRINT(debugPARSE_DTIME, " Hr '%.*s'", iD1, pSrc) ;
+		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) (HOURS_IN_DAY-1)) ;
+		CHECK_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_hour = Value ;
 		flag	|= DATETIME_HOUR_OK ;					// mark as done
-		xLen	-= (idx + 1) ;
-		idx		= 2 ;
-		pBuf++ ;										// skip over separator
+		++pSrc ;										// skip over separator
 	}
 
-// what about specifying [0]9:59 and nothing else ?
-	if (idx < 2) {
-		idx = ((pBuf[2] == CHR_COLON) &&
-				(pBuf[5] == CHR_Z || pBuf[5] == CHR_z || pBuf[5] == CHR_FULLSTOP || pBuf[5] == CHR_SPACE || pBuf[5] == CHR_NUL)) ? 2 : 1 ;
-	}
-
-// check for mm:ss
-	IF_SL_DBG(debugPARSE_DTIME, "[MM?SS?] Parsing '%s'", pBuf) ;
-	if ((xLen >= (idx+3)) && (pBuf[idx] == CHR_COLON &&
-		(pBuf[idx+3] == CHR_Z || pBuf[idx+3] == CHR_z || pBuf[idx+3] == CHR_FULLSTOP || pBuf[idx+3]==CHR_SPACE || pBuf[idx+3] == CHR_NUL))) {
-		pBuf = pcStringParseNumberRange(&Value, pBuf, 0, MINUTES_IN_HOUR - 1) ;
-		CHECK_RETURN(pBuf, pcFAILURE) ;
+	// check for MM?SS?
+	iD1 = xStringFindDelim(pSrc, delimTIME2, 3) ;
+	iD2 = (iD1 > 0) ? xStringFindDelim(pSrc+iD1+1, delimTIME3, 3) : 0 ;
+	IF_PRINT(debugPARSE_DTIME, " M: iD1=%d  iD2=%d", iD1, iD2) ;
+	if ((flag & DATETIME_HOUR_OK) ||
+		(iD2 == 2) ||
+		(iD2 == 0 && iD1 > 0 && pSrc[iD1+3] == CHR_NUL)) {
+		IF_PRINT(debugPARSE_DTIME, " Min '%.*s'", iD1, pSrc) ;
+		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) (MINUTES_IN_HOUR-1)) ;
+		CHECK_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_min = Value ;
 		flag	|= DATETIME_MIN_OK ;					// mark as done
-		xLen	-= (idx + 1) ;
-		idx		= 2 ;
-		pBuf++ ;										// skip over separator
+		++pSrc ;										// skip over separator
 	}
 
-// what about specifying [0]9 and nothing else ?
-	if (idx < 2) {
-		idx = (pBuf[2]==CHR_FULLSTOP || pBuf[2]==CHR_Z || pBuf[2]==CHR_z || pBuf[2]==CHR_SPACE || pBuf[2]==CHR_NUL) ? 2 : 1 ;
-	}
-
-// check for ss[. Z]
-	IF_SL_DBG(debugPARSE_DTIME, "[SS?] Parsing '%s'", pBuf) ;
-	if ((xLen >= idx) &&
-		(pBuf[idx] == CHR_FULLSTOP || pBuf[idx] == CHR_Z || pBuf[idx] == CHR_z || pBuf[idx] == CHR_SPACE || pBuf[idx] == CHR_NUL)) {
-		pBuf = pcStringParseNumberRange(&Value, pBuf, 0, SECONDS_IN_MINUTE - 1) ;
-		CHECK_RETURN(pBuf, pcFAILURE) ;
+	// SS? or xxZ or xxz or xx
+	iD1 = xStringFindDelim(pSrc, delimTIME3, 3) ;
+	iD2 = (iD1 < 1) ? strlen(pSrc) : 0 ;
+	IF_PRINT(debugPARSE_DTIME, " S: iD1=%d  iD2=%d", iD1, iD2) ;
+	if ((flag & DATETIME_MIN_OK) ||
+		(iD1 > 0) ||
+		(INRANGE(1, iD2, 2, int32_t))) {
+		IF_PRINT(debugPARSE_DTIME, " Sec '%.*s'", iD1, pSrc) ;
+		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) (SECONDS_IN_MINUTE-1)) ;
+		CHECK_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_sec = Value ;
 		flag	|= DATETIME_SEC_OK ;					// mark as done
-		xLen	-= (idx + 1) ;
 	}
 
-// check for [.0{...}Z] and skip as appropriate
-	int32_t count, uSecs = 0 ;
-	if ((xLen >= 1) && (pBuf[0] == CHR_FULLSTOP)) {
-		pBuf++ ;										// skip over '.'
-		count = xinstring(pBuf, CHR_Z) ;				// find position of 'Z' in buffer
-		if (count == erFAILURE || count > 6) {
-			count = xinstring(pBuf, CHR_z) ;			// try again for 'z' in buffer
-			if (count == erFAILURE || count > 6) {
+	// check for [.0{...}Z] and skip as appropriate
+	int32_t uSecs = 0 ;
+	iD1 = xStringFindDelim(pSrc, ".s", 1) ;
+	if (iD1 == 0) {
+		++pSrc ;										// skip over '.'
+		iD1 = xStringFindDelim(pSrc, "z ", 7) ;			// find position of Z/z in buffer
+		if (OUTSIDE(1, iD1, 7, int32_t)) {
+		/* TODO valid terminator not found, but maybe a NUL ?
+		 * still a problem, what about junk after the last number ? */
+			iD2 = strlen(pSrc) ;
+			if (OUTSIDE(1, iD2, 6, int32_t)) {
 				return pcFAILURE ;
 			}
+			iD1 = iD2 ;
 		}
-		IF_SL_DBG(debugPARSE_DTIME, "[.1-6D?] Parsing '%s'", pBuf) ;
-		pBuf = pcStringParseNumberRange((int32_t *) &uSecs, pBuf, 0, MICROS_IN_SECOND - 1) ;
-		CHECK_RETURN(pBuf, pcFAILURE) ;
-		count = 6 - count ;
-		while (count--) {
+		IF_PRINT(debugPARSE_DTIME, " uSec '%.*s'", iD1, pSrc) ;
+		pSrc = pcStringParseValueRange(pSrc, (p32_t) &uSecs, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) (MICROS_IN_SECOND-1)) ;
+		CHECK_RETURN(pSrc, pcFAILURE) ;
+		iD1 = 6 - iD1 ;
+		while (iD1--) {
 			uSecs *= 10 ;
 		}
 		flag |= DATETIME_MSEC_OK ;						// mark as done
 	}
-	if (pBuf[0]==CHR_Z || pBuf[0]==CHR_z) {
-		pBuf++ ;						// skip over trailing 'Z'
+	if (pSrc[0]==CHR_Z || pSrc[0]==CHR_z) {
+		++pSrc ;						// skip over trailing 'Z'
 	}
 
 	uint32_t Secs ;
@@ -543,11 +524,12 @@ char *	pcStringParseDateTime(char * pBuf, uint64_t * pTStamp, struct tm * psTM) 
 	} else {
 		Secs = xTime_CalcSeconds(psTM, 1) ;
 	}
-	IF_SL_DBG(debugPARSE_DTIME, "flag=%p %u.%u wday=%d yday=%d %d/%02d/%02d %dh%02dm%02ds",
-						flag, Secs, uSecs, psTM->tm_wday, psTM->tm_yday,
-						psTM->tm_year, psTM->tm_mon, psTM->tm_mday, psTM->tm_hour, psTM->tm_min, psTM->tm_sec) ;
 	*pTStamp = xTimeMakeTimestamp(Secs, uSecs) ;
-	return pBuf ;
+	IF_PRINT(debugPARSE_DTIME, " flag=%p uS=%llu wday=%d yday=%d %04d/%02d/%02d %dh%02dm%02ds\n",
+								flag, *pTStamp, psTM->tm_wday, psTM->tm_yday,
+								psTM->tm_year, psTM->tm_mon, psTM->tm_mday,
+								psTM->tm_hour, psTM->tm_min, psTM->tm_sec) ;
+	return pSrc ;
 }
 
 /*
