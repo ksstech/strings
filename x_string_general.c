@@ -532,7 +532,7 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 	return pSrc ;
 }
 
-/*
+/**
  * pcCodeToMessage() - locates the provided eCode within the table specified and return the message
  * @param[in]	eCode - (error) code to lookup
  * @param[in]	eTable - pointer to message table within which to look
@@ -556,7 +556,7 @@ char * pcCodeToMessage(int32_t eCode, const eTable_t * eTable) {
 				break ;
 			}
 		}
-		i++ ;											// no match found, try next entry
+		++i ;											// no match found, try next entry
 	}
 	return (char *) eTable[i].pMess ;
 }
