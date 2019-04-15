@@ -50,7 +50,7 @@ extern "C" {
 
 // ########################################### MACROS ##############################################
 
-#define	sepSPACE_COMMA_TAB_EOL		" ,\t\n"
+#define	sepSPACE_COMMA_TAB_LF		" ,\t\n"
 #define	sepSPACE_COMMA_TAB			" ,\t"
 #define	sepSPACE_COMMA				" ,"
 #define	sepSPACE					" "
@@ -73,8 +73,6 @@ typedef struct eTable_s {
 } eTable_t ;
 
 int32_t	xstrverify(char * pStr, char cMin, char cMax, char cNum) ;
-char	xToUpper(char val) ;
-char	xToLower(char val) ;
 int32_t	xstrlen(char * s) ;
 int32_t	xstrnlen(char * s, int32_t len) ;
 int32_t	xstrncpy(char * s1, char * s2, int32_t len ) ;
@@ -82,7 +80,7 @@ void	xstrrev(char * pStr) ;
 int32_t	xinstring(const char * pStr, char cChr) ;
 int32_t xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) ;
 int32_t	xstrcmp(const char * s1, const char * s2, bool Exact) ;
-int32_t	xstrindex(char * key, char * array[], bool Exact) ;
+int32_t	xstrindex(char *, char * *) ;
 
 int32_t	xStringParseEncoded(char * pStr, char * pDst) ;
 int32_t	xStringSkipDelim(char * pSrc, const char * pDel, int32_t MaxLen) ;
