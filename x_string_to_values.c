@@ -129,10 +129,13 @@ uint64_t xStringParseX64(char *pSrc, uint8_t * pDst, uint32_t xLen) {
  * 				pcFAILURE is no valid value found to parse
  */
 char *	pcStringParseU64(char * pSrc, uint64_t * pDst, int32_t * pSign, const char * pDel) {
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(pSign) && INRANGE_SRAM(pDst) && INRANGE_MEM(pSrc) && INRANGE_MEM(pDel)) ;
+	IF_myASSERT(debugPARAM, INRANGE_SRAM(pSign) && INRANGE_SRAM(pDst) && INRANGE_MEM(pSrc)) ;
 	*pSign 	= 0 ;						// set sign as not provided
 	uint64_t	Base = 10 ;				// default to decimal
-	pSrc += xStringSkipDelim(pSrc, pDel, sizeof("+18,446,744,073,709,551,615")) ;
+	if (pDel) {
+		IF_myASSERT(debugPARAM, INRANGE_MEM(pDel)) ;
+		pSrc += xStringSkipDelim(pSrc, pDel, sizeof("+18,446,744,073,709,551,615")) ;
+	}
 
 	// check for sign at start
 	if (*pSrc == CHR_MINUS) {			// NEGative sign?
@@ -180,7 +183,7 @@ char *	pcStringParseU64(char * pSrc, uint64_t * pDst, int32_t * pSign, const cha
  */
 char *	pcStringParseF64(char *pSrc, double * pDst, int32_t * pSign, const char * pDel) {
 	uint64_t	u64Val ;
-// parse the integer portion
+	// parse the integer portion
 	char * pTmp = pcStringParseU64(pSrc, &u64Val, pSign, " ") ;
 	if (pTmp == pcFAILURE) {
 		return pTmp ;
@@ -188,7 +191,7 @@ char *	pcStringParseF64(char *pSrc, double * pDst, int32_t * pSign, const char *
 	double dVal = u64Val ;
 	u64Val = 0 ;
 	int32_t	scale = 0 ;
-// handle fractional portion if decimal '.' & number follow
+	// handle fractional portion if decimal '.' & number follow
 	if ((*pTmp == CHR_FULLSTOP) && (pTmp[1] >= CHR_0) && (pTmp[1] <= CHR_9)) {
 		pTmp++ ;										// skip the '.'
 		do {
@@ -199,7 +202,8 @@ char *	pcStringParseF64(char *pSrc, double * pDst, int32_t * pSign, const char *
 	}
 	double dFrac	= u64Val ;
 	dFrac	*= pow(10.0, scale) ;
-// handle exponent
+
+	// handle exponent
 	int32_t	subscale = 0 ;
 	int32_t	signsubscale = 1 ;
 	if ((*pTmp == CHR_e) || (*pTmp == CHR_E)) {			// exponent?
@@ -216,7 +220,8 @@ char *	pcStringParseF64(char *pSrc, double * pDst, int32_t * pSign, const char *
 			subscale = (subscale * 10) + (*pTmp++ - CHR_0) ;	// update the exponent value
 		}
 	}
-// calculate the actual value (number = +/- number.fraction * 10^+/- exponent)
+
+	// calculate the actual value (number = +/- number.fraction * 10^+/- exponent)
 	if (subscale) {
 		*pDst = (dVal + dFrac) * pow(10.0 , (subscale * signsubscale)) ;
 	} else {
