@@ -31,7 +31,7 @@
 #include	<string.h>
 #include	<ctype.h>
 
-#define	debugFLAG						0xC040
+#define	debugFLAG						0xC000
 
 #define	debugXSTRCMP					(debugFLAG & 0x0001)
 #define	debugPARSE_U64					(debugFLAG & 0x0002)

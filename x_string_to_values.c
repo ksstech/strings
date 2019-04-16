@@ -267,6 +267,7 @@ char *	pcStringParseX64(char * pSrc, x64_t * px64Val, varform_t VarForm, const c
 char *	pcStringParseValue(char * pSrc, p32_t p32Pntr, varform_t VarForm, varsize_t VarSize, const char * pDel) {
 	// assume we might find a 64bit value, so plan accordingly
 	x64_t	x64Val ;
+	IF_PRINT(debugPARSE_VALUE, "'%.3s' ->", pSrc) ;
 	char * ptr1	= pcStringParseX64(pSrc, &x64Val, VarForm, pDel) ;
 	CHECK_RETURN(ptr1, pcFAILURE)
 
