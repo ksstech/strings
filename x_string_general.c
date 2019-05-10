@@ -401,7 +401,7 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 	if (iD2 >= 1) {
 		IF_PRINT(debugPARSE_DTIME, " Yr '%.*s'", iD1, pSrc) ;
 		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) YEAR_BASE_MAX) ;
-		CHECK_RETURN(pSrc, pcFAILURE) ;
+		EQ_RETURN(pSrc, pcFAILURE) ;
 		// Cater for CCYY vs YY form
 		psTM->tm_year = INRANGE(YEAR_BASE_MIN, Value, YEAR_BASE_MAX, int32_t) ? Value - YEAR_BASE_MIN : Value ;
 		flag |= DATETIME_YEAR_OK ;						// mark as done
@@ -417,7 +417,7 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 		(iD2 == 0 && iD1 > 0 && pSrc[iD1+3] == CHR_NUL)) {
 		IF_PRINT(debugPARSE_DTIME, " Mon '%.*s'", iD1, pSrc) ;
 		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 1, (x32_t) MONTHS_IN_YEAR) ;
-		CHECK_RETURN(pSrc, pcFAILURE) ;
+		EQ_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_mon = Value - 1 ;						// make 0 relative
 		flag |= DATETIME_MON_OK ;						// mark as done
 		++pSrc ;										// skip over separator
@@ -431,7 +431,7 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 		(iD1 > 0 && tolower((int) pSrc[iD1]) == CHR_t)) {
 		IF_PRINT(debugPARSE_DTIME, " Day '%.*s'", iD1, pSrc) ;
 		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 1, (x32_t) xTime_CalcDaysInMonth(psTM)) ;
-		CHECK_RETURN(pSrc, pcFAILURE) ;
+		EQ_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_mday = Value ;
 		flag |= DATETIME_MDAY_OK ;						// mark as done
 	}
@@ -453,7 +453,7 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 	if (iD2 >= 1) {
 		IF_PRINT(debugPARSE_DTIME, " Hr '%.*s'", iD1, pSrc) ;
 		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) (HOURS_IN_DAY-1)) ;
-		CHECK_RETURN(pSrc, pcFAILURE) ;
+		EQ_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_hour = Value ;
 		flag	|= DATETIME_HOUR_OK ;					// mark as done
 		++pSrc ;										// skip over separator
@@ -468,7 +468,7 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 		(iD2 == 0 && iD1 > 0 && pSrc[iD1+3] == CHR_NUL)) {
 		IF_PRINT(debugPARSE_DTIME, " Min '%.*s'", iD1, pSrc) ;
 		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) (MINUTES_IN_HOUR-1)) ;
-		CHECK_RETURN(pSrc, pcFAILURE) ;
+		EQ_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_min = Value ;
 		flag	|= DATETIME_MIN_OK ;					// mark as done
 		++pSrc ;										// skip over separator
@@ -483,7 +483,7 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 		(INRANGE(1, iD2, 2, int32_t))) {
 		IF_PRINT(debugPARSE_DTIME, " Sec '%.*s'", iD1, pSrc) ;
 		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) (SECONDS_IN_MINUTE-1)) ;
-		CHECK_RETURN(pSrc, pcFAILURE) ;
+		EQ_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_sec = Value ;
 		flag	|= DATETIME_SEC_OK ;					// mark as done
 	}
@@ -505,7 +505,7 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 		}
 		IF_PRINT(debugPARSE_DTIME, " uSec '%.*s'", iD1, pSrc) ;
 		pSrc = pcStringParseValueRange(pSrc, (p32_t) &uSecs, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) (MICROS_IN_SECOND-1)) ;
-		CHECK_RETURN(pSrc, pcFAILURE) ;
+		EQ_RETURN(pSrc, pcFAILURE) ;
 		iD1 = 6 - iD1 ;
 		while (iD1--) {
 			uSecs *= 10 ;

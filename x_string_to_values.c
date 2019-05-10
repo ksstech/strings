@@ -250,7 +250,7 @@ char *	pcStringParseX64(char * pSrc, x64_t * px64Val, varform_t VarForm, const c
 	} else {
 		ptr1	= pcStringParseU64(pSrc, p32Pntr.pu64, &Sign, pDel) ;
 	}
-	CHECK_RETURN(ptr1, pcFAILURE)
+	EQ_RETURN(ptr1, pcFAILURE)
 
 	// ensure NO SIGN is specified if unsigned is requested, and no error returned
 	if (Sign && (VarForm == vfUXX)) {
@@ -269,7 +269,7 @@ char *	pcStringParseValue(char * pSrc, p32_t p32Pntr, varform_t VarForm, varsize
 	x64_t	x64Val ;
 	IF_PRINT(debugPARSE_VALUE, "'%.3s' ->", pSrc) ;
 	char * ptr1	= pcStringParseX64(pSrc, &x64Val, VarForm, pDel) ;
-	CHECK_RETURN(ptr1, pcFAILURE)
+	EQ_RETURN(ptr1, pcFAILURE)
 
 	// if what we were asked to scan is less than 64bit in size, scale it up/down...
 	if (VarSize < vs64B) {
@@ -302,7 +302,7 @@ char *	pcStringParseValue(char * pSrc, p32_t p32Pntr, varform_t VarForm, varsize
 char *	pcStringParseValueRange(char * pSrc, p32_t p32Pntr, varform_t VarForm, varsize_t VarSize, const char * pDel, x32_t x32Lo, x32_t x32Hi) {
 	x64_t	x64Val ;
 	char * pTmp	= pcStringParseX64(pSrc, &x64Val, VarForm, pDel) ;
-	CHECK_RETURN(pTmp, pcFAILURE)
+	EQ_RETURN(pTmp, pcFAILURE)
 
 	// Lo & Hi values MUST be full 32bit width..
 	x64_t x64Lo = xValuesUpscaleX32_X64(x32Lo, VarForm) ;
@@ -339,7 +339,7 @@ char *	pcStringParseValueRange(char * pSrc, p32_t p32Pntr, varform_t VarForm, va
 char *	pcStringParseValues(char * pSrc, p32_t p32Pntr, varform_t VarForm, varsize_t VarSize, const char * pDel, int32_t Count) {
 	while(Count--) {
 		char * ptr1	= pcStringParseValue(pSrc, p32Pntr, VarForm, VarSize, pDel) ;
-		CHECK_RETURN(ptr1, pcFAILURE)
+		EQ_RETURN(ptr1, pcFAILURE)
 		switch(VarSize) {								// adjust the pointer based on the size of the destination storage
 		case vs08B:	++p32Pntr.px8 ;				break ;
 		case vs16B:	++p32Pntr.px16 ;			break ;
