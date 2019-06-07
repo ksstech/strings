@@ -388,19 +388,19 @@ char *	pcStringParseIpAddr(char * pStr, uint32_t * pVal) {
 }
 
 void	x_string_values_test(void) {
-x64_t	x64Val ;
-// Test error if sign present for vfUXX
+	x64_t	x64Val ;
+	// Test error if sign present for vfUXX
 	SL_DBG("Sign test") ;
 	pcStringParseValue((char *) "123456", (p32_t) &x64Val, vfUXX, vs08B, " ") ;
 	pcStringParseValue((char *) "+123456", (p32_t) &x64Val, vfUXX, vs16B, " ") ;
 	pcStringParseValue((char *) "-123456", (p32_t) &x64Val, vfUXX, vs32B, " ") ;
 	pcStringParseValue((char *) "123456", (p32_t) &x64Val, vfUXX, vs64B, " ") ;
-// Unsigned round down
+	// Unsigned round down
 	SL_DBG("U-8/16/32 test") ;
 	pcStringParseValue((char *) "257", (p32_t) &x64Val, vfUXX, vs08B, " ") ;
 	pcStringParseValue((char *) "65537", (p32_t) &x64Val, vfUXX, vs16B, " ") ;
 	pcStringParseValue((char *) "4294967297", (p32_t) &x64Val, vfUXX, vs32B, " ") ;
-// Signed round down
+	// Signed round down
 	SL_DBG("I8 signed test") ;
 	pcStringParseValue((char *) "130", (p32_t) &x64Val, vfIXX, vs08B, " ") ;
 	pcStringParseValue((char *) "-130", (p32_t) &x64Val, vfIXX, vs08B, " ") ;
@@ -413,7 +413,7 @@ x64_t	x64Val ;
 	pcStringParseValue((char *) "2147483660", (p32_t) &x64Val, vfIXX, vs32B, " ") ;
 	pcStringParseValue((char *) "+2147483660", (p32_t) &x64Val, vfIXX, vs32B, " ") ;
 	pcStringParseValue((char *) "-2147483660", (p32_t) &x64Val, vfIXX, vs32B, " ") ;
-// Float round down
+	// Float round down
 	SL_DBG("F32 test") ;
 	pcStringParseValue((char *) "1.1", (p32_t) &x64Val, vfFXX, vs32B, " ") ;
 	pcStringParseValue((char *) "123.123", (p32_t) &x64Val, vfFXX, vs32B, " ") ;
@@ -422,10 +422,10 @@ x64_t	x64Val ;
 	pcStringParseValue((char *) "1234567890.1234567", (p32_t) &x64Val, vfFXX, vs32B, " ") ;
 	pcStringParseValue((char *) "+1234567890.1234567", (p32_t) &x64Val, vfFXX, vs32B, " ") ;
 	pcStringParseValue((char *) "-1234567890.1234567", (p32_t) &x64Val, vfFXX, vs32B, " ") ;
-// Double no round
+	// Double no round
 	SL_DBG("F64 test") ;
 	pcStringParseValue((char *) "12345678901234567.123456789", (p32_t) &x64Val, vfFXX, vs64B, " ") ;
-// Version format
+	// Version format
 	SL_DBG("4x U8 test") ;
 	pcStringParseValues((char *) "11.22.33.44", (p32_t) &x64Val, vfUXX, vs08B, " .", 4) ;
 }
