@@ -23,6 +23,7 @@
  */
 
 #include	"x_debug.h"
+#include	"x_printf.h"
 #include	"x_definitions.h"
 #include	"x_string_general.h"
 #include	"x_string_to_values.h"
@@ -367,6 +368,12 @@ char *	pcStringParseNumberRange(int32_t * i32Ptr, char * pSrc, int32_t Min, int3
 	return (INRANGE(Min, *i32Ptr, Max, int32_t) == true) ? pSrc : pcFAILURE ;
 }
 
+/**
+ * pcStringParseIpAddr() - parse a string and return an IP address in NETWORK byte order
+ * @param	pStr
+ * @param	pVal
+ * @return	pcFAILURE or pointer to 1st char after the IP address
+ */
 char *	pcStringParseIpAddr(char * pStr, uint32_t * pVal) {
 	IF_myASSERT(debugPARAM, INRANGE_MEM(pStr) && INRANGE_SRAM(pVal)) ;
 	*pVal = 0 ;
@@ -383,7 +390,8 @@ char *	pcStringParseIpAddr(char * pStr, uint32_t * pVal) {
 			++pStr ;
 		}
 	}
-	IF_CPRINT(debugRESULT, "IP : %-I\n", *pVal) ;
+	*pVal = htonl(*pVal) ;
+	IF_CPRINT(debugRESULT, "IP : %#-I\n", *pVal) ;
 	return pStr ;
 }
 
