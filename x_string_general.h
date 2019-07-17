@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-18 Andre M Maree / KSS Technologies (Pty) Ltd.
+ * Copyright 2014-19 Andre M Maree / KSS Technologies (Pty) Ltd.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
  * and associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,6 +27,7 @@
 #include	"x_time.h"
 
 #include	<stdint.h>
+#include	<stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,7 +77,10 @@ int32_t	xstrverify(char * pStr, char cMin, char cMax, char cNum) ;
 int32_t	xstrlen(char * s) ;
 int32_t	xstrnlen(char * s, int32_t len) ;
 int32_t	xstrncpy(char * s1, char * s2, int32_t len ) ;
+
+int32_t	xmemrev(char * pMem, size_t Size) ;
 void	xstrrev(char * pStr) ;
+
 int32_t	xinstring(const char * pStr, char cChr) ;
 int32_t xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) ;
 int32_t	xstrcmp(const char * s1, const char * s2, bool Exact) ;

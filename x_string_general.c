@@ -23,6 +23,7 @@
  */
 
 #include	"x_debug.h"
+#include	"x_printf.h"
 #include	"x_string_general.h"
 #include	"x_string_to_values.h"
 #include	"x_errors_events.h"
@@ -113,23 +114,49 @@ int32_t	xstrncpy(char * pDst, char * pSrc, int32_t xLen ) {
 	return Cnt ;
 }
 
+int32_t	xmemrev(char * pMem, size_t Size) {
+	IF_myASSERT(debugPARAM, INRANGE_SRAM(pMem) && Size > 1) ;
+	if (pMem == NULL || *pMem == CHR_NUL || Size < 2) {
+		return erFAILURE;
+	}
+	char * pRev = pMem + Size - 1 ;
+#if		(stringXMEMREV_XOR == 1)
+	for (char * pFwd = pMem; pRev > pFwd; ++pFwd, --pRev) {
+		*pFwd ^= *pRev ;
+		*pRev ^= *pFwd ;
+		*pFwd ^= *pRev ;
+	}
+#else
+	while (pMem < pRev) {
+		char cTemp = *pMem ;
+		*pMem++	= *pRev ;
+		*pRev--	= cTemp ;
+	}
+#endif
+	return erSUCCESS ;
+}
+
 /**
  * xstrrev
  * @param  str is a pointer to the string to be reversed
  * @return none
- * @brief  perform 'in-place' start <-> end charater reversal
+ * @brief  perform 'in-place' start <-> end character reversal
  */
 void	xstrrev(char * pStr) {
+#if 0
 	IF_myASSERT(debugPARAM, INRANGE_SRAM(pStr)) ;
 	if ((pStr == NULL) || (*pStr == CHR_NUL)) {
 		return ;
 	}
-	char *p1, *p2 ;
-	for (p1 = pStr, p2 = pStr + xstrlen(pStr) - 1; p2 > p1; ++p1, --p2) {
-		*p1 ^= *p2 ;
-		*p2 ^= *p1 ;
-		*p1 ^= *p2 ;
+	char * pRev = pStr + xstrlen(pStr) - 1 ;
+	for (char * pFwd = pStr; pRev > pFwd; ++pFwd, --pRev) {
+		*pFwd ^= *pRev ;
+		*pRev ^= *pFwd ;
+		*pFwd ^= *pRev ;
 	}
+#else
+	xmemrev(pStr, xstrlen(pStr)) ;
+#endif
 }
 
 /**
