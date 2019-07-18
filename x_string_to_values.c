@@ -391,7 +391,7 @@ char *	pcStringParseIpAddr(char * pStr, uint32_t * pVal) {
 		}
 	}
 	*pVal = htonl(*pVal) ;
-	IF_CPRINT(debugRESULT, "IP : %#-I\n", *pVal) ;
+	IF_PRINT(debugRESULT, "IP : %#-I\n", *pVal) ;
 	return pStr ;
 }
 
