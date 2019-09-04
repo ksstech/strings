@@ -192,7 +192,7 @@ int32_t	xinstring(const char * pStr, char cChr) {
  */
 int32_t	xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) {
 	IF_myASSERT(debugPARAM, INRANGE_MEM(s1) && INRANGE_MEM(s2) && (xLen < 1024)) ;
-	IF_SL_DBG(debugXSTRCMP, " S1=%s:S2=%s ", s1, s2) ;
+	IF_SL_DBG(debugXSTRCMP, " '%s' vs '%s' ", s1, s2) ;
 	while (*s1 && *s2 && xLen) {
 		if (Exact == true) {
 			if (*s1 != *s2) {

@@ -51,11 +51,6 @@ extern "C" {
 
 // ########################################### MACROS ##############################################
 
-#define	sepSPACE_COMMA_TAB_LF		" ,\t\n"
-#define	sepSPACE_COMMA_TAB			" ,\t"
-#define	sepSPACE_COMMA				" ,"
-#define	sepSPACE					" "
-
 // ##################################### string operations #########################################
 
 typedef struct eTable_s {
