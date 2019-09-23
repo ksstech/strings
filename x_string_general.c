@@ -168,7 +168,7 @@ void	xstrrev(char * pStr) {
  * 				FAILURE if no match found, or cChr is NULL
  */
 int32_t	xinstring(const char * pStr, char cChr) {
-	IF_myASSERT(debugPARAM, INRANGE_MEM(pStr)) ;
+//	IF_myASSERT(debugPARAM, INRANGE_MEM(pStr)) ;
 	if (cChr == CHR_NUL) {
 		return erFAILURE ;
 	}
@@ -365,7 +365,7 @@ int32_t	xStringFindDelim(char * pSrc, const char * pDlm, int32_t xMax) {
  * @return		pointer to next character to be processed...
  */
 char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int32_t flag, int32_t MaxLen) {
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(pDst) && INRANGE_MEM(pSrc) && INRANGE_MEM(pDel)) ;
+	IF_myASSERT(debugPARAM, INRANGE_SRAM(pDst) && INRANGE_MEM(pSrc) && INRANGE_MEM(pDel) && (*pSrc != CHR_NUL) && (*pDel != CHR_NUL)) ;
 	// If no length supplied
 	if (MaxLen == 0) {
 		MaxLen = strlen((const char *) pSrc) ;			// assume NULL terminated and calculate length
