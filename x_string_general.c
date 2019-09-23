@@ -619,7 +619,7 @@ int32_t	xBitMapDecode(uint32_t Value, uint32_t Mask, const char * pMesArray[], c
 	for (pos = 31, idx = 0, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, pos--) {
 		if (Mask & CurMask) {
 			if (Value & CurMask) {
-				BufLen += snprintf(pBuf + BufLen, BufSize - BufLen, " %02d=%s", pos, pMesArray[idx]) ;
+				BufLen += snprintf(pBuf + BufLen, BufSize - BufLen, "  %s", pMesArray[idx]) ;
 			}
 			idx++ ;
 		}
