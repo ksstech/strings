@@ -89,6 +89,7 @@ char *	pcStringParseDateTime(char * buf, uint64_t * pTStamp, struct tm *ptm) ;
 
 char *	pcCodeToMessage(int32_t eCode, const eTable_t * eTable) ;
 
+int32_t	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * pMesArray[], char * pBuf, size_t BufSize) ;
 int32_t	xBitMapDecode(uint32_t Value, uint32_t Mask, const char * pMesArray[], char * pBuf, size_t BufSize) ;
 void	vBitMapDecode(uint32_t Value, uint32_t Mask, const char * pMesArray[]) ;
 void	vBitMapReport(char * Name, uint32_t Value, uint32_t Width, const char ** pMesArray) ;

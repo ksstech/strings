@@ -590,6 +590,29 @@ char * pcCodeToMessage(int32_t eCode, const eTable_t * eTable) {
 
 // ############################## Bitmap to string decode functions ################################
 
+int32_t	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * pMesArray[], char * pBuf, size_t BufSize) {
+	int32_t	pos, idx, BufLen = 0 ;
+	uint32_t	CurMask, ColCode ;
+	for (pos = 31, idx = 0, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, pos--) {
+		if (Mask & CurMask) {
+			if ((Val1 & CurMask) && (Val2 & CurMask)) {
+				ColCode = xpfSGR(attrRESET, colourFG_WHITE, 0, 0) ;
+			} else if (Val1 & CurMask) {
+				ColCode = xpfSGR(attrRESET, colourFG_RED, 0, 0) ;
+			} else if (Val2 & CurMask) {
+				ColCode = xpfSGR(attrRESET, colourFG_GREEN, 0, 0) ;
+			} else {
+				ColCode = 0 ;
+			}
+			if (ColCode) {
+				BufLen += snprintf(pBuf + BufLen, BufSize - BufLen, "  %C%s%C", ColCode, pMesArray[idx], attrRESET) ;
+			}
+			idx++ ;
+		}
+	}
+	return BufLen ;
+}
+
 int32_t	xBitMapDecode(uint32_t Value, uint32_t Mask, const char * pMesArray[], char * pBuf, size_t BufSize) {
 	int32_t	pos, idx, BufLen = 0 ;
 	uint32_t	CurMask ;
