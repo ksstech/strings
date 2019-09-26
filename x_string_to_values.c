@@ -130,7 +130,7 @@ uint64_t xStringParseX64(char *pSrc, uint8_t * pDst, uint32_t xLen) {
  * 				pcFAILURE is no valid value found to parse
  */
 char *	pcStringParseU64(char * pSrc, uint64_t * pDst, int32_t * pSign, const char * pDel) {
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(pSign) && INRANGE_SRAM(pDst) && INRANGE_MEM(pSrc)) ;
+	IF_myASSERT(debugPARAM, INRANGE_MEM(pSrc) && INRANGE_SRAM(pDst) && INRANGE_SRAM(pSign)) ;
 	*pSign 	= 0 ;						// set sign as not provided
 	uint64_t	Base = 10 ;				// default to decimal
 	if (pDel) {

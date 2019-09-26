@@ -168,7 +168,7 @@ void	xstrrev(char * pStr) {
  * 				FAILURE if no match found, or cChr is NULL
  */
 int32_t	xinstring(const char * pStr, char cChr) {
-//	IF_myASSERT(debugPARAM, INRANGE_MEM(pStr)) ;
+	IF_myASSERT(debugPARAM, INRANGE_MEM(pStr)) ;
 	if (cChr == CHR_NUL) {
 		return erFAILURE ;
 	}
@@ -191,7 +191,7 @@ int32_t	xinstring(const char * pStr, char cChr) {
  * @return			true or false based on comparison
  */
 int32_t	xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) {
-	IF_myASSERT(debugPARAM, INRANGE_MEM(s1) && INRANGE_MEM(s2) && (xLen < 1024)) ;
+	IF_myASSERT(debugPARAM, INRANGE_MEM(s1) && INRANGE_MEM(s2) && xLen < 1024) ;
 	IF_SL_DBG(debugXSTRCMP, " '%s' vs '%s' ", s1, s2) ;
 	while (*s1 && *s2 && xLen) {
 		if (Exact == true) {
@@ -310,7 +310,6 @@ int32_t	xStringParseEncoded(char * pStr, char * pDst) {
  */
 int32_t	xStringSkipDelim(char * pSrc, const char * pDel, int32_t MaxLen) {
 	IF_myASSERT(debugPARAM, INRANGE_MEM(pSrc) && INRANGE_MEM(pDel)) ;
-
 	// If no length supplied
 	if (MaxLen == 0) {
 		MaxLen = xstrnlen(pSrc, stringGENERAL_MAX_LEN) ;// assume NULL terminated and calculate length
@@ -415,7 +414,7 @@ char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int32_t f
  *					Fri Dec 31 23:59:59 1999
  */
 char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) {
-	IF_myASSERT(debugPARAM, INRANGE_MEM(psTM) && INRANGE_SRAM(pTStamp) && INRANGE_SRAM(psTM)) ;
+	IF_myASSERT(debugPARAM, INRANGE_MEM(pSrc) && INRANGE_SRAM(pTStamp) && INRANGE_SRAM(psTM)) ;
 	uint32_t	flag = 0 ;
 	int32_t		Value, iD1, iD2 ;
 	memset(psTM, 0, sizeof(struct tm)) ;				// ensure all start as 0
