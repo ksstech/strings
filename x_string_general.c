@@ -267,7 +267,7 @@ int32_t	xstrindex(char * key, char * array[]) {
  */
 int32_t	xStringParseEncoded(char * pStr, char * pDst) {
 	IF_myASSERT(debugPARAM, INRANGE_SRAM(pStr)) ;
-	int32_t iRetVal = 0 ;
+	int32_t iRV = 0 ;
 	if (pDst == NULL) {
 		pDst	= pStr ;
 	} else {
@@ -290,11 +290,11 @@ int32_t	xStringParseEncoded(char * pStr, char * pDst) {
 		} else {
 			*pDst++ = *pStr++ ;							// copy as is to (new) position
 		}
-		++iRetVal ;										// & adjust count...
+		++iRV ;										// & adjust count...
 	}
 	*pDst = CHR_NUL ;									// terminate
-	IF_PRINT(debugPARSE_ENCODED, "%s\n", pStr-iRetVal) ;
-	return iRetVal ;
+	IF_PRINT(debugPARSE_ENCODED, "%s\n", pStr-iRV) ;
+	return iRV ;
 }
 
 #define	stringGENERAL_MAX_LEN		2048
