@@ -353,19 +353,19 @@ char *	pcStringParseValues(char * pSrc, p32_t p32Pntr, varform_t VarForm, varsiz
 	return pSrc ;
 }
 
-char *	pcStringParseNumber(int32_t * i32Ptr, char * pSrc) {
+char *	pcStringParseNumber(char * pSrc, p32_t p32Pntr) {
 	char * pTmp = pSrc ;
-	*i32Ptr = 0 ;
+	*p32Pntr.pi32 = 0 ;
 	while (*pSrc && INRANGE(CHR_0, *pSrc, CHR_9, int32_t)) {
-		*i32Ptr	*= 10 ;
-		*i32Ptr	+= *pSrc++ - CHR_0 ;
+		*p32Pntr.pi32	*= 10 ;
+		*p32Pntr.pi32	+= *pSrc++ - CHR_0 ;
 	}
 	return (pTmp == pSrc) ? pcFAILURE : pSrc ;
 }
 
-char *	pcStringParseNumberRange(int32_t * i32Ptr, char * pSrc, int32_t Min, int32_t Max) {
-	pSrc = pcStringParseNumber(i32Ptr, pSrc) ;
-	return (INRANGE(Min, *i32Ptr, Max, int32_t) == true) ? pSrc : pcFAILURE ;
+char *	pcStringParseNumberRange(char * pSrc, p32_t p32Pntr, int32_t Min, int32_t Max) {
+	pSrc = pcStringParseNumber(pSrc, p32Pntr) ;
+	return (INRANGE(Min, *p32Pntr.pi32, Max, int32_t) == true) ? pSrc : pcFAILURE ;
 }
 
 /**
@@ -374,25 +374,27 @@ char *	pcStringParseNumberRange(int32_t * i32Ptr, char * pSrc, int32_t Min, int3
  * @param	pVal
  * @return	pcFAILURE or pointer to 1st char after the IP address
  */
-char *	pcStringParseIpAddr(char * pStr, uint32_t * pVal) {
-	IF_myASSERT(debugPARAM, INRANGE_MEM(pStr) && INRANGE_SRAM(pVal)) ;
-	*pVal = 0 ;
-	for(int32_t Idx = 0; Idx < 4; ++Idx) {
+char *	pcStringParseIpAddr(char * pSrc, p32_t p32Pntr) {
+	IF_myASSERT(debugPARAM, INRANGE_MEM(pSrc) && INRANGE_SRAM(p32Pntr.pu32)) ;
+	char * pcRV = pSrc ;
+	*p32Pntr.pu32 = 0 ;
+	for(int32_t i = 0; i < 4; ++i) {
 		uint32_t u32Val = 0 ;
-		pStr = pcStringParseValueRange(pStr, (p32_t) &u32Val, vfUXX, vs32B, (Idx < 3) ? "." : "\0", (x32_t) 0, (x32_t) 255) ;
-//		PRINT("Idx=%d  '%s'  0x%08x  %-I  ", Idx, pStr, u32Val, u32Val) ;
-		if (pStr == pcFAILURE) {
-			return pStr ;
-		}
-		*pVal <<= 8 ;
-		*pVal += u32Val ;
-		if (*pStr == CHR_FULLSTOP) {
-			++pStr ;
+		const char * pccTmp = (i == 0) ? " " : "." ;
+		pcRV = pcStringParseValueRange(pSrc = pcRV, (p32_t) &u32Val, vfUXX, vs32B, pccTmp, (x32_t) UINT8_MIN, (x32_t) UINT8_MAX) ;
+		EQ_GOTO(pcRV, pcFAILURE, exit) ;
+//		PRINT("i=%d  '%s' -> '%s'  0x%08x  %-I  ", i, pSrc, pcRV, u32Val, u32Val) ;
+
+		*p32Pntr.pu32	<<= 8 ;
+		*p32Pntr.pu32	+= u32Val ;
+		if (*pcRV == CHR_FULLSTOP) {
+			++pcRV ;
 		}
 	}
-	*pVal = htonl(*pVal) ;
-	IF_PRINT(debugRESULT, "IP : %#-I\n", *pVal) ;
-	return pStr ;
+	*p32Pntr.pu32	= htonl(*p32Pntr.pu32) ;
+	IF_PRINT(debugRESULT, "IP : %#-I\n", *p32Pntr.pu32) ;
+exit:
+	return pcRV ;
 }
 
 void	x_string_values_test(void) {

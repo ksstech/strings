@@ -37,14 +37,14 @@ uint64_t xStringParseX64(char *pSrc, uint8_t * pDst, uint32_t xLen) ;
 int32_t	xHexCharToValue(uint8_t, int32_t) ;
 
 char *	pcStringParseU64(char * pSrc, uint64_t * pVal, int32_t * pSign, const char * pDel) ;
-char *	pcStringParseF64(char *str, double * pDst, int32_t * pSign, const char * pDel) ;
+char *	pcStringParseF64(char *pSrc, double * pDst, int32_t * pSign, const char * pDel) ;
 char *	pcStringParseX64(char * pSrc, x64_t * px64Val, varform_t VarForm, const char * pDel) ;
 char *	pcStringParseValue(char * pSrc, p32_t p32Pntr, varform_t VarForm, varsize_t VarSize, const char * pDel) ;
 char *	pcStringParseValueRange(char * pSrc, p32_t p32Pntr, varform_t VarForm, varsize_t VarSize, const char * pDel, x32_t x32Lo, x32_t x32Hi) ;
 char *	pcStringParseValues(char * pSrc, p32_t p32Pntr, varform_t VarForm, varsize_t VarSize, const char * pDel, int32_t Count) ;
-char *	pcStringParseNumber(int32_t * i32Ptr, char * pSrc) ;
-char *	pcStringParseNumberRange(int32_t * i32Ptr, char * pSrc, int32_t Min, int32_t Max) ;
-char *	pcStringParseIpAddr(char * pStr, uint32_t * pVal) ;
+char *	pcStringParseNumber(char * pSrc, p32_t p32Pntr) ;
+char *	pcStringParseNumberRange(char * pSrc, p32_t p32Pntr, int32_t Min, int32_t Max) ;
+char *	pcStringParseIpAddr(char * pStr, p32_t p32Pntr) ;
 
 void	x_string_values_test(void) ;
 
