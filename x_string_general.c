@@ -390,7 +390,7 @@ char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int32_t f
 #define	delimDATE2	"t "
 #define	delimTIME1	"h:"
 #define	delimTIME2	"m:"
-#define	delimTIME3	"s.z "
+#define	delimTIME3	"sz. "
 
 /**
  * pcStringParseDateTime()
@@ -416,16 +416,21 @@ char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int32_t f
 char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) {
 	IF_myASSERT(debugPARAM, INRANGE_MEM(pSrc) && INRANGE_SRAM(pTStamp) && INRANGE_SRAM(psTM)) ;
 	uint32_t	flag = 0 ;
-	int32_t		Value, iD1, iD2 ;
+	/* TPmax	= ThisPar max length+1
+	 * TPact	= ThisPar actual length ( <0=error  0=not found  >0=length )
+	 * NPact	= NextPar actual length
+	 * TPlim	= ThisPar max value */
+	int32_t		Value, TPmax, TPact, NPact, TPlim ;
 	memset(psTM, 0, sizeof(struct tm)) ;				// ensure all start as 0
 	while (*pSrc == CHR_SPACE) ++pSrc ;					// make sure no leading spaces ....
 
+	IF_PRINT(debugPARSE_DTIME, "pcStringParseDateTime()\n") ;
 	// check CCYY?MM? ahead
-	iD1 = xStringFindDelim(pSrc, delimDATE1, 5) ;
-	iD2 = (iD1 > 0) ? xStringFindDelim(pSrc+iD1+1, delimDATE1, 3) : 0 ;
-	IF_PRINT(debugPARSE_DTIME, " C: iD1=%d  iD2=%d", iD1, iD2) ;
-	if (iD2 >= 1) {
-		IF_PRINT(debugPARSE_DTIME, " Yr '%.*s'", iD1, pSrc) ;
+	TPact = xStringFindDelim(pSrc, delimDATE1, sizeof("CCYY")) ;
+	NPact = (TPact > 0) ? xStringFindDelim(pSrc+TPact+1, delimDATE1, sizeof("MM")) : 0 ;
+	IF_PRINT(debugPARSE_DTIME, "C: TPact=%d  NPact=%d", TPact, NPact) ;
+	if (NPact >= 1) {
+		IF_PRINT(debugPARSE_DTIME, "  Yr '%.*s'", TPact, pSrc) ;
 		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) YEAR_BASE_MAX) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
 		// Cater for CCYY vs YY form
@@ -433,125 +438,168 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 		flag |= DATETIME_YEAR_OK ;						// mark as done
 		++pSrc ;										// skip over separator
 	}
+	IF_PRINT(debugPARSE_DTIME, "  Val=%d\n", psTM->tm_year) ;
 
 	// check for MM?DD? ahead
-	iD1 = xStringFindDelim(pSrc, delimDATE1, 3) ;
-	iD2 = (iD1 > 0) ? xStringFindDelim(pSrc+iD1+1, delimDATE2, 3) : 0 ;
-	IF_PRINT(debugPARSE_DTIME, " M: iD1=%d  iD2=%d", iD1, iD2) ;
-	if ((flag & DATETIME_YEAR_OK) ||
-		(iD2 == 2) ||
-		(iD2 == 0 && iD1 > 0 && pSrc[iD1+3] == CHR_NUL)) {
-		IF_PRINT(debugPARSE_DTIME, " Mon '%.*s'", iD1, pSrc) ;
+	TPact = xStringFindDelim(pSrc, delimDATE1, sizeof("MM")) ;
+	NPact = (TPact > 0) ? xStringFindDelim(pSrc+TPact+1, delimDATE2, sizeof("DD")) : 0 ;
+	IF_PRINT(debugPARSE_DTIME, "M: TPact=%d  NPact=%d", TPact, NPact) ;
+
+	if ((flag & DATETIME_YEAR_OK) || (NPact == 2) || (NPact == 0 && TPact > 0 && pSrc[TPact+3] == CHR_NUL)) {
+		IF_PRINT(debugPARSE_DTIME, "  Mon '%.*s'", TPact, pSrc) ;
 		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 1, (x32_t) MONTHS_IN_YEAR) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_mon = Value - 1 ;						// make 0 relative
 		flag |= DATETIME_MON_OK ;						// mark as done
 		++pSrc ;										// skip over separator
 	}
+	IF_PRINT(debugPARSE_DTIME, "  Val=%d\n", psTM->tm_mon) ;
 
-	// DD? or xxt or xxT or xx
-	iD1 = xStringFindDelim(pSrc, delimDATE2, 3) ;
-	iD2 = (iD1 <= 0) && pSrc[1] == CHR_NUL ? 1 : (iD1 <= 0 && pSrc[2] == CHR_NUL) ? 2 : 0 ;
-	IF_PRINT(debugPARSE_DTIME, " D: iD1=%d  iD2=%d", iD1, iD2) ;
-	if ((flag & DATETIME_MON_OK) ||
-		(iD1 > 0 && tolower((int) pSrc[iD1]) == CHR_t)) {
-		IF_PRINT(debugPARSE_DTIME, " Day '%.*s'", iD1, pSrc) ;
-		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 1, (x32_t) xTime_CalcDaysInMonth(psTM)) ;
+	if (flag & (DATETIME_YEAR_OK | DATETIME_MON_OK)) {
+		TPmax = sizeof("DD") ;
+		TPlim = xTimeCalcDaysInMonth(psTM) ;
+	} else {
+		TPmax = sizeof("365") ;
+		TPlim = DAYS_IN_YEAR ;
+	}
+	TPact = xStringFindDelim(pSrc, delimDATE2, TPmax) ;
+	NPact = (TPact < 1 && pSrc[1] == CHR_NUL) ? 1 : (TPact < 1 && pSrc[2] == CHR_NUL) ? 2 : 0 ;
+	IF_PRINT(debugPARSE_DTIME, "D: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
+
+	if ((flag & DATETIME_MON_OK) || (TPact > 0 && tolower((int) pSrc[TPact]) == CHR_t)) {
+		IF_PRINT(debugPARSE_DTIME, "  Day '%.*s'", TPact, pSrc) ;
+		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 1, (x32_t) TPlim) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_mday = Value ;
 		flag |= DATETIME_MDAY_OK ;						// mark as done
 	}
+	IF_PRINT(debugPARSE_DTIME, "  Val=%d\n", psTM->tm_mday) ;
 
 	// calculate day of year ONLY if yyyy-mm-dd read in...
 	if (flag == (DATETIME_YEAR_OK | DATETIME_MON_OK | DATETIME_MDAY_OK)) {
-		psTM->tm_yday = xTime_CalcDaysYTD(psTM) ;
+		psTM->tm_yday = xTimeCalcDaysYTD(psTM) ;
 		flag |= DATETIME_YDAY_OK ;
 	}
+
 	// skip over 'T' if there
 	if (*pSrc == CHR_T || *pSrc == CHR_t || *pSrc == CHR_SPACE) {
 		++pSrc ;
 	}
 
 	// check for HH?MM?
-	iD1 = xStringFindDelim(pSrc, delimTIME1, 3) ;
-	iD2 = (iD1 > 0) ? xStringFindDelim(pSrc+iD1+1, delimTIME2, 3) : 0 ;
-	IF_PRINT(debugPARSE_DTIME, " H: iD1=%d  iD2=%d", iD1, iD2) ;
-	if (iD2 >= 1) {
-		IF_PRINT(debugPARSE_DTIME, " Hr '%.*s'", iD1, pSrc) ;
-		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) (HOURS_IN_DAY-1)) ;
+	if (flag & (DATETIME_YEAR_OK | DATETIME_MON_OK | DATETIME_MDAY_OK)) {
+		TPmax = sizeof("HH") ;
+		TPlim = HOURS_IN_DAY - 1 ;
+	} else {
+		TPmax = sizeof("8760") ;
+		TPlim = HOURS_IN_YEAR ;
+	}
+	TPact = xStringFindDelim(pSrc, delimTIME1, TPmax) ;
+	NPact = (TPact > 0) ? xStringFindDelim(pSrc+TPact+1, delimTIME2, sizeof("HH")) : 0 ;
+	IF_PRINT(debugPARSE_DTIME, "H: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
+
+	if (NPact > 0) {
+		IF_PRINT(debugPARSE_DTIME, "  Hr '%.*s'", TPact, pSrc) ;
+		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) TPlim) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_hour = Value ;
 		flag	|= DATETIME_HOUR_OK ;					// mark as done
 		++pSrc ;										// skip over separator
 	}
+	IF_PRINT(debugPARSE_DTIME, "  Val=%d\n", psTM->tm_hour) ;
 
 	// check for MM?SS?
-	iD1 = xStringFindDelim(pSrc, delimTIME2, 3) ;
-	iD2 = (iD1 > 0) ? xStringFindDelim(pSrc+iD1+1, delimTIME3, 3) : 0 ;
-	IF_PRINT(debugPARSE_DTIME, " M: iD1=%d  iD2=%d", iD1, iD2) ;
-	if ((flag & DATETIME_HOUR_OK) ||
-		(iD2 == 2) ||
-		(iD2 == 0 && iD1 > 0 && pSrc[iD1+3] == CHR_NUL)) {
-		IF_PRINT(debugPARSE_DTIME, " Min '%.*s'", iD1, pSrc) ;
-		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) (MINUTES_IN_HOUR-1)) ;
+	// [M..]M{m:}[S]S{s.Zz }
+	if (flag & (DATETIME_YEAR_OK | DATETIME_MON_OK | DATETIME_MDAY_OK | DATETIME_HOUR_OK)) {
+		TPmax = sizeof("MM") ;
+		TPlim = MINUTES_IN_HOUR-1 ;
+	} else {
+		TPmax = sizeof("525600") ;
+		TPlim = MINUTES_IN_YEAR ;
+	}
+	TPact = xStringFindDelim(pSrc, delimTIME2, TPmax) ;
+	NPact = (TPact > 0) ? xStringFindDelim(pSrc+TPact+1, delimTIME3, sizeof("SS")) : 0 ;
+	IF_PRINT(debugPARSE_DTIME, "M: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
+
+	if ((flag & DATETIME_HOUR_OK) || (NPact == 2) || (NPact == 0 && TPact > 0 && pSrc[TPact+3] == CHR_NUL)) {
+		IF_PRINT(debugPARSE_DTIME, "  Min '%.*s'", TPact, pSrc) ;
+		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) TPlim) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_min = Value ;
 		flag	|= DATETIME_MIN_OK ;					// mark as done
 		++pSrc ;										// skip over separator
 	}
+	IF_PRINT(debugPARSE_DTIME, "  Val=%d\n", psTM->tm_min) ;
 
-	// SS? or xxZ or xxz or xx
-	iD1 = xStringFindDelim(pSrc, delimTIME3, 3) ;
-	iD2 = (iD1 < 1) ? strlen(pSrc) : 0 ;
-	IF_PRINT(debugPARSE_DTIME, " S: iD1=%d  iD2=%d", iD1, iD2) ;
-	if ((flag & DATETIME_MIN_OK) ||
-		(iD1 > 0) ||
-		(INRANGE(1, iD2, 2, int32_t))) {
-		IF_PRINT(debugPARSE_DTIME, " Sec '%.*s'", iD1, pSrc) ;
-		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) (SECONDS_IN_MINUTE-1)) ;
+	/*
+	 * To support parsing of long (>60s) RELATIVE time period we must support values
+	 * much bigger than 59.
+	 * If NONE of the CCYY?MM?DD?HH?MM portions supplied then must be
+	 *		SS[s.Zz ]
+	 * else we must allow for
+	 * 		SSSSSSSS[s.Zz ]
+	 */
+	if (flag & (DATETIME_YEAR_OK | DATETIME_MON_OK | DATETIME_MDAY_OK | DATETIME_HOUR_OK | DATETIME_MIN_OK)) {
+		TPmax = sizeof("SS") ;
+		TPlim = SECONDS_IN_MINUTE - 1 ;
+	} else {
+		TPmax = sizeof("31622399") ;
+		TPlim = SECONDS_IN_LEAPYEAR - 1 ;
+	}
+	TPact = xStringFindDelim(pSrc, delimTIME3, TPmax) ;
+	NPact = (TPact < 1) ? strlen(pSrc) : 0 ;
+	IF_PRINT(debugPARSE_DTIME, "S: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
+
+	if ((flag & DATETIME_MIN_OK) || (TPact > 0) || (INRANGE(1, NPact, --TPmax, int32_t))) {
+		IF_PRINT(debugPARSE_DTIME, "  Sec '%.*s'", TPact, pSrc) ;
+		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) TPlim) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_sec = Value ;
 		flag	|= DATETIME_SEC_OK ;					// mark as done
 	}
+	IF_PRINT(debugPARSE_DTIME, "  Val=%d\n", psTM->tm_sec) ;
 
 	// check for [.0{...}Z] and skip as appropriate
 	int32_t uSecs = 0 ;
-	iD1 = xStringFindDelim(pSrc, ".s", 1) ;
-	if (iD1 == 0) {
+	TPact = xStringFindDelim(pSrc, ".s", 1) ;
+	TPmax = sizeof("999999") ;
+	if (TPact == 0) {
 		++pSrc ;										// skip over '.'
-		iD1 = xStringFindDelim(pSrc, "z ", 7) ;			// find position of Z/z in buffer
-		if (OUTSIDE(1, iD1, 7, int32_t)) {
+		TPact = xStringFindDelim(pSrc, "z ", TPmax) ;	// find position of Z/z in buffer
+		if (OUTSIDE(1, TPact, TPmax, int32_t)) {
 		/* TODO valid terminator not found, but maybe a NUL ?
 		 * still a problem, what about junk after the last number ? */
-			iD2 = strlen(pSrc) ;
-			if (OUTSIDE(1, iD2, 6, int32_t)) {
+			NPact = strlen(pSrc) ;
+			if (OUTSIDE(1, NPact, --TPmax , int32_t)) {
 				return pcFAILURE ;
 			}
-			iD1 = iD2 ;
+			TPact = NPact ;
 		}
-		IF_PRINT(debugPARSE_DTIME, " uSec '%.*s'", iD1, pSrc) ;
+		IF_PRINT(debugPARSE_DTIME, " uS '%.*s'", TPact, pSrc) ;
 		pSrc = pcStringParseValueRange(pSrc, (p32_t) &uSecs, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) (MICROS_IN_SECOND-1)) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
-		iD1 = 6 - iD1 ;
-		while (iD1--) {
+		TPact = 6 - TPact ;
+		while (TPact--) {
 			uSecs *= 10 ;
 		}
 		flag |= DATETIME_MSEC_OK ;						// mark as done
+		IF_PRINT(debugPARSE_DTIME, "  Val=%d\n", uSecs) ;
 	}
+
 	if (pSrc[0]==CHR_Z || pSrc[0]==CHR_z) {
 		++pSrc ;						// skip over trailing 'Z'
 	}
 
 	uint32_t Secs ;
 	if (flag & DATETIME_YEAR_OK) {						// full timestamp data found?
-		psTM->tm_wday = (xTime_CalcDaysToDate(psTM) + timeEPOCH_DAY_0_NUM) % DAYS_IN_WEEK ;
-		psTM->tm_yday = xTime_CalcDaysYTD(psTM) ;
-		Secs = xTime_CalcSeconds(psTM, 0) ;
+		psTM->tm_wday = (xTimeCalcDaysToDate(psTM) + timeEPOCH_DAY_0_NUM) % DAYS_IN_WEEK ;
+		psTM->tm_yday = xTimeCalcDaysYTD(psTM) ;
+		Secs = xTimeCalcSeconds(psTM, 0) ;
 	} else {
-		Secs = xTime_CalcSeconds(psTM, 1) ;
+		Secs = xTimeCalcSeconds(psTM, 1) ;
 	}
 	*pTStamp = xTimeMakeTimestamp(Secs, uSecs) ;
-	IF_PRINT(debugPARSE_DTIME, " flag=%p uS=%llu wday=%d yday=%d %04d/%02d/%02d %dh%02dm%02ds\n",
+	IF_PRINT(debugPARSE_DTIME, "flag=%p  uS=%'llu  wday=%d  yday=%d  %04d/%02d/%02d  %dh%02dm%02ds\n",
 								flag, *pTStamp, psTM->tm_wday, psTM->tm_yday,
 								psTM->tm_year, psTM->tm_mon, psTM->tm_mday,
 								psTM->tm_hour, psTM->tm_min, psTM->tm_sec) ;
