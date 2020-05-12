@@ -26,6 +26,7 @@
 #include	"x_string_to_values.h"
 #include	"x_errors_events.h"
 #include	"x_syslog.h"
+#include	"x_printf.h"
 
 #include	"hal_debug.h"
 

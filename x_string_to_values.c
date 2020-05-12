@@ -27,9 +27,12 @@
 #include	"x_string_to_values.h"
 #include	"x_values_convert.h"
 #include	"x_syslog.h"
+#include	"x_printf.h"
 #include	"x_errors_events.h"
 
 #include	"hal_debug.h"
+
+#include	"lwip/def.h"
 
 #include	<math.h>
 
