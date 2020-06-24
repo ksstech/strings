@@ -86,7 +86,7 @@ int32_t	xHexCharToValue(uint8_t cChr, int32_t xBase) {
 		if (INRANGE(CHR_a, cChr, CHR_f, uint8_t)) {
 			return cChr - CHR_a + 10 ;
 		}
-		if (cChr == CHR_O || cChr == CHR_o) {		// AMM TEMP fix for capture error
+		if (cChr == CHR_O || cChr == CHR_o) {		// XXX TEMP fix for capture error
 			SL_ERR("chr= 0x%x '%c'", cChr, cChr) ;
 			return 0 ;
 		}

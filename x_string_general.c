@@ -193,7 +193,7 @@ int32_t	xinstring(const char * pStr, char cChr) {
  */
 int32_t	xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) {
 	IF_myASSERT(debugPARAM, INRANGE_MEM(s1) && INRANGE_MEM(s2) && xLen < 1024) ;
-	IF_SL_DBG(debugXSTRCMP, " '%s' vs '%s' ", s1, s2) ;
+	IF_SL_DBG(debugXSTRCMP, "xLen=%d '%.*s' vs '%.*s' ", xLen, xLen, s1, xLen, s2) ;
 	while (*s1 && *s2 && xLen) {
 		if (Exact == true) {
 			if (*s1 != *s2) {
@@ -568,7 +568,7 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 		++pSrc ;										// skip over '.'
 		TPact = xStringFindDelim(pSrc, "z ", TPmax) ;	// find position of Z/z in buffer
 		if (OUTSIDE(1, TPact, TPmax, int32_t)) {
-		/* TODO valid terminator not found, but maybe a NUL ?
+		/* XXX valid terminator not found, but maybe a NUL ?
 		 * still a problem, what about junk after the last number ? */
 			NPact = strlen(pSrc) ;
 			if (OUTSIDE(1, NPact, --TPmax , int32_t)) {
