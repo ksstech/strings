@@ -25,9 +25,11 @@
 #include	"x_string_general.h"
 #include	"x_string_to_values.h"
 #include	"x_errors_events.h"
+#include	"x_time.h"
 #include	"syslog.h"
 #include	"printfx.h"
 
+#include	"hal_config.h"
 #include	"hal_debug.h"
 
 #include	<string.h>
@@ -641,7 +643,7 @@ char * pcCodeToMessage(int32_t eCode, const eTable_t * eTable) {
 int32_t	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * pMesArray[], char * pBuf, size_t BufSize) {
 	int32_t	pos, idx, BufLen = 0 ;
 	uint32_t	CurMask, ColCode ;
-	for (pos = 31, idx = 0, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, pos--) {
+	for (pos = 31, idx = 31, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos, --idx) {
 		if (Mask & CurMask) {
 			if ((Val1 & CurMask) && (Val2 & CurMask)) {
 				ColCode = xpfSGR(attrRESET, colourFG_WHITE, 0, 0) ;
@@ -653,9 +655,8 @@ int32_t	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const 
 				ColCode = 0 ;
 			}
 			if (ColCode) {
-				BufLen += snprintf(pBuf + BufLen, BufSize - BufLen, "  %C%s%C", ColCode, pMesArray[idx], attrRESET) ;
+				BufLen += snprintfx(pBuf + BufLen, BufSize - BufLen, "  %C%s%C", ColCode, pMesArray[idx], attrRESET) ;
 			}
-			idx++ ;
 		}
 	}
 	return BufLen ;
