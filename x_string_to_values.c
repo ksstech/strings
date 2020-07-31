@@ -37,14 +37,17 @@
 
 #include	<math.h>
 
-#define	debugFLAG				0x4000
-#define	debugPARSE_U64			(debugFLAG & 0x0001)
-#define	debugPARSE_F64			(debugFLAG & 0x0002)
-#define	debugPARSE_X64			(debugFLAG & 0x0004)
-#define	debugPARSE_VALUE		(debugFLAG & 0x0008)
+#define	debugFLAG					0x4000
 
-#define	debugPARAM				(debugFLAG & 0x4000)
-#define	debugRESULT				(debugFLAG & 0x8000)
+#define	debugPARSE_U64				(debugFLAG & 0x0001)
+#define	debugPARSE_F64				(debugFLAG & 0x0002)
+#define	debugPARSE_X64				(debugFLAG & 0x0004)
+#define	debugPARSE_VALUE			(debugFLAG & 0x0008)
+
+#define	debugTIMING					(debugFLAG_GLOBAL & debugFLAG & 0x1000)
+#define	debugTRACK					(debugFLAG_GLOBAL & debugFLAG & 0x2000)
+#define	debugPARAM					(debugFLAG_GLOBAL & debugFLAG & 0x4000)
+#define	debugRESULT					(debugFLAG_GLOBAL & debugFLAG & 0x8000)
 
 /*
  * char2u64 - Convert n chars to a unsigned 64 bit value

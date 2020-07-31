@@ -35,23 +35,25 @@
 #include	<string.h>
 #include	<ctype.h>
 
-#define	debugFLAG						0xC000
+#define	debugFLAG					0xC000
 
-#define	debugXSTRCMP					(debugFLAG & 0x0001)
-#define	debugPARSE_U64					(debugFLAG & 0x0002)
-#define	debugPARSE_F64					(debugFLAG & 0x0004)
-#define	debugPARSE_X64					(debugFLAG & 0x0008)
+#define	debugXSTRCMP				(debugFLAG & 0x0001)
+#define	debugPARSE_U64				(debugFLAG & 0x0002)
+#define	debugPARSE_F64				(debugFLAG & 0x0004)
+#define	debugPARSE_X64				(debugFLAG & 0x0008)
 
-#define	debugPARSE_VALUE				(debugFLAG & 0x0010)
-#define	debugPARSE_TOKEN				(debugFLAG & 0x0020)
-#define	debugPARSE_DTIME				(debugFLAG & 0x0040)
-#define	debugPARSE_TRACK				(debugFLAG & 0x0080)
+#define	debugPARSE_VALUE			(debugFLAG & 0x0010)
+#define	debugPARSE_TOKEN			(debugFLAG & 0x0020)
+#define	debugPARSE_DTIME			(debugFLAG & 0x0040)
+#define	debugPARSE_TRACK			(debugFLAG & 0x0080)
 
-#define	debugPARSE_ENCODED				(debugFLAG & 0x0100)
-#define	debugDELIM						(debugFLAG & 0x0200)
+#define	debugPARSE_ENCODED			(debugFLAG & 0x0100)
+#define	debugDELIM					(debugFLAG & 0x0200)
 
-#define	debugPARAM						(debugFLAG & 0x4000)
-#define	debugRESULT						(debugFLAG & 0x8000)
+#define	debugTIMING					(debugFLAG_GLOBAL & debugFLAG & 0x1000)
+#define	debugTRACK					(debugFLAG_GLOBAL & debugFLAG & 0x2000)
+#define	debugPARAM					(debugFLAG_GLOBAL & debugFLAG & 0x4000)
+#define	debugRESULT					(debugFLAG_GLOBAL & debugFLAG & 0x8000)
 
 /**
  * xstrverify() - verify to a maximum number of characters that each character is within a range
