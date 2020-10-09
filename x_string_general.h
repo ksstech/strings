@@ -68,8 +68,8 @@ typedef struct eTable_s {
 } eTable_t ;
 
 int32_t	xstrverify(char * pStr, char cMin, char cMax, char cNum) ;
-int32_t	xstrlen(char * s) ;
-int32_t	xstrnlen(char * s, int32_t len) ;
+int32_t	xstrlen(const char * s) ;
+int32_t	xstrnlen(const char * s, int32_t len) ;
 int32_t	xstrncpy(char * s1, char * s2, int32_t len ) ;
 
 int32_t	xmemrev(char * pMem, size_t Size) ;

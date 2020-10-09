@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-18 Andre M Maree / KSS Technologies (Pty) Ltd.
+ * Copyright 2014-20 Andre M Maree / KSS Technologies (Pty) Ltd.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
  * and associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -77,17 +77,7 @@ int32_t	xstrverify(char * pStr, char cMin, char cMax, char cNum) {
  * @param[in]	len		maximum length to check for/return
  * @return		length of the string excl the terminating '\0'
  */
-int32_t	xstrnlen(char * s, int32_t len) {
-	int32_t l = 0;
-	PRINT("s=%s  len=%d", s, len) ;
-	while ((*s != CHR_NUL) && (l < len)) {
-		s++ ;
-		l++ ;
-	}
-	PRINT("  l=%d\n", l) ;
-	IF_myASSERT(debugRESULT, l < len) ;
-	return l ;
-}
+int32_t	xstrnlen(const char * s, int32_t len) { int l ; for (l = 0; *s != CHR_NUL && l < len; ++s, ++l) ; return l ; }
 
 /**
  * xstrlen
@@ -95,7 +85,7 @@ int32_t	xstrnlen(char * s, int32_t len) {
  * @param	char *s		pointer to the string
  * @return	int32_t		length of the string up to but excl the terminating '\0'
  */
-int32_t	xstrlen(char * s) { return xstrnlen(s, 32767) ; }
+int32_t	xstrlen(const char * s) { int l ; for(l = 0; *s != CHR_NUL; ++s, ++l) ; return l ; }
 
 /**
  * xstrncpy
@@ -337,7 +327,7 @@ int32_t	xStringFindDelim(char * pSrc, const char * pDlm, int32_t xMax) {
 	IF_myASSERT(debugPARAM, INRANGE_MEM(pSrc) && INRANGE_FLASH(pDlm)) ;
 	int32_t xPos = 0 ;
 	if (xMax == 0) {
-		xMax = strlen(pSrc) ;
+		xMax = xstrlen(pSrc) ;
 	}
 	while (*pSrc && xMax) {
 		int32_t	xSrc = isupper((int) *pSrc) ? tolower((int) *pSrc) : (int) *pSrc ;
@@ -369,15 +359,22 @@ int32_t	xStringFindDelim(char * pSrc, const char * pDlm, int32_t xMax) {
  * @return		pointer to next character to be processed...
  */
 char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int32_t flag, int32_t MaxLen) {
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(pDst) && INRANGE_MEM(pSrc) && INRANGE_MEM(pDel) && (*pSrc != CHR_NUL) && (*pDel != CHR_NUL)) ;
+	IF_myASSERT(debugPARAM, INRANGE_SRAM(pDst)) ;
+	IF_myASSERT(debugPARAM, INRANGE_MEM(pSrc)) ;
+	IF_myASSERT(debugPARAM, INRANGE_MEM(pDel)) ;
+	IF_myASSERT(debugPARAM, *pDel != CHR_NUL) ;
 	// If no length supplied
-	if (MaxLen == 0) {
-		MaxLen = strlen((const char *) pSrc) ;			// assume NULL terminated and calculate length
-	}
+	if (MaxLen == 0)
+		MaxLen = xstrlen((const char *) pSrc) ;			// assume NULL terminated and calculate length
+	if (MaxLen == 0)
+		return pcFAILURE ;
+
 	int32_t CurLen = xStringSkipDelim(pSrc, pDel, MaxLen) ;
+	IF_TRACK(debugPARSE_TOKEN, "pS='%s'  Lmax=%d  Lcur=%d\n", pSrc, MaxLen, CurLen) ;
 	MaxLen	-= CurLen ;
 	pSrc	+= CurLen ;
 
+	IF_TRACK(debugPARSE_TOKEN, "pS='%s'  Lmax=%d  Lcur=%d\n", pSrc, MaxLen, CurLen) ;
 	while (*pSrc && MaxLen--) {							// while not separator/terminator char or end of string
 		if (xinstring(pDel, *pSrc) != erFAILURE)	{	// check if current char a delim
 			break ;										// yes, all done...
@@ -388,6 +385,7 @@ char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int32_t f
 		++pSrc ;
 	}
 	*pDst = CHR_NUL ;									// terminate destination string
+	IF_TRACK(debugPARSE_TOKEN, "pS='%s'  Lmax=%d  Lcur=%d  pD='%s'\n", pSrc, MaxLen, CurLen, pDst) ;
 	return pSrc ;										// pointer to NULL or next char to be processed..
 }
 
@@ -552,7 +550,7 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 		TPlim = SECONDS_IN_LEAPYEAR - 1 ;
 	}
 	TPact = xStringFindDelim(pSrc, delimTIME3, TPmax) ;
-	NPact = (TPact < 1) ? strlen(pSrc) : 0 ;
+	NPact = (TPact < 1) ? xstrlen(pSrc) : 0 ;
 	IF_PRINT(debugPARSE_DTIME, "S: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
 
 	if ((flag & DATETIME_MIN_OK) || (TPact > 0) || (INRANGE(1, NPact, --TPmax, int32_t))) {
@@ -574,7 +572,7 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 		if (OUTSIDE(1, TPact, TPmax, int32_t)) {
 		/* XXX valid terminator not found, but maybe a NUL ?
 		 * still a problem, what about junk after the last number ? */
-			NPact = strlen(pSrc) ;
+			NPact = xstrlen(pSrc) ;
 			if (OUTSIDE(1, NPact, --TPmax , int32_t)) {
 				return pcFAILURE ;
 			}
