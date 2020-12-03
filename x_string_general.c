@@ -638,7 +638,9 @@ char * pcCodeToMessage(int32_t eCode, const eTable_t * eTable) {
 
 // ############################## Bitmap to string decode functions ################################
 
-int32_t	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * pMesArray[], char * pBuf, size_t BufSize) {
+#define	controlSIZE_FLAGS_BUF		(24 * 60)
+
+int32_t	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[], char * pcBuf, size_t BufSize) {
 	int32_t	pos, idx, BufLen = 0 ;
 	uint32_t	CurMask, ColCode ;
 	for (pos = 31, idx = 31, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos, --idx) {
@@ -653,14 +655,20 @@ int32_t	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const 
 				ColCode = 0 ;
 			}
 			if (ColCode) {
-				BufLen += snprintfx(pBuf + BufLen, BufSize - BufLen, "  %C%s%C", ColCode, pMesArray[idx], attrRESET) ;
+				BufLen += snprintfx(pcBuf + BufLen, BufSize - BufLen, "  %C%s%C", ColCode, pMesArray[idx], attrRESET) ;
 			}
 		}
 	}
 	return BufLen ;
 }
 
-int32_t	xBitMapDecode(uint32_t Value, uint32_t Mask, const char * pMesArray[], char * pBuf, size_t BufSize) {
+char *	pcBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[]) {
+	char * pcBuf = malloc(controlSIZE_FLAGS_BUF) ;
+	xBitMapDecodeChanges(Val1, Val2, Mask, pMesArray, pcBuf, controlSIZE_FLAGS_BUF) ;
+	return pcBuf ;
+}
+
+int32_t	xBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[], char * pBuf, size_t BufSize) {
 	int32_t	pos, idx, BufLen = 0 ;
 	uint32_t	CurMask ;
 	for (pos = 31, idx = 0, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, pos--) {
@@ -673,6 +681,12 @@ int32_t	xBitMapDecode(uint32_t Value, uint32_t Mask, const char * pMesArray[], c
 	return BufLen ;
 }
 
+char * pcBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[]) {
+	char * pcBuf = malloc(controlSIZE_FLAGS_BUF) ;
+	xBitMapDecode(Value, Mask, pMesArray, pcBuf, controlSIZE_FLAGS_BUF) ;
+	return pcBuf ;
+}
+
 /**
  * vBitMapDecode() - decodes a bitmapped value using a bit-mapped mask
  * @brief
@@ -681,7 +695,7 @@ int32_t	xBitMapDecode(uint32_t Value, uint32_t Mask, const char * pMesArray[], c
  * @param	pMesArray - pointer to array of messages (1 per bit SET in the mask)
  * return	none
  */
-void	vBitMapDecode(uint32_t Value, uint32_t Mask, const char * pMesArray[]) {
+void	vBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[]) {
 	int32_t	pos, idx ;
 	uint32_t	CurMask ;
 	if (Mask) {
