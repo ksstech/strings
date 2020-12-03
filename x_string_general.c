@@ -26,8 +26,8 @@
 #include	"x_string_to_values.h"
 #include	"x_errors_events.h"
 #include	"x_time.h"
+#include	"printfx.h"									// +x_definitions +stdarg +stdint +stdio
 #include	"syslog.h"
-#include	"printfx.h"
 
 #include	"hal_config.h"
 #include	"hal_debug.h"
@@ -99,13 +99,12 @@ int32_t	xstrlen(const char * s) { int l ; for(l = 0; *s != CHR_NUL; ++s, ++l) ; 
 int32_t	xstrncpy(char * pDst, char * pSrc, int32_t xLen ) {
 	IF_myASSERT(debugPARAM, INRANGE_SRAM(pDst) && INRANGE_MEM(pSrc) && xLen) ;
 	int32_t Cnt = 0 ;
-	while ((*pSrc != CHR_NUL) && (Cnt < xLen)) {
+	while (*pSrc != CHR_NUL && Cnt < xLen) {
 		*pDst++ = *pSrc++ ;						// copy across and adjust both pointers
 		Cnt++ ;								// adjust length copied
 	}
-	if (Cnt < xLen) {						// ONLY if less than maximum copied...
+	if (Cnt < xLen)							// ONLY if less than maximum copied...
 		*pDst = CHR_NUL ;					// null terminate the string
-	}
 	return Cnt ;
 }
 
@@ -243,9 +242,8 @@ int32_t	xstrcmp(const char * s1, const char * s2, bool Exact) {
 int32_t	xstrindex(char * key, char * array[]) {
 	int32_t	i = 0 ;
 	while (array[i]) {
-		if (strcasecmp(key, array[i]) == 0) {			// strings match?
+		if (strcasecmp(key, array[i]) == 0)				// strings match?
 			return i ;									// yes, return the index
-		}
 		++i ;
 	}
 	return erFAILURE ;
@@ -301,7 +299,7 @@ int32_t	xStringParseEncoded(char * pStr, char * pDst) {
  * @param[in]	pSrc - pointer to source buffer
  * @param[in]	pDel - pointer to string of valid delimiters
  * @param[in]	MaxLen - maximum number of characters in buffer
- * @return		number of delimiters skipped
+ * @return		number of delimiters (to be) skipped
  */
 int32_t	xStringSkipDelim(char * pSrc, const char * pDel, int32_t MaxLen) {
 	IF_myASSERT(debugPARAM, INRANGE_MEM(pSrc) && INRANGE_MEM(pDel)) ;
@@ -667,9 +665,8 @@ int32_t	xBitMapDecode(uint32_t Value, uint32_t Mask, const char * pMesArray[], c
 	uint32_t	CurMask ;
 	for (pos = 31, idx = 0, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, pos--) {
 		if (Mask & CurMask) {
-			if (Value & CurMask) {
-				BufLen += snprintf(pBuf + BufLen, BufSize - BufLen, "  %s", pMesArray[idx]) ;
-			}
+			if (Value & CurMask)
+				BufLen += snprintfx(pBuf + BufLen, BufSize - BufLen, "  %s", pMesArray[idx]) ;
 			idx++ ;
 		}
 	}
@@ -689,12 +686,8 @@ void	vBitMapDecode(uint32_t Value, uint32_t Mask, const char * pMesArray[]) {
 	uint32_t	CurMask ;
 	if (Mask) {
 		for (pos = 31, idx = 0, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos) {
-			if (CurMask & Mask & Value) {
-				PRINT(" |%02d|%s|", pos, pMesArray[idx]) ;
-			}
-			if (CurMask & Mask) {
-				idx++ ;
-			}
+			if (CurMask & Mask & Value)		PRINT(" |%02d|%s|", pos, pMesArray[idx]) ;
+			if (CurMask & Mask)				idx++ ;
 		}
 	}
 }
@@ -710,13 +703,9 @@ void	vBitMapDecode(uint32_t Value, uint32_t Mask, const char * pMesArray[]) {
  */
 void	vBitMapReport(char * pName, uint32_t Value, uint32_t Mask, const char * pMesArray[]) {
 	IF_myASSERT(debugPARAM, INRANGE_MEM(pMesArray)) ;
-	if (pName != NULL) {
-		PRINT(" %s 0x%02x:", pName, Value) ;
-	}
+	if (pName != NULL)		PRINT(" %s 0x%02x:", pName, Value) ;
 	vBitMapDecode(Value, Mask, pMesArray) ;
-	if (pName != NULL) {
-		PRINT("\n") ;
-	}
+	if (pName != NULL)		PRINT("\n") ;
 }
 
 /**
@@ -732,9 +721,8 @@ int32_t	xStringValueMap(const char * pString, char * pBuf, uint32_t uValue, int3
 	IF_myASSERT(debugPARAM, INRANGE_FLASH(pString) && INRANGE_SRAM(pBuf) && (iWidth <= 32) && (strnlen(pString, 33) <= iWidth)) ;
 	uint32_t uMask = 0x8000 >> (32 - iWidth) ;
 	int32_t Idx ;
-	for (Idx = 0; Idx < iWidth; ++Idx, ++pString, ++pBuf, uMask >>= 1) {
+	for (Idx = 0; Idx < iWidth; ++Idx, ++pString, ++pBuf, uMask >>= 1)
 		*pBuf = (uValue | uMask) ? *pString : CHR_MINUS ;
-	}
 	*pBuf = CHR_NUL ;
 	return Idx ;
 }
