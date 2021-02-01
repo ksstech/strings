@@ -137,11 +137,11 @@ uint64_t xStringParseX64(char *pSrc, uint8_t * pDst, uint32_t xLen) {
  * 				pcFAILURE is no valid value found to parse
  */
 char *	pcStringParseU64(char * pSrc, uint64_t * pDst, int32_t * pSign, const char * pDel) {
-	IF_myASSERT(debugPARAM, INRANGE_MEM(pSrc) && INRANGE_SRAM(pDst) && INRANGE_SRAM(pSign)) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inSRAM(pDst) && halCONFIG_inSRAM(pSign)) ;
 	*pSign 	= 0 ;						// set sign as not provided
 	uint64_t	Base = 10 ;				// default to decimal
 	if (pDel) {
-		IF_myASSERT(debugPARAM, INRANGE_MEM(pDel)) ;
+		IF_myASSERT(debugPARAM, halCONFIG_inMEM(pDel)) ;
 		pSrc += xStringSkipDelim(pSrc, pDel, sizeof("+18,446,744,073,709,551,615")) ;
 	}
 
@@ -382,7 +382,7 @@ char *	pcStringParseNumberRange(char * pSrc, p32_t p32Pntr, int32_t Min, int32_t
  * @return	pcFAILURE or pointer to 1st char after the IP address
  */
 char *	pcStringParseIpAddr(char * pSrc, p32_t p32Pntr) {
-	IF_myASSERT(debugPARAM, INRANGE_MEM(pSrc) && INRANGE_SRAM(p32Pntr.pu32)) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inSRAM(p32Pntr.pu32)) ;
 	char * pcRV = pSrc ;
 	*p32Pntr.pu32 = 0 ;
 	for(int32_t i = 0; i < 4; ++i) {

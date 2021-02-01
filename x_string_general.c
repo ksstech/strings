@@ -97,7 +97,7 @@ int32_t	xstrlen(const char * s) { int l ; for(l = 0; *s != CHR_NUL; ++s, ++l) ; 
  * @return	Actual number of chars copied (x <= n) excluding possible NULL
  */
 int32_t	xstrncpy(char * pDst, char * pSrc, int32_t xLen ) {
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(pDst) && INRANGE_MEM(pSrc) && xLen) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pDst) && halCONFIG_inMEM(pSrc) && xLen) ;
 	int32_t Cnt = 0 ;
 	while (*pSrc != CHR_NUL && Cnt < xLen) {
 		*pDst++ = *pSrc++ ;						// copy across and adjust both pointers
@@ -109,7 +109,7 @@ int32_t	xstrncpy(char * pDst, char * pSrc, int32_t xLen ) {
 }
 
 int32_t	xmemrev(char * pMem, size_t Size) {
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(pMem) && Size > 1) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pMem) && Size > 1) ;
 	if (pMem == NULL || *pMem == CHR_NUL || Size < 2) {
 		return erFAILURE;
 	}
@@ -138,7 +138,7 @@ int32_t	xmemrev(char * pMem, size_t Size) {
  */
 void	xstrrev(char * pStr) {
 #if 0
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(pStr)) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pStr)) ;
 	if ((pStr == NULL) || (*pStr == CHR_NUL)) {
 		return ;
 	}
@@ -162,7 +162,7 @@ void	xstrrev(char * pStr) {
  * 				FAILURE if no match found, or cChr is NULL
  */
 int32_t	xinstring(const char * pStr, char cChr) {
-	IF_myASSERT(debugPARAM, INRANGE_MEM(pStr)) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pStr)) ;
 	if (cChr == CHR_NUL) {
 		return erFAILURE ;
 	}
@@ -185,7 +185,7 @@ int32_t	xinstring(const char * pStr, char cChr) {
  * @return			true or false based on comparison
  */
 int32_t	xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) {
-	IF_myASSERT(debugPARAM, INRANGE_MEM(s1) && INRANGE_MEM(s2) && xLen < 1024) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inMEM(s1) && halCONFIG_inMEM(s2) && xLen < 1024) ;
 	IF_SL_DBG(debugXSTRCMP, "xLen=%d '%.*s' vs '%.*s' ", xLen, xLen, s1, xLen, s2) ;
 	while (*s1 && *s2 && xLen) {
 		if (Exact == true) {
@@ -212,7 +212,7 @@ int32_t	xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) {
  * @return	true or false based on comparison
  */
 int32_t	xstrcmp(const char * s1, const char * s2, bool Exact) {
-	IF_myASSERT(debugPARAM, INRANGE_MEM(s1) && INRANGE_MEM(s2)) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inMEM(s1) && halCONFIG_inMEM(s2)) ;
 	IF_SL_DBG(debugXSTRCMP, " S1=%s:S2=%s ", s1, s2) ;
 	while (*s1 && *s2) {
 		if (Exact) {
@@ -259,12 +259,12 @@ int32_t	xstrindex(char * key, char * array[]) {
  * 			1 or greater = length of the parsed string
  */
 int32_t	xStringParseEncoded(char * pStr, char * pDst) {
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(pStr)) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pStr)) ;
 	int32_t iRV = 0 ;
 	if (pDst == NULL) {
 		pDst	= pStr ;
 	} else {
-		IF_myASSERT(debugPARAM, INRANGE_SRAM(pDst)) ;
+		IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pDst)) ;
 	}
 	IF_PRINT(debugPARSE_ENCODED, "%s  ", pStr) ;
 	while(*pStr != 0) {
@@ -302,7 +302,7 @@ int32_t	xStringParseEncoded(char * pStr, char * pDst) {
  * @return		number of delimiters (to be) skipped
  */
 int32_t	xStringSkipDelim(char * pSrc, const char * pDel, int32_t MaxLen) {
-	IF_myASSERT(debugPARAM, INRANGE_MEM(pSrc) && INRANGE_MEM(pDel)) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inMEM(pDel)) ;
 	// If no length supplied
 	if (MaxLen == 0) {
 		MaxLen = xstrnlen(pSrc, stringGENERAL_MAX_LEN) ;// assume NULL terminated and calculate length
@@ -322,7 +322,7 @@ int32_t	xStringSkipDelim(char * pSrc, const char * pDel, int32_t MaxLen) {
 }
 
 int32_t	xStringFindDelim(char * pSrc, const char * pDlm, int32_t xMax) {
-	IF_myASSERT(debugPARAM, INRANGE_MEM(pSrc) && INRANGE_FLASH(pDlm)) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inFLASH(pDlm)) ;
 	int32_t xPos = 0 ;
 	if (xMax == 0) {
 		xMax = xstrlen(pSrc) ;
@@ -357,9 +357,9 @@ int32_t	xStringFindDelim(char * pSrc, const char * pDlm, int32_t xMax) {
  * @return		pointer to next character to be processed...
  */
 char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int32_t flag, int32_t MaxLen) {
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(pDst)) ;
-	IF_myASSERT(debugPARAM, INRANGE_MEM(pSrc)) ;
-	IF_myASSERT(debugPARAM, INRANGE_MEM(pDel)) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pDst)) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc)) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pDel)) ;
 	IF_myASSERT(debugPARAM, *pDel != CHR_NUL) ;
 	// If no length supplied
 	if (MaxLen == 0)
@@ -415,7 +415,7 @@ char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int32_t f
  *					Fri Dec 31 23:59:59 1999
  */
 char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) {
-	IF_myASSERT(debugPARAM, INRANGE_MEM(pSrc) && INRANGE_SRAM(pTStamp) && INRANGE_SRAM(psTM)) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inSRAM(pTStamp) && halCONFIG_inSRAM(psTM)) ;
 	uint32_t	flag = 0 ;
 	/* TPmax	= ThisPar max length+1
 	 * TPact	= ThisPar actual length ( <0=error  0=not found  >0=length )
@@ -716,7 +716,7 @@ void	vBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[]
  * return	none
  */
 void	vBitMapReport(char * pName, uint32_t Value, uint32_t Mask, const char * pMesArray[]) {
-	IF_myASSERT(debugPARAM, INRANGE_MEM(pMesArray)) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pMesArray)) ;
 	if (pName != NULL)		PRINT(" %s 0x%02x:", pName, Value) ;
 	vBitMapDecode(Value, Mask, pMesArray) ;
 	if (pName != NULL)		PRINT("\n") ;
@@ -732,7 +732,7 @@ void	vBitMapReport(char * pName, uint32_t Value, uint32_t Mask, const char * pMe
  * @return
  */
 int32_t	xStringValueMap(const char * pString, char * pBuf, uint32_t uValue, int32_t iWidth) {
-	IF_myASSERT(debugPARAM, INRANGE_FLASH(pString) && INRANGE_SRAM(pBuf) && (iWidth <= 32) && (strnlen(pString, 33) <= iWidth)) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inFLASH(pString) && halCONFIG_inSRAM(pBuf) && (iWidth <= 32) && (strnlen(pString, 33) <= iWidth)) ;
 	uint32_t uMask = 0x8000 >> (32 - iWidth) ;
 	int32_t Idx ;
 	for (Idx = 0; Idx < iWidth; ++Idx, ++pString, ++pBuf, uMask >>= 1)
