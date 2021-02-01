@@ -286,9 +286,9 @@ char *	pcStringParseValue(char * pSrc, p32_t p32Pntr, varform_t VarForm, varsize
 
 	// store at destination based on size
 	switch(VarSize) {
-	case vs08B:	*p32Pntr.pu8	= x64Val.u8[0] ;		break ;
-	case vs16B:	*p32Pntr.pu16	= x64Val.u16[0] ;		break ;
-	case vs32B:	*p32Pntr.pu32	= x64Val.u32[0] ;		break ;
+	case vs08B:	*p32Pntr.pu8	= x64Val.x8[0].u8 ;		break ;
+	case vs16B:	*p32Pntr.pu16	= x64Val.x16[0].u16 ;	break ;
+	case vs32B:	*p32Pntr.pu32	= x64Val.x32[0].u32 ;	break ;
 	case vs64B:	*p32Pntr.pu64	= x64Val.u64 ;			break ;
 	default:	SL_ERR(debugAPPL_PLACE) ;
 	}
