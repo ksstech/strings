@@ -186,7 +186,7 @@ int32_t	xinstring(const char * pStr, char cChr) {
  */
 int32_t	xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(s1) && halCONFIG_inMEM(s2) && xLen < 1024) ;
-	IF_SL_DBG(debugXSTRCMP, "xLen=%d '%.*s' vs '%.*s' ", xLen, xLen, s1, xLen, s2) ;
+	IF_SL_INFO(debugXSTRCMP, "xLen=%d '%.*s' vs '%.*s' ", xLen, xLen, s1, xLen, s2) ;
 	while (*s1 && *s2 && xLen) {
 		if (Exact == true) {
 			if (*s1 != *s2) {
@@ -213,7 +213,7 @@ int32_t	xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) {
  */
 int32_t	xstrcmp(const char * s1, const char * s2, bool Exact) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(s1) && halCONFIG_inMEM(s2)) ;
-	IF_SL_DBG(debugXSTRCMP, " S1=%s:S2=%s ", s1, s2) ;
+	IF_SL_INFO(debugXSTRCMP, " S1=%s:S2=%s ", s1, s2) ;
 	while (*s1 && *s2) {
 		if (Exact) {
 			if (*s1 != *s2) {
