@@ -76,7 +76,11 @@ int32_t	xstrverify(char * pStr, char cMin, char cMax, char cNum) {
  * @param[in]	len		maximum length to check for/return
  * @return		length of the string excl the terminating '\0'
  */
-int32_t	xstrnlen(const char * s, int32_t len) { int l ; for (l = 0; *s != CHR_NUL && l < len; ++s, ++l) ; return l ; }
+int32_t	xstrnlen(const char * s, int32_t len) {
+	int32_t l ;
+	for (l = 0; *s != CHR_NUL && l < len; ++s, ++l) ;
+	return l ;
+}
 
 /**
  * xstrlen
@@ -84,7 +88,11 @@ int32_t	xstrnlen(const char * s, int32_t len) { int l ; for (l = 0; *s != CHR_NU
  * @param	char *s		pointer to the string
  * @return	int32_t		length of the string up to but excl the terminating '\0'
  */
-int32_t	xstrlen(const char * s) { int l ; for(l = 0; *s != CHR_NUL; ++s, ++l) ; return l ; }
+int32_t	xstrlen(const char * s) {
+	int32_t l ;
+	for(l = 0; *s != CHR_NUL; ++s, ++l) ;
+	return l ;
+}
 
 /**
  * xstrncpy
@@ -644,18 +652,16 @@ int32_t	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const 
 	uint32_t	CurMask, ColCode ;
 	for (pos = 31, idx = 31, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos, --idx) {
 		if (Mask & CurMask) {
-			if ((Val1 & CurMask) && (Val2 & CurMask)) {
-				ColCode = xpfSGR(attrRESET, colourFG_WHITE, 0, 0) ;
-			} else if (Val1 & CurMask) {
-				ColCode = xpfSGR(attrRESET, colourFG_RED, 0, 0) ;
-			} else if (Val2 & CurMask) {
-				ColCode = xpfSGR(attrRESET, colourFG_GREEN, 0, 0) ;
-			} else {
+			if ((Val1 & CurMask) && (Val2 & CurMask))
+				ColCode = xpfSGR(colourFG_WHITE, 0, 0, 0) ;
+			else if (Val1 & CurMask)
+				ColCode = xpfSGR(colourFG_RED, 0, 0, 0) ;
+			else if (Val2 & CurMask)
+				ColCode = xpfSGR(colourFG_GREEN, 0, 0, 0) ;
+			else
 				ColCode = 0 ;
-			}
-			if (ColCode) {
+			if (ColCode)
 				BufLen += snprintfx(pcBuf + BufLen, BufSize - BufLen, "  %C%s%C", ColCode, pMesArray[idx], attrRESET) ;
-			}
 		}
 	}
 	return BufLen ;
