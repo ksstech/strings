@@ -250,28 +250,28 @@ char *	pcStringParseF64(char *pSrc, double * pDst, int32_t * pSign, const char *
 char *	pcStringParseX64(char * pSrc, x64_t * px64Val, varform_t VarForm, const char * pDel) {
 	char *	ptr1 ;
 	int32_t	Sign ;
-	p32_t	p32Pntr ;
-	p32Pntr.px64	= px64Val ;
+	px_t	px ;
+	px.px64	= px64Val ;
 	if (VarForm == vfFXX) {
-		ptr1	= pcStringParseF64(pSrc, p32Pntr.pf64, &Sign, pDel) ;
+		ptr1	= pcStringParseF64(pSrc, px.pf64, &Sign, pDel) ;
 	} else {
-		ptr1	= pcStringParseU64(pSrc, p32Pntr.pu64, &Sign, pDel) ;
+		ptr1	= pcStringParseU64(pSrc, px.pu64, &Sign, pDel) ;
 	}
 	EQ_RETURN(ptr1, pcFAILURE)
 
 	// ensure NO SIGN is specified if unsigned is requested, and no error returned
 	if (Sign && (VarForm == vfUXX)) {
-		*p32Pntr.pu64	= 0ULL ;
+		*px.pu64	= 0ULL ;
 		SL_ERR("Uxx cannot have +/- sign") ;
 		return pcFAILURE ;
 	}
 	if ((VarForm == vfIXX) && (Sign == -1)) {
-		*p32Pntr.pi64	*= Sign ;
+		*px.pi64	*= Sign ;
 	}
 	return ptr1 ;
 }
 
-char *	pcStringParseValue(char * pSrc, p32_t p32Pntr, varform_t VarForm, varsize_t VarSize, const char * pDel) {
+char *	pcStringParseValue(char * pSrc, px_t px, varform_t VarForm, varsize_t VarSize, const char * pDel) {
 	// assume we might find a 64bit value, so plan accordingly
 	x64_t	x64Val ;
 	IF_PRINT(debugPARSE_VALUE, "'%.3s' ->", pSrc) ;
@@ -285,20 +285,20 @@ char *	pcStringParseValue(char * pSrc, p32_t p32Pntr, varform_t VarForm, varsize
 
 	// store at destination based on size
 	switch(VarSize) {
-	case vs08B:	*p32Pntr.pu8	= x64Val.x8[0].u8 ;		break ;
-	case vs16B:	*p32Pntr.pu16	= x64Val.x16[0].u16 ;	break ;
-	case vs32B:	*p32Pntr.pu32	= x64Val.x32[0].u32 ;	break ;
-	case vs64B:	*p32Pntr.pu64	= x64Val.u64 ;			break ;
+	case vs08B:	*px.pu8	= x64Val.x8[0].u8 ;		break ;
+	case vs16B:	*px.pu16= x64Val.x16[0].u16 ;	break ;
+	case vs32B:	*px.pu32= x64Val.x32[0].u32 ;	break ;
+	case vs64B:	*px.pu64= x64Val.u64 ;			break ;
 	default:	SL_ERR(debugAPPL_PLACE) ;
 	}
-	IF_EXEC_4(debugPARSE_VALUE, vValuesReportXxx, NULL, p32Pntr, VarForm, VarSize) ;
+	IF_EXEC_4(debugPARSE_VALUE, vValuesReportXxx, NULL, px, VarForm, VarSize) ;
 	return ptr1 ;
 }
 
 /**
  * pcStringParseValueRange
  * @param pSrc		string buffer to parse from
- * @param p32Pntr	pointer to oocation where value to be stored
+ * @param px		pointer to oocation where value to be stored
  * @param VarForm	vfUXX / vfIXX / vfFXX / vfSXX
  * @param VarSize	vs08B / vs16B / vs32B / vs64B
  * @param pDel		valid delimiters to skip over /verify against
@@ -306,7 +306,7 @@ char *	pcStringParseValue(char * pSrc, p32_t p32Pntr, varform_t VarForm, varsize
  * @param x32Hi		upper limit valid value
  * @return			pointer to next char to process or pcFAILURE
  */
-char *	pcStringParseValueRange(char * pSrc, p32_t p32Pntr, varform_t VarForm, varsize_t VarSize, const char * pDel, x32_t x32Lo, x32_t x32Hi) {
+char *	pcStringParseValueRange(char * pSrc, px_t px, varform_t VarForm, varsize_t VarSize, const char * pDel, x32_t x32Lo, x32_t x32Hi) {
 	x64_t	x64Val ;
 	char * pTmp	= pcStringParseX64(pSrc, &x64Val, VarForm, pDel) ;
 	EQ_RETURN(pTmp, pcFAILURE)
@@ -339,19 +339,19 @@ char *	pcStringParseValueRange(char * pSrc, p32_t p32Pntr, varform_t VarForm, va
 		SL_ERR(debugAPPL_PLACE) ;
 		return pcFAILURE ;
 	}
-	vValuesStoreX64_Xxx(x64Val, p32Pntr, VarForm, VarSize) ;
+	vValuesStoreX64_Xxx(x64Val, px, VarForm, VarSize) ;
 	return pTmp ;
 }
 
-char *	pcStringParseValues(char * pSrc, p32_t p32Pntr, varform_t VarForm, varsize_t VarSize, const char * pDel, int32_t Count) {
+char *	pcStringParseValues(char * pSrc, px_t px, varform_t VarForm, varsize_t VarSize, const char * pDel, int32_t Count) {
 	while(Count--) {
-		char * ptr1	= pcStringParseValue(pSrc, p32Pntr, VarForm, VarSize, pDel) ;
+		char * ptr1	= pcStringParseValue(pSrc, px, VarForm, VarSize, pDel) ;
 		EQ_RETURN(ptr1, pcFAILURE)
 		switch(VarSize) {								// adjust the pointer based on the size of the destination storage
-		case vs08B:	++p32Pntr.px8 ;				break ;
-		case vs16B:	++p32Pntr.px16 ;			break ;
-		case vs32B:	++p32Pntr.px32 ;			break ;
-		case vs64B:	++p32Pntr.px64 ;			break ;
+		case vs08B:	++px.px8 ;			break ;
+		case vs16B:	++px.px16 ;			break ;
+		case vs32B:	++px.px32 ;			break ;
+		case vs64B:	++px.px64 ;			break ;
 		default:	SL_ERR(debugAPPL_PLACE) ;
 		}
 		pSrc	= ptr1 ;								// set starting pointer ready for the next
@@ -359,19 +359,19 @@ char *	pcStringParseValues(char * pSrc, p32_t p32Pntr, varform_t VarForm, varsiz
 	return pSrc ;
 }
 
-char *	pcStringParseNumber(char * pSrc, p32_t p32Pntr) {
+char *	pcStringParseNumber(char * pSrc, px_t px) {
 	char * pTmp = pSrc ;
-	*p32Pntr.pi32 = 0 ;
+	*px.pi32 = 0 ;
 	while (*pSrc && INRANGE(CHR_0, *pSrc, CHR_9, int32_t)) {
-		*p32Pntr.pi32	*= 10 ;
-		*p32Pntr.pi32	+= *pSrc++ - CHR_0 ;
+		*px.pi32	*= 10 ;
+		*px.pi32	+= *pSrc++ - CHR_0 ;
 	}
 	return (pTmp == pSrc) ? pcFAILURE : pSrc ;
 }
 
-char *	pcStringParseNumberRange(char * pSrc, p32_t p32Pntr, int32_t Min, int32_t Max) {
-	pSrc = pcStringParseNumber(pSrc, p32Pntr) ;
-	return (INRANGE(Min, *p32Pntr.pi32, Max, int32_t) == true) ? pSrc : pcFAILURE ;
+char *	pcStringParseNumberRange(char * pSrc, px_t px, int32_t Min, int32_t Max) {
+	pSrc = pcStringParseNumber(pSrc, px) ;
+	return (INRANGE(Min, *px.pi32, Max, int32_t) == 1) ? pSrc : pcFAILURE ;
 }
 
 /**
@@ -380,25 +380,25 @@ char *	pcStringParseNumberRange(char * pSrc, p32_t p32Pntr, int32_t Min, int32_t
  * @param	pVal
  * @return	pcFAILURE or pointer to 1st char after the IP address
  */
-char *	pcStringParseIpAddr(char * pSrc, p32_t p32Pntr) {
-	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inSRAM(p32Pntr.pu32)) ;
+char *	pcStringParseIpAddr(char * pSrc, px_t px) {
+	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inSRAM(px.pu32)) ;
 	char * pcRV = pSrc ;
-	*p32Pntr.pu32 = 0 ;
+	*px.pu32 = 0 ;
 	for(int32_t i = 0; i < 4; ++i) {
 		uint32_t u32Val = 0 ;
 		const char * pccTmp = (i == 0) ? " " : "." ;
-		pcRV = pcStringParseValueRange(pSrc = pcRV, (p32_t) &u32Val, vfUXX, vs32B, pccTmp, (x32_t) UINT8_MIN, (x32_t) UINT8_MAX) ;
+		pcRV = pcStringParseValueRange(pSrc = pcRV, (px_t) &u32Val, vfUXX, vs32B, pccTmp, (x32_t) UINT8_MIN, (x32_t) UINT8_MAX) ;
 		EQ_GOTO(pcRV, pcFAILURE, exit) ;
 //		PRINT("i=%d  '%s' -> '%s'  0x%08x  %-I  ", i, pSrc, pcRV, u32Val, u32Val) ;
 
-		*p32Pntr.pu32	<<= 8 ;
-		*p32Pntr.pu32	+= u32Val ;
+		*px.pu32	<<= 8 ;
+		*px.pu32	+= u32Val ;
 		if (*pcRV == CHR_FULLSTOP) {
 			++pcRV ;
 		}
 	}
-	*p32Pntr.pu32	= htonl(*p32Pntr.pu32) ;
-	IF_PRINT(debugRESULT, "IP : %#-I\n", *p32Pntr.pu32) ;
+	*px.pu32	= htonl(*px.pu32) ;
+	IF_PRINT(debugRESULT, "IP : %#-I\n", *px.pu32) ;
 exit:
 	return pcRV ;
 }
@@ -407,41 +407,41 @@ void	x_string_values_test(void) {
 	x64_t	x64Val ;
 	// Test error if sign present for vfUXX
 	SL_INFO("Sign test") ;
-	pcStringParseValue((char *) "123456", (p32_t) &x64Val, vfUXX, vs08B, " ") ;
-	pcStringParseValue((char *) "+123456", (p32_t) &x64Val, vfUXX, vs16B, " ") ;
-	pcStringParseValue((char *) "-123456", (p32_t) &x64Val, vfUXX, vs32B, " ") ;
-	pcStringParseValue((char *) "123456", (p32_t) &x64Val, vfUXX, vs64B, " ") ;
+	pcStringParseValue((char *) "123456", (px_t) &x64Val, vfUXX, vs08B, " ") ;
+	pcStringParseValue((char *) "+123456", (px_t) &x64Val, vfUXX, vs16B, " ") ;
+	pcStringParseValue((char *) "-123456", (px_t) &x64Val, vfUXX, vs32B, " ") ;
+	pcStringParseValue((char *) "123456", (px_t) &x64Val, vfUXX, vs64B, " ") ;
 	// Unsigned round down
 	SL_INFO("U-8/16/32 test") ;
-	pcStringParseValue((char *) "257", (p32_t) &x64Val, vfUXX, vs08B, " ") ;
-	pcStringParseValue((char *) "65537", (p32_t) &x64Val, vfUXX, vs16B, " ") ;
-	pcStringParseValue((char *) "4294967297", (p32_t) &x64Val, vfUXX, vs32B, " ") ;
+	pcStringParseValue((char *) "257", (px_t) &x64Val, vfUXX, vs08B, " ") ;
+	pcStringParseValue((char *) "65537", (px_t) &x64Val, vfUXX, vs16B, " ") ;
+	pcStringParseValue((char *) "4294967297", (px_t) &x64Val, vfUXX, vs32B, " ") ;
 	// Signed round down
 	SL_INFO("I8 signed test") ;
-	pcStringParseValue((char *) "130", (p32_t) &x64Val, vfIXX, vs08B, " ") ;
-	pcStringParseValue((char *) "-130", (p32_t) &x64Val, vfIXX, vs08B, " ") ;
-	pcStringParseValue((char *) "+130", (p32_t) &x64Val, vfIXX, vs08B, " ") ;
+	pcStringParseValue((char *) "130", (px_t) &x64Val, vfIXX, vs08B, " ") ;
+	pcStringParseValue((char *) "-130", (px_t) &x64Val, vfIXX, vs08B, " ") ;
+	pcStringParseValue((char *) "+130", (px_t) &x64Val, vfIXX, vs08B, " ") ;
 	SL_INFO("I16 signed test") ;
-	pcStringParseValue((char *) "32770", (p32_t) &x64Val, vfIXX, vs16B, " ") ;
-	pcStringParseValue((char *) "+32770", (p32_t) &x64Val, vfIXX, vs16B, " ") ;
-	pcStringParseValue((char *) "-32770", (p32_t) &x64Val, vfIXX, vs16B, " ") ;
+	pcStringParseValue((char *) "32770", (px_t) &x64Val, vfIXX, vs16B, " ") ;
+	pcStringParseValue((char *) "+32770", (px_t) &x64Val, vfIXX, vs16B, " ") ;
+	pcStringParseValue((char *) "-32770", (px_t) &x64Val, vfIXX, vs16B, " ") ;
 	SL_INFO("I32 signed test") ;
-	pcStringParseValue((char *) "2147483660", (p32_t) &x64Val, vfIXX, vs32B, " ") ;
-	pcStringParseValue((char *) "+2147483660", (p32_t) &x64Val, vfIXX, vs32B, " ") ;
-	pcStringParseValue((char *) "-2147483660", (p32_t) &x64Val, vfIXX, vs32B, " ") ;
+	pcStringParseValue((char *) "2147483660", (px_t) &x64Val, vfIXX, vs32B, " ") ;
+	pcStringParseValue((char *) "+2147483660", (px_t) &x64Val, vfIXX, vs32B, " ") ;
+	pcStringParseValue((char *) "-2147483660", (px_t) &x64Val, vfIXX, vs32B, " ") ;
 	// Float round down
 	SL_INFO("F32 test") ;
-	pcStringParseValue((char *) "1.1", (p32_t) &x64Val, vfFXX, vs32B, " ") ;
-	pcStringParseValue((char *) "123.123", (p32_t) &x64Val, vfFXX, vs32B, " ") ;
-	pcStringParseValue((char *) "123456.123456", (p32_t) &x64Val, vfFXX, vs32B, " ") ;
-	pcStringParseValue((char *) "123456789.123456", (p32_t) &x64Val, vfFXX, vs32B, " ") ;
-	pcStringParseValue((char *) "1234567890.1234567", (p32_t) &x64Val, vfFXX, vs32B, " ") ;
-	pcStringParseValue((char *) "+1234567890.1234567", (p32_t) &x64Val, vfFXX, vs32B, " ") ;
-	pcStringParseValue((char *) "-1234567890.1234567", (p32_t) &x64Val, vfFXX, vs32B, " ") ;
+	pcStringParseValue((char *) "1.1", (px_t) &x64Val, vfFXX, vs32B, " ") ;
+	pcStringParseValue((char *) "123.123", (px_t) &x64Val, vfFXX, vs32B, " ") ;
+	pcStringParseValue((char *) "123456.123456", (px_t) &x64Val, vfFXX, vs32B, " ") ;
+	pcStringParseValue((char *) "123456789.123456", (px_t) &x64Val, vfFXX, vs32B, " ") ;
+	pcStringParseValue((char *) "1234567890.1234567", (px_t) &x64Val, vfFXX, vs32B, " ") ;
+	pcStringParseValue((char *) "+1234567890.1234567", (px_t) &x64Val, vfFXX, vs32B, " ") ;
+	pcStringParseValue((char *) "-1234567890.1234567", (px_t) &x64Val, vfFXX, vs32B, " ") ;
 	// Double no round
 	SL_INFO("F64 test") ;
-	pcStringParseValue((char *) "12345678901234567.123456789", (p32_t) &x64Val, vfFXX, vs64B, " ") ;
+	pcStringParseValue((char *) "12345678901234567.123456789", (px_t) &x64Val, vfFXX, vs64B, " ") ;
 	// Version format
 	SL_INFO("4x U8 test") ;
-	pcStringParseValues((char *) "11.22.33.44", (p32_t) &x64Val, vfUXX, vs08B, " .", 4) ;
+	pcStringParseValues((char *) "11.22.33.44", (px_t) &x64Val, vfUXX, vs08B, " .", 4) ;
 }

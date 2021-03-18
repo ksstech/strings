@@ -439,7 +439,7 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 	IF_PRINT(debugPARSE_DTIME, "C: TPact=%d  NPact=%d", TPact, NPact) ;
 	if (NPact >= 1) {
 		IF_PRINT(debugPARSE_DTIME, "  Yr '%.*s'", TPact, pSrc) ;
-		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) YEAR_BASE_MAX) ;
+		pSrc = pcStringParseValueRange(pSrc, (px_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) YEAR_BASE_MAX) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
 		// Cater for CCYY vs YY form
 		psTM->tm_year = INRANGE(YEAR_BASE_MIN, Value, YEAR_BASE_MAX, int32_t) ? Value - YEAR_BASE_MIN : Value ;
@@ -455,7 +455,7 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 
 	if ((flag & DATETIME_YEAR_OK) || (NPact == 2) || (NPact == 0 && TPact > 0 && pSrc[TPact+3] == CHR_NUL)) {
 		IF_PRINT(debugPARSE_DTIME, "  Mon '%.*s'", TPact, pSrc) ;
-		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 1, (x32_t) MONTHS_IN_YEAR) ;
+		pSrc = pcStringParseValueRange(pSrc, (px_t) &Value, vfIXX, vs32B, NULL, (x32_t) 1, (x32_t) MONTHS_IN_YEAR) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_mon = Value - 1 ;						// make 0 relative
 		flag |= DATETIME_MON_OK ;						// mark as done
@@ -476,7 +476,7 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 
 	if ((flag & DATETIME_MON_OK) || (TPact > 0 && tolower((int) pSrc[TPact]) == CHR_t)) {
 		IF_PRINT(debugPARSE_DTIME, "  Day '%.*s'", TPact, pSrc) ;
-		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 1, (x32_t) TPlim) ;
+		pSrc = pcStringParseValueRange(pSrc, (px_t) &Value, vfIXX, vs32B, NULL, (x32_t) 1, (x32_t) TPlim) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_mday = Value ;
 		flag |= DATETIME_MDAY_OK ;						// mark as done
@@ -508,7 +508,7 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 
 	if (NPact > 0) {
 		IF_PRINT(debugPARSE_DTIME, "  Hr '%.*s'", TPact, pSrc) ;
-		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) TPlim) ;
+		pSrc = pcStringParseValueRange(pSrc, (px_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) TPlim) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_hour = Value ;
 		flag	|= DATETIME_HOUR_OK ;					// mark as done
@@ -531,7 +531,7 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 
 	if ((flag & DATETIME_HOUR_OK) || (NPact == 2) || (NPact == 0 && TPact > 0 && pSrc[TPact+3] == CHR_NUL)) {
 		IF_PRINT(debugPARSE_DTIME, "  Min '%.*s'", TPact, pSrc) ;
-		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) TPlim) ;
+		pSrc = pcStringParseValueRange(pSrc, (px_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) TPlim) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_min = Value ;
 		flag	|= DATETIME_MIN_OK ;					// mark as done
@@ -560,7 +560,7 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 
 	if ((flag & DATETIME_MIN_OK) || (TPact > 0) || (INRANGE(1, NPact, --TPmax, int32_t))) {
 		IF_PRINT(debugPARSE_DTIME, "  Sec '%.*s'", TPact, pSrc) ;
-		pSrc = pcStringParseValueRange(pSrc, (p32_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) TPlim) ;
+		pSrc = pcStringParseValueRange(pSrc, (px_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) TPlim) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_sec = Value ;
 		flag	|= DATETIME_SEC_OK ;					// mark as done
@@ -584,7 +584,7 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 			TPact = NPact ;
 		}
 		IF_PRINT(debugPARSE_DTIME, " uS '%.*s'", TPact, pSrc) ;
-		pSrc = pcStringParseValueRange(pSrc, (p32_t) &uSecs, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) (MICROS_IN_SECOND-1)) ;
+		pSrc = pcStringParseValueRange(pSrc, (px_t) &uSecs, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) (MICROS_IN_SECOND-1)) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
 		TPact = 6 - TPact ;
 		while (TPact--) {
