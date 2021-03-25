@@ -315,9 +315,9 @@ char *	pcStringParseValueRange(char * pSrc, px_t px, varform_t VarForm, varsize_
 	x64_t x64Lo = xValuesUpscaleX32_X64(x32Lo, VarForm) ;
 	x64_t x64Hi = xValuesUpscaleX32_X64(x32Hi, VarForm) ;
 	IF_PRINT(debugPARSE_VALUE, " '%.*s'", pTmp - pSrc, pSrc) ;
-	IF_EXEC_4(debugPARSE_VALUE, xCompValueReport, " Val=", x64Val, VarForm, VarSize) ;
-	IF_EXEC_4(debugPARSE_VALUE, xCompValueReport, " Lo=", x64Lo, VarForm, VarSize) ;
-	IF_EXEC_4(debugPARSE_VALUE, xCompValueReport, " Hi=", x64Hi, VarForm, VarSize) ;
+	IF_EXEC_4(debugPARSE_VALUE, xCV_ReportValue, " Val=", x64Val, VarForm, VarSize) ;
+	IF_EXEC_4(debugPARSE_VALUE, xCV_ReportValue, " Lo=", x64Lo, VarForm, VarSize) ;
+	IF_EXEC_4(debugPARSE_VALUE, xCV_ReportValue, " Hi=", x64Hi, VarForm, VarSize) ;
 	switch(VarForm) {
 	case vfUXX:
 		if ((x64Val.u64 < x64Lo.u64) || (x64Val.u64 > x64Hi.u64)) {
@@ -390,7 +390,6 @@ char *	pcStringParseIpAddr(char * pSrc, px_t px) {
 		pcRV = pcStringParseValueRange(pSrc = pcRV, (px_t) &u32Val, vfUXX, vs32B, pccTmp, (x32_t) UINT8_MIN, (x32_t) UINT8_MAX) ;
 		EQ_GOTO(pcRV, pcFAILURE, exit) ;
 //		PRINT("i=%d  '%s' -> '%s'  0x%08x  %-I  ", i, pSrc, pcRV, u32Val, u32Val) ;
-
 		*px.pu32	<<= 8 ;
 		*px.pu32	+= u32Val ;
 		if (*pcRV == CHR_FULLSTOP) {
