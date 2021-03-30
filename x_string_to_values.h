@@ -23,10 +23,10 @@ int32_t	xHexCharToValue(uint8_t, int32_t) ;
 char *	pcStringParseU64(char * pSrc, uint64_t * pVal, int32_t * pSign, const char * pDel) ;
 char *	pcStringParseF64(char *pSrc, double * pDst, int32_t * pSign, const char * pDel) ;
 
-char *	pcStringParseX64(char * pSrc, x64_t * px64Val, varform_t VarForm, const char * pDel) ;
-char *	pcStringParseValue(char * pSrc, px_t px, varform_t VarForm, varsize_t VarSize, const char * pDel) ;
-char *	pcStringParseValueRange(char * pSrc, px_t px, varform_t VarForm, varsize_t VarSize, const char * pDel, x32_t x32Lo, x32_t x32Hi) ;
-char *	pcStringParseValues(char * pSrc, px_t px, varform_t VarForm, varsize_t VarSize, const char * pDel, int32_t Count) ;
+char *	pcStringParseX64(char * pSrc, x64_t * px64Val, vf_e VarForm, const char * pDel) ;
+char *	pcStringParseValue(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize, const char * pDel) ;
+char *	pcStringParseValueRange(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize, const char * pDel, x32_t x32Lo, x32_t x32Hi) ;
+char *	pcStringParseValues(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize, const char * pDel, int32_t Count) ;
 char *	pcStringParseNumber(char * pSrc, px_t px) ;
 char *	pcStringParseNumberRange(char * pSrc, px_t px, int32_t Min, int32_t Max) ;
 char *	pcStringParseIpAddr(char * pStr, px_t px) ;

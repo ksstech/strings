@@ -247,7 +247,7 @@ char *	pcStringParseF64(char *pSrc, double * pDst, int32_t * pSign, const char *
  * @param[out]	x64Ptr - pointer to the location where value is to be stored
  * @return		FAILPTR if no valid value or keyword found else updated pointer to next character to be parsed
  */
-char *	pcStringParseX64(char * pSrc, x64_t * px64Val, varform_t VarForm, const char * pDel) {
+char *	pcStringParseX64(char * pSrc, x64_t * px64Val, vf_e VarForm, const char * pDel) {
 	char *	ptr1 ;
 	int32_t	Sign ;
 	px_t	px ;
@@ -271,7 +271,7 @@ char *	pcStringParseX64(char * pSrc, x64_t * px64Val, varform_t VarForm, const c
 	return ptr1 ;
 }
 
-char *	pcStringParseValue(char * pSrc, px_t px, varform_t VarForm, varsize_t VarSize, const char * pDel) {
+char *	pcStringParseValue(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize, const char * pDel) {
 	// assume we might find a 64bit value, so plan accordingly
 	x64_t	x64Val ;
 	IF_PRINT(debugPARSE_VALUE, "'%.3s' ->", pSrc) ;
@@ -306,7 +306,7 @@ char *	pcStringParseValue(char * pSrc, px_t px, varform_t VarForm, varsize_t Var
  * @param x32Hi		upper limit valid value
  * @return			pointer to next char to process or pcFAILURE
  */
-char *	pcStringParseValueRange(char * pSrc, px_t px, varform_t VarForm, varsize_t VarSize, const char * pDel, x32_t x32Lo, x32_t x32Hi) {
+char *	pcStringParseValueRange(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize, const char * pDel, x32_t x32Lo, x32_t x32Hi) {
 	x64_t	x64Val ;
 	char * pTmp	= pcStringParseX64(pSrc, &x64Val, VarForm, pDel) ;
 	EQ_RETURN(pTmp, pcFAILURE)
@@ -343,7 +343,7 @@ char *	pcStringParseValueRange(char * pSrc, px_t px, varform_t VarForm, varsize_
 	return pTmp ;
 }
 
-char *	pcStringParseValues(char * pSrc, px_t px, varform_t VarForm, varsize_t VarSize, const char * pDel, int32_t Count) {
+char *	pcStringParseValues(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize, const char * pDel, int32_t Count) {
 	while(Count--) {
 		char * ptr1	= pcStringParseValue(pSrc, px, VarForm, VarSize, pDel) ;
 		EQ_RETURN(ptr1, pcFAILURE)
