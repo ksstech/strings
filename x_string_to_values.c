@@ -104,11 +104,11 @@ uint64_t xStringParseX64(char *pSrc, uint8_t * pDst, uint32_t xLen) {
 	int32_t iRV ;
 	while (xLen && *pSrc) {
 		iRV = xHexCharToValue(*pSrc, BASE16) ;
-		if (iRV == erFAILURE) {						// invalid char
+		if (iRV == erFAILURE) {							// invalid char
 			SL_ERR("Invalid source Src=%s  Dst=%s", pSrc, pDst) ;
 			break ;										// yes, stop parsing
 		}
-		x8Value += iRV ;							// nope, add to value
+		x8Value += iRV ;								// nope, add to value
 		if (xLen % 2) {									// odd length boundary?
 			xTemp	<<= 8 ;
 			xTemp += x8Value ;
@@ -280,7 +280,7 @@ char *	pcStringParseValue(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize, cons
 
 	// if what we were asked to scan is less than 64bit in size, scale it up/down...
 	if (VarSize < vs64B) {
-		x64Val	= xValuesScaleX64(x64Val, VarForm, VarSize) ;
+		x64Val	= xValuesScaleX64(x64Val, VarForm, VarSize) ;	// XXX not logical
 	}
 
 	// store at destination based on size
@@ -339,7 +339,7 @@ char *	pcStringParseValueRange(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize,
 		SL_ERR(debugAPPL_PLACE) ;
 		return pcFAILURE ;
 	}
-	vValuesStoreX64_Xxx(x64Val, px, VarForm, VarSize) ;
+	vValuesStoreX64_Xxx(x64Val, px, VarForm, VarSize) ;		// XXX
 	return pTmp ;
 }
 
