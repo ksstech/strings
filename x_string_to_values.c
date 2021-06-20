@@ -137,39 +137,34 @@ uint64_t xStringParseX64(char *pSrc, uint8_t * pDst, uint32_t xLen) {
  */
 char *	pcStringParseU64(char * pSrc, uint64_t * pDst, int32_t * pSign, const char * pDel) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inSRAM(pDst) && halCONFIG_inSRAM(pSign)) ;
-	*pSign 	= 0 ;						// set sign as not provided
-	uint64_t	Base = 10 ;				// default to decimal
+	uint64_t Base = 10 ;								// default to decimal
+	*pSign 	= 0 ;										// set sign as not provided
 	if (pDel) {
 		IF_myASSERT(debugPARAM, halCONFIG_inMEM(pDel)) ;
 		pSrc += xStringSkipDelim(pSrc, pDel, sizeof("+18,446,744,073,709,551,615")) ;
 	}
 
 	// check for sign at start
-	if (*pSrc == CHR_MINUS) {			// NEGative sign?
-		*pSign = -1 ;					// yes, flag accordingly
-		++pSrc ;						// & skip over sign
+	if (*pSrc == CHR_MINUS) {							// NEGative sign?
+		*pSign = -1 ;									// yes, flag accordingly
+		++pSrc ;										// & skip over sign
 
-	} else if (*pSrc == CHR_PLUS) {		// POSitive sign?
-		*pSign = 1 ;					// yes, flag accordingly
-		++pSrc ;						// & skip over sign
+	} else if (*pSrc == CHR_PLUS) {						// POSitive sign?
+		*pSign = 1 ;									// yes, flag accordingly
+		++pSrc ;										// & skip over sign
 
-	} else if (*pSrc == CHR_X || *pSrc == CHR_x) {	// HEXadecimal format ?
+	} else if (*pSrc == CHR_X || *pSrc == CHR_x) {		// HEXadecimal format ?
 		Base = 16 ;
-		++pSrc ;						// & skip over hex format
+		++pSrc ;										// & skip over hex format
 	}
 
 	// ensure something there to parse
-	if (xHexCharToValue(*pSrc, Base) == erFAILURE) {
-		return pcFAILURE ;
-	}
-
+	if (xHexCharToValue(*pSrc, Base) == erFAILURE)  return pcFAILURE ;
 	// now scan string and convert to value
 	*pDst = 0ULL ;						// set default value as ZERO
 	int32_t		Value ;
 	while (*pSrc) {
-		if ((Value = xHexCharToValue(*pSrc, Base)) == erFAILURE) {
-			break ;
-		}
+		if ((Value = xHexCharToValue(*pSrc, Base)) == erFAILURE) break ;
 		*pDst *= Base ;
 		*pDst += Value ;
 		++pSrc ;
@@ -192,9 +187,7 @@ char *	pcStringParseF64(char *pSrc, double * pDst, int32_t * pSign, const char *
 	uint64_t	u64Val ;
 	// parse the integer portion
 	char * pTmp = pcStringParseU64(pSrc, &u64Val, pSign, " ") ;
-	if (pTmp == pcFAILURE) {
-		return pTmp ;
-	}
+	if (pTmp == pcFAILURE) return pTmp ;
 	double dVal = u64Val ;
 	u64Val = 0 ;
 	int32_t	scale = 0 ;
@@ -229,14 +222,9 @@ char *	pcStringParseF64(char *pSrc, double * pDst, int32_t * pSign, const char *
 	}
 
 	// calculate the actual value (number = +/- number.fraction * 10^+/- exponent)
-	if (subscale) {
-		*pDst = (dVal + dFrac) * pow(10.0 , (subscale * signsubscale)) ;
-	} else {
-		*pDst = dVal + dFrac ;
-	}
-	if (*pSign < 0) {
-		*pDst *= -1.0 ;
-	}
+	if (subscale) *pDst = (dVal + dFrac) * pow(10.0 , (subscale * signsubscale)) ;
+	else *pDst = dVal + dFrac ;
+	if (*pSign < 0) *pDst *= -1.0 ;
 	IF_PRINT(debugPARSE_F64, "Input: %*s dInt=%f dFrac=%f Scale=%d SubScale=%d F64=%f\n", pTmp - pSrc, pSrc, dVal, dFrac, scale, subscale, *pDst) ;
 	return pTmp ;
 }
@@ -252,11 +240,8 @@ char *	pcStringParseX64(char * pSrc, x64_t * px64Val, vf_e VarForm, const char *
 	int32_t	Sign ;
 	px_t	px ;
 	px.px64	= px64Val ;
-	if (VarForm == vfFXX) {
-		ptr1	= pcStringParseF64(pSrc, px.pf64, &Sign, pDel) ;
-	} else {
-		ptr1	= pcStringParseU64(pSrc, px.pu64, &Sign, pDel) ;
-	}
+	if (VarForm == vfFXX) ptr1	= pcStringParseF64(pSrc, px.pf64, &Sign, pDel) ;
+	else ptr1	= pcStringParseU64(pSrc, px.pu64, &Sign, pDel) ;
 	EQ_RETURN(ptr1, pcFAILURE)
 
 	// ensure NO SIGN is specified if unsigned is requested, and no error returned
@@ -265,9 +250,7 @@ char *	pcStringParseX64(char * pSrc, x64_t * px64Val, vf_e VarForm, const char *
 		SL_ERR("Uxx cannot have +/- sign") ;
 		return pcFAILURE ;
 	}
-	if ((VarForm == vfIXX) && (Sign == -1)) {
-		*px.pi64	*= Sign ;
-	}
+	if ((VarForm == vfIXX) && (Sign == -1)) *px.pi64 *= Sign ;
 	return ptr1 ;
 }
 
@@ -279,9 +262,7 @@ char *	pcStringParseValue(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize, cons
 	EQ_RETURN(ptr1, pcFAILURE)
 
 	// if what we were asked to scan is less than 64bit in size, scale it up/down...
-	if (VarSize < vs64B) {
-		x64Val	= xValuesScaleX64(x64Val, VarForm, VarSize) ;	// XXX not logical
-	}
+	if (VarSize < vs64B) x64Val	= xValuesScaleX64(x64Val, VarForm, VarSize) ;	// XXX not logical
 
 	// store at destination based on size
 	switch(VarSize) {
