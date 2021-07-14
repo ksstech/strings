@@ -54,11 +54,11 @@ extern "C" {
 
 typedef struct eTable_s {
 	union {
-		int32_t		iVal1 ;
+		int			iVal1 ;
 		uint32_t	uVal1 ;
 	} ;
 	union {
-		int32_t		iVal2 ;
+		int			iVal2 ;
 		uint32_t	uVal2 ;
 	} ;
 	union {
@@ -67,37 +67,36 @@ typedef struct eTable_s {
 	} ;
 } eTable_t ;
 
-int32_t	xstrverify(char * pStr, char cMin, char cMax, char cNum) ;
-int32_t	xstrlen(const char * s) ;
-int32_t	xstrnlen(const char * s, int32_t len) ;
-int32_t	xstrncpy(char * s1, char * s2, int32_t len ) ;
+int	xstrverify(char * pStr, char cMin, char cMax, char cNum) ;
+int	xstrlen(const char * s) ;
+int	xstrnlen(const char * s, int len) ;
+int	xstrncpy(char * s1, char * s2, int len ) ;
 
-int32_t	xmemrev(char * pMem, size_t Size) ;
-void	xstrrev(char * pStr) ;
+int	xmemrev(char * pMem, size_t Size) ;
+void xstrrev(char * pStr) ;
 
-int32_t	xinstring(const char * pStr, char cChr) ;
-int32_t xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) ;
-int32_t	xstrcmp(const char * s1, const char * s2, bool Exact) ;
-int32_t	xstrindex(char *, char * *) ;
+int	xinstring(const char * pStr, char cChr) ;
+int xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) ;
+int	xstrcmp(const char * s1, const char * s2, bool Exact) ;
+int	xstrindex(char *, char * *) ;
 
-int32_t	xStringParseEncoded(char * pStr, char * pDst) ;
-int32_t	xStringSkipDelim(char * pSrc, const char * pDel, int32_t MaxLen) ;
-int32_t	xStringFindDelim(char * pSrc, const char * pDlm, int32_t xMax) ;
-char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int32_t flag, int32_t MaxLen) ;
+int	xStringParseEncoded(char * pStr, char * pDst) ;
+int	xStringSkipDelim(char * pSrc, const char * pDel, int MaxLen) ;
+int	xStringFindDelim(char * pSrc, const char * pDlm, int xMax) ;
+char * pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag, int MaxLen) ;
 struct tm ;
-char *	pcStringParseDateTime(char * buf, uint64_t * pTStamp, struct tm * ptm) ;
+char * pcStringParseDateTime(char * buf, uint64_t * pTStamp, struct tm * ptm) ;
+char * pcCodeToMessage(int eCode, const eTable_t * eTable) ;
 
-char *	pcCodeToMessage(int32_t eCode, const eTable_t * eTable) ;
+int	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[], char * pBuf, size_t BufSize) ;
+char * pcBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[]) ;
 
-int32_t	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[], char * pBuf, size_t BufSize) ;
-char *	pcBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[]) ;
+int	xBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[], char * pBuf, size_t BufSize) ;
+char * pcBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[]) ;
 
-int32_t	xBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[], char * pBuf, size_t BufSize) ;
-char *	pcBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[]) ;
-
-void	vBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[]) ;
-void	vBitMapReport(char * Name, uint32_t Value, uint32_t Width, const char ** pMesArray) ;
-int32_t	xStringValueMap(const char * pString, char * pBuf, uint32_t uValue, int32_t iWidth) ;
+void vBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[]) ;
+void vBitMapReport(char * Name, uint32_t Value, uint32_t Width, const char ** pMesArray) ;
+int	xStringValueMap(const char * pString, char * pBuf, uint32_t uValue, int iWidth) ;
 
 void 	x_string_general_test(void) ;
 

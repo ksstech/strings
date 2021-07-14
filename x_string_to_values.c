@@ -22,15 +22,13 @@
  * x_string_to_values.c
  */
 
-#include	"x_definitions.h"
+#include	"hal_config.h"
 #include	"x_string_general.h"
 #include	"x_string_to_values.h"
 #include	"x_values_convert.h"
 #include	"printfx.h"									// +x_definitions +stdarg +stdint +stdio
 #include	"syslog.h"
 #include	"x_errors_events.h"
-
-#include	"hal_config.h"
 
 #include	"lwip/def.h"
 
