@@ -539,35 +539,6 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 	return pSrc ;
 }
 
-/**
- * pcCodeToMessage() - locates the provided eCode within the table specified and return the message
- * @param[in]	eCode - (error) code to lookup
- * @param[in]	eTable - pointer to message table within which to look
- * @return		pointer to correct/matched or default (not found) message
- */
-char * pcCodeToMessage(int32_t eCode, const eTable_t * eTable) {
-	int32_t	i = 0 ;
-	while ((eTable[i].uVal1 != 0xFFFFFFFF) && (eTable[i].uVal2 != 0xFFFFFFFF)) {
-	// If an exact match with 1st value in table, return pointer to the message
-		if (eCode == eTable[i].iVal1) {
-			break ;
-		}
-	// If we have a 2nd (ie range) value, then test differently for positive & negative ranges
-		if (eTable[i].iVal2 != 0) {
-		// code is negative (ie an error code) and within this (negative) range, return pointer to message
-			if ((eCode < 0) && (eCode < eTable[i].iVal1) && (eCode >= eTable[i].iVal2)) {
-				break ;
-			}
-		// if code is positive (ie a normal) and within the positive range, return pointer to message
-			if ((eCode > 0) && (eCode > eTable[i].iVal1) && (eCode <= eTable[i].iVal2)) {
-				break ;
-			}
-		}
-		++i ;											// no match found, try next entry
-	}
-	return (char *) eTable[i].pMess ;
-}
-
 // ############################## Bitmap to string decode functions ################################
 
 #define	controlSIZE_FLAGS_BUF		(24 * 60)

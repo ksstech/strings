@@ -34,21 +34,6 @@ extern "C" {
 
 // ##################################### string operations #########################################
 
-typedef struct eTable_s {
-	union {
-		int			iVal1 ;
-		uint32_t	uVal1 ;
-	} ;
-	union {
-		int			iVal2 ;
-		uint32_t	uVal2 ;
-	} ;
-	union {
-		const char * pVoid ;
-		const char * pMess ;
-	} ;
-} eTable_t ;
-
 int	xstrverify(char * pStr, char cMin, char cMax, char cNum) ;
 int	xstrlen(const char * s) ;
 int	xstrnlen(const char * s, int len) ;
