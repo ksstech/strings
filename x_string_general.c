@@ -119,22 +119,7 @@ int	xmemrev(char * pMem, size_t Size) {
  * @return none
  * @brief  perform 'in-place' start <-> end character reversal
  */
-void	xstrrev(char * pStr) {
-#if 0
-	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pStr)) ;
-	if ((pStr == NULL) || (*pStr == CHR_NUL)) {
-		return ;
-	}
-	char * pRev = pStr + xstrlen(pStr) - 1 ;
-	for (char * pFwd = pStr; pRev > pFwd; ++pFwd, --pRev) {
-		*pFwd ^= *pRev ;
-		*pRev ^= *pFwd ;
-		*pFwd ^= *pRev ;
-	}
-#else
-	xmemrev(pStr, xstrlen(pStr)) ;
-#endif
-}
+void xstrrev(char * pStr) { xmemrev(pStr, xstrlen(pStr)); }
 
 /**
  * xinstring()
