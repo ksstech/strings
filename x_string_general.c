@@ -1,35 +1,18 @@
 /*
- * Copyright 2014-20 Andre M Maree / KSS Technologies (Pty) Ltd.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
- * and associated documentation files (the "Software"), to deal in the Software without restriction,
- * including without limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all copies or
- * substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
- * BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
- * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- */
-
-/*
+ * Copyright 2014-21 Andre M. Maree / KSS Technologies (Pty) Ltd.
  * x_string_general.c
  */
 
+#include	"hal_config.h"
+
 #include	"x_string_general.h"
 #include	"x_string_to_values.h"
-#include	"x_errors_events.h"
-#include	"x_time.h"
+
 #include	"printfx.h"									// +x_definitions +stdarg +stdint +stdio
 #include	"syslog.h"
 
-#include	"hal_config.h"
+#include	"x_errors_events.h"
+#include	"x_time.h"
 
 #include	<string.h>
 #include	<ctype.h>
@@ -56,16 +39,12 @@
 
 /**
  * xstrverify() - verify to a maximum number of characters that each character is within a range
- * @return	erSUCCESS if cNum or fewer chars tested OK and a CHR_NUL is reached
+ * @return	erSUCCESS if cNum or fewer chars tested OK and a NUL is reached
  */
-int32_t	xstrverify(char * pStr, char cMin, char cMax, char cNum) {
-	if (*pStr == CHR_NUL) {			// if the 1st character is a NUL, ie no ASCII string there
-		return erFAILURE ;			// return error
-	}
+int	xstrverify(char * pStr, char cMin, char cMax, char cNum) {
+	if (*pStr == 0) return erFAILURE;
 	while (cNum--) {
-		if (OUTSIDE(cMin, *pStr, cMax, char)) {
-			return erFAILURE ;
-		}
+		if (OUTSIDE(cMin, *pStr, cMax, char)) return erFAILURE;
 	}
 	return erSUCCESS ;
 }
@@ -76,9 +55,9 @@ int32_t	xstrverify(char * pStr, char cMin, char cMax, char cNum) {
  * @param[in]	len		maximum length to check for/return
  * @return		length of the string excl the terminating '\0'
  */
-int32_t	xstrnlen(const char * s, int32_t len) {
-	int32_t l ;
-	for (l = 0; *s != CHR_NUL && l < len; ++s, ++l) ;
+int	xstrnlen(const char * s, int len) {
+	int l ;
+	for (l = 0; *s != 0 && l < len; ++s, ++l) ;
 	return l ;
 }
 
@@ -88,9 +67,9 @@ int32_t	xstrnlen(const char * s, int32_t len) {
  * @param	char *s		pointer to the string
  * @return	int32_t		length of the string up to but excl the terminating '\0'
  */
-int32_t	xstrlen(const char * s) {
-	int32_t l ;
-	for(l = 0; *s != CHR_NUL; ++s, ++l) ;
+int	xstrlen(const char * s) {
+	int l ;
+	for(l = 0; *s != 0; ++s, ++l) ;
 	return l ;
 }
 
@@ -103,23 +82,20 @@ int32_t	xstrlen(const char * s) {
  *			n - maximum number of chars to copy
  * @return	Actual number of chars copied (x <= n) excluding possible NULL
  */
-int32_t	xstrncpy(char * pDst, char * pSrc, int32_t xLen ) {
+int	xstrncpy(char * pDst, char * pSrc, int xLen ) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pDst) && halCONFIG_inMEM(pSrc) && xLen) ;
-	int32_t Cnt = 0 ;
-	while (*pSrc != CHR_NUL && Cnt < xLen) {
-		*pDst++ = *pSrc++ ;						// copy across and adjust both pointers
-		Cnt++ ;								// adjust length copied
+	int Cnt = 0 ;
+	while (*pSrc != 0 && Cnt < xLen) {
+		*pDst++ = *pSrc++ ;								// copy across and adjust both pointers
+		Cnt++ ;											// adjust length copied
 	}
-	if (Cnt < xLen)							// ONLY if less than maximum copied...
-		*pDst = CHR_NUL ;					// null terminate the string
+	if (Cnt < xLen)	*pDst = 0;							// if space left, terminate
 	return Cnt ;
 }
 
-int32_t	xmemrev(char * pMem, size_t Size) {
+int	xmemrev(char * pMem, size_t Size) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pMem) && Size > 1) ;
-	if (pMem == NULL || *pMem == CHR_NUL || Size < 2) {
-		return erFAILURE;
-	}
+	if (pMem == NULL || *pMem == 0 || Size < 2) return erFAILURE;
 	char * pRev = pMem + Size - 1 ;
 #if		(stringXMEMREV_XOR == 1)
 	for (char * pFwd = pMem; pRev > pFwd; ++pFwd, --pRev) {
@@ -168,16 +144,12 @@ void	xstrrev(char * pStr) {
  * @return		0 -> n the index into the string where the char is found
  * 				FAILURE if no match found, or cChr is NULL
  */
-int32_t	xinstring(const char * pStr, char cChr) {
+int	xinstring(const char * pStr, char cChr) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pStr)) ;
-	if (cChr == CHR_NUL) {
-		return erFAILURE ;
-	}
-	int32_t	pos = 0 ;
+	if (cChr == 0) return erFAILURE;
+	int	pos = 0 ;
 	while (*pStr) {
-		if (*pStr++ == cChr) {
-			return pos ;
-		}
+		if (*pStr++ == cChr) return pos ;
 		pos++ ;
 	}
 	return erFAILURE ;
@@ -191,24 +163,19 @@ int32_t	xinstring(const char * pStr, char cChr) {
  * @param flag		true for exact match, else upper/lower case difference ignored
  * @return			true or false based on comparison
  */
-int32_t	xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) {
+int	xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(s1) && halCONFIG_inMEM(s2) && xLen < 1024) ;
-	IF_SL_INFO(debugXSTRCMP, "xLen=%d '%.*s' vs '%.*s' ", xLen, xLen, s1, xLen, s2) ;
 	while (*s1 && *s2 && xLen) {
 		if (Exact == true) {
-			if (*s1 != *s2) {
-				break ;
-			}
+			if (*s1 != *s2) break;
 		} else {
-			if (toupper((int)*s1) != toupper((int)*s2)) {
-				break ;
-			}
+			if (toupper((int)*s1) != toupper((int)*s2)) break ;
 		}
 		++s1 ;
 		++s2 ;
 		--xLen ;
 	}
-	return ((*s1 == CHR_NUL) && (*s2 == CHR_NUL)) ? true : (xLen == 0) ? true : false ;
+	return (*s1 == 0 && *s2 == 0) ? 1 : (xLen == 0) ? 1 : 0 ;
 }
 
 /**
@@ -218,23 +185,18 @@ int32_t	xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) {
  * 			flag - true for exact match, else upper/lower case difference ignored
  * @return	true or false based on comparison
  */
-int32_t	xstrcmp(const char * s1, const char * s2, bool Exact) {
+int	xstrcmp(const char * s1, const char * s2, bool Exact) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(s1) && halCONFIG_inMEM(s2)) ;
-	IF_SL_INFO(debugXSTRCMP, " S1=%s:S2=%s ", s1, s2) ;
 	while (*s1 && *s2) {
 		if (Exact) {
-			if (*s1 != *s2) {
-				break ;
-			}
+			if (*s1 != *s2) break;
 		} else {
-			if (toupper((int)*s1) != toupper((int)*s2)) {
-				break ;
-			}
+			if (toupper((int)*s1) != toupper((int)*s2)) break;
 		}
 		++s1 ;
 		++s2 ;
 	}
-	return ((*s1 == CHR_NUL) && (*s2 == CHR_NUL)) ? true : false ;
+	return (*s1 == 0 && *s2 == 0) ? 1 : 0 ;
 }
 
 /**
@@ -246,11 +208,10 @@ int32_t	xstrcmp(const char * s1, const char * s2, bool Exact) {
  * 			flag - true for exact match, else upper/lower case difference ignored
  * @return	if match found, index into array else FAILURE
  */
-int32_t	xstrindex(char * key, char * array[]) {
-	int32_t	i = 0 ;
+int	xstrindex(char * key, char * array[]) {
+	int	i = 0 ;
 	while (array[i]) {
-		if (strcasecmp(key, array[i]) == 0)				// strings match?
-			return i ;									// yes, return the index
+		if (strcasecmp(key, array[i]) == 0)	return i;	// strings match, return index
 		++i ;
 	}
 	return erFAILURE ;
@@ -265,34 +226,30 @@ int32_t	xstrindex(char * key, char * array[]) {
  * 			erSUCCESS if a zero length string encountered
  * 			1 or greater = length of the parsed string
  */
-int32_t	xStringParseEncoded(char * pStr, char * pDst) {
+int	xStringParseEncoded(char * pStr, char * pDst) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pStr)) ;
-	int32_t iRV = 0 ;
+	int iRV = 0 ;
 	if (pDst == NULL) {
-		pDst	= pStr ;
+		pDst = pStr ;
 	} else {
 		IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pDst)) ;
 	}
 	IF_PRINT(debugPARSE_ENCODED, "%s  ", pStr) ;
 	while(*pStr != 0) {
-		if (*pStr == CHR_PERCENT) {						// escape char?
-			int32_t Val1 = xHexCharToValue(*++pStr, BASE16) ;	// yes, parse 1st value
-			if (Val1 == erFAILURE) {
-				return erFAILURE ;
-			}
-			int32_t Val2 = xHexCharToValue(*++pStr, BASE16) ;	// parse 2nd value
-			if (Val2 == erFAILURE) {
-				return erFAILURE ;
-			}
+		if (*pStr == '%' ) {						// escape char?
+			int Val1 = xHexCharToValue(*++pStr, BASE16) ;	// yes, parse 1st value
+			if (Val1 == erFAILURE) return erFAILURE;
+			int Val2 = xHexCharToValue(*++pStr, BASE16) ;	// parse 2nd value
+			if (Val2 == erFAILURE) return erFAILURE ;
 			IF_PRINT(debugPARSE_ENCODED, "[%d+%d=%d]  ", Val1, Val2, (Val1 << 4) + Val2) ;
 			*pDst++ = (Val1 << 4) + Val2 ;				// calc & store final value
 			++pStr ;									// step to next char
 		} else {
 			*pDst++ = *pStr++ ;							// copy as is to (new) position
 		}
-		++iRV ;										// & adjust count...
+		++iRV ;											// & adjust count...
 	}
-	*pDst = CHR_NUL ;									// terminate
+	*pDst = 0;
 	IF_PRINT(debugPARSE_ENCODED, "%s\n", pStr-iRV) ;
 	return iRV ;
 }
@@ -308,7 +265,7 @@ int32_t	xStringParseEncoded(char * pStr, char * pDst) {
  * @param[in]	MaxLen - maximum number of characters in buffer
  * @return		number of delimiters (to be) skipped
  */
-int32_t	xStringSkipDelim(char * pSrc, const char * pDel, int32_t MaxLen) {
+int	xStringSkipDelim(char * pSrc, const char * pDel, int MaxLen) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inMEM(pDel)) ;
 	// If no length supplied
 	if (MaxLen == 0) {
@@ -318,7 +275,7 @@ int32_t	xStringSkipDelim(char * pSrc, const char * pDel, int32_t MaxLen) {
 
 	IF_PRINT(debugDELIM, " '%.4s'", pSrc) ;
 	// continue skipping over valid terminator characters
-	int32_t	CurLen = 0 ;
+	int	CurLen = 0 ;
 	while ((xinstring(pDel, *pSrc) != erFAILURE) && (CurLen < MaxLen)) {
 		++pSrc ;
 		++CurLen ;
@@ -328,20 +285,16 @@ int32_t	xStringSkipDelim(char * pSrc, const char * pDel, int32_t MaxLen) {
 	return CurLen ;								// number of delimiters skipped over
 }
 
-int32_t	xStringFindDelim(char * pSrc, const char * pDlm, int32_t xMax) {
+int	xStringFindDelim(char * pSrc, const char * pDlm, int xMax) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inFLASH(pDlm)) ;
-	int32_t xPos = 0 ;
-	if (xMax == 0) {
-		xMax = xstrlen(pSrc) ;
-	}
+	int xPos = 0 ;
+	if (xMax == 0) xMax = xstrlen(pSrc);
 	while (*pSrc && xMax) {
-		int32_t	xSrc = isupper((int) *pSrc) ? tolower((int) *pSrc) : (int) *pSrc ;
+		int	xSrc = isupper((int) *pSrc) ? tolower((int) *pSrc) : (int) *pSrc ;
 		const char * pTmp = pDlm ;
 		while (*pTmp) {
-			int32_t	xDlm = isupper((int) *pTmp) ? tolower((int) *pTmp) : (int) *pTmp ;
-			if (xSrc == xDlm) {
-				return xPos ;
-			}
+			int	xDlm = isupper((int) *pTmp) ? tolower((int) *pTmp) : (int) *pTmp ;
+			if (xSrc == xDlm) return xPos ;
 			++pTmp ;
 		}
 		++xPos ;
@@ -363,16 +316,14 @@ int32_t	xStringFindDelim(char * pSrc, const char * pDlm, int32_t xMax) {
  * @param[in]	MaxLen - maximum number of characters in buffer
  * @return		pointer to next character to be processed...
  */
-char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int32_t flag, int32_t MaxLen) {
+char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag, int MaxLen) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pDst)) ;
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc)) ;
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pDel)) ;
-	IF_myASSERT(debugPARAM, *pDel != CHR_NUL) ;
+	IF_myASSERT(debugPARAM, *pDel != 0);
 	// If no length supplied
-	if (MaxLen == 0)
-		MaxLen = xstrlen((const char *) pSrc) ;			// assume NULL terminated and calculate length
-	if (MaxLen == 0)
-		return pcFAILURE ;
+	if (MaxLen == 0) MaxLen = xstrlen((const char *) pSrc) ;			// assume NULL terminated and calculate length
+	if (MaxLen == 0) return pcFAILURE ;
 
 	int32_t CurLen = xStringSkipDelim(pSrc, pDel, MaxLen) ;
 	IF_TRACK(debugPARSE_TOKEN, "pS='%s'  Lmax=%d  Lcur=%d\n", pSrc, MaxLen, CurLen) ;
@@ -381,15 +332,12 @@ char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int32_t f
 
 	IF_TRACK(debugPARSE_TOKEN, "pS='%s'  Lmax=%d  Lcur=%d\n", pSrc, MaxLen, CurLen) ;
 	while (*pSrc && MaxLen--) {							// while not separator/terminator char or end of string
-		if (xinstring(pDel, *pSrc) != erFAILURE)	{	// check if current char a delim
-			break ;										// yes, all done...
-		}
-		*pDst = (flag < 0) ? tolower((int)*pSrc) :
-				(flag > 0) ? toupper((int)*pSrc) : *pSrc ;
+		if (xinstring(pDel, *pSrc) != erFAILURE) break;	// check if current char a delim
+		*pDst = (flag < 0) ? tolower((int)*pSrc) : (flag > 0) ? toupper((int)*pSrc) : *pSrc ;
 		++pDst ;
 		++pSrc ;
 	}
-	*pDst = CHR_NUL ;									// terminate destination string
+	*pDst = 0;
 	IF_TRACK(debugPARSE_TOKEN, "pS='%s'  Lmax=%d  Lcur=%d  pD='%s'\n", pSrc, MaxLen, CurLen, pDst) ;
 	return pSrc ;										// pointer to NULL or next char to be processed..
 }
@@ -430,7 +378,7 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 	 * TPlim	= ThisPar max value */
 	int32_t		Value, TPmax, TPact, NPact, TPlim ;
 	memset(psTM, 0, sizeof(struct tm)) ;				// ensure all start as 0
-	while (*pSrc == CHR_SPACE) ++pSrc ;					// make sure no leading spaces ....
+	while (*pSrc == ' ') ++pSrc ;						// make sure no leading spaces ....
 
 	IF_PRINT(debugPARSE_DTIME, "pcStringParseDateTime()\n") ;
 	// check CCYY?MM? ahead
@@ -453,7 +401,7 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 	NPact = (TPact > 0) ? xStringFindDelim(pSrc+TPact+1, delimDATE2, sizeof("DD")) : 0 ;
 	IF_PRINT(debugPARSE_DTIME, "M: TPact=%d  NPact=%d", TPact, NPact) ;
 
-	if ((flag & DATETIME_YEAR_OK) || (NPact == 2) || (NPact == 0 && TPact > 0 && pSrc[TPact+3] == CHR_NUL)) {
+	if ((flag & DATETIME_YEAR_OK) || (NPact == 2) || (NPact == 0 && TPact > 0 && pSrc[TPact+3] == 0)) {
 		IF_PRINT(debugPARSE_DTIME, "  Mon '%.*s'", TPact, pSrc) ;
 		pSrc = pcStringParseValueRange(pSrc, (px_t) &Value, vfIXX, vs32B, NULL, (x32_t) 1, (x32_t) MONTHS_IN_YEAR) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
@@ -471,10 +419,10 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 		TPlim = DAYS_IN_YEAR ;
 	}
 	TPact = xStringFindDelim(pSrc, delimDATE2, TPmax) ;
-	NPact = (TPact < 1 && pSrc[1] == CHR_NUL) ? 1 : (TPact < 1 && pSrc[2] == CHR_NUL) ? 2 : 0 ;
+	NPact = (TPact < 1 && pSrc[1] == 0) ? 1 : (TPact < 1 && pSrc[2] == 0) ? 2 : 0 ;
 	IF_PRINT(debugPARSE_DTIME, "D: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
 
-	if ((flag & DATETIME_MON_OK) || (TPact > 0 && tolower((int) pSrc[TPact]) == CHR_t)) {
+	if ((flag & DATETIME_MON_OK) || (TPact > 0 && tolower((int) pSrc[TPact]) == 't')) {
 		IF_PRINT(debugPARSE_DTIME, "  Day '%.*s'", TPact, pSrc) ;
 		pSrc = pcStringParseValueRange(pSrc, (px_t) &Value, vfIXX, vs32B, NULL, (x32_t) 1, (x32_t) TPlim) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
@@ -490,9 +438,7 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 	}
 
 	// skip over 'T' if there
-	if (*pSrc == CHR_T || *pSrc == CHR_t || *pSrc == CHR_SPACE) {
-		++pSrc ;
-	}
+	if (*pSrc == 'T' || *pSrc == 't' || *pSrc == ' ') ++pSrc;
 
 	// check for HH?MM?
 	if (flag & (DATETIME_YEAR_OK | DATETIME_MON_OK | DATETIME_MDAY_OK)) {
@@ -529,7 +475,7 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 	NPact = (TPact > 0) ? xStringFindDelim(pSrc+TPact+1, delimTIME3, sizeof("SS")) : 0 ;
 	IF_PRINT(debugPARSE_DTIME, "M: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
 
-	if ((flag & DATETIME_HOUR_OK) || (NPact == 2) || (NPact == 0 && TPact > 0 && pSrc[TPact+3] == CHR_NUL)) {
+	if ((flag & DATETIME_HOUR_OK) || (NPact == 2) || (NPact == 0 && TPact > 0 && pSrc[TPact+3] == 0)) {
 		IF_PRINT(debugPARSE_DTIME, "  Min '%.*s'", TPact, pSrc) ;
 		pSrc = pcStringParseValueRange(pSrc, (px_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) TPlim) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
@@ -578,25 +524,19 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 		/* XXX valid terminator not found, but maybe a NUL ?
 		 * still a problem, what about junk after the last number ? */
 			NPact = xstrlen(pSrc) ;
-			if (OUTSIDE(1, NPact, --TPmax , int32_t)) {
-				return pcFAILURE ;
-			}
+			if (OUTSIDE(1, NPact, --TPmax , int32_t)) return pcFAILURE;
 			TPact = NPact ;
 		}
 		IF_PRINT(debugPARSE_DTIME, " uS '%.*s'", TPact, pSrc) ;
 		pSrc = pcStringParseValueRange(pSrc, (px_t) &uSecs, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) (MICROS_IN_SECOND-1)) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
 		TPact = 6 - TPact ;
-		while (TPact--) {
-			uSecs *= 10 ;
-		}
+		while (TPact--) uSecs *= 10;
 		flag |= DATETIME_MSEC_OK ;						// mark as done
 		IF_PRINT(debugPARSE_DTIME, "  Val=%d\n", uSecs) ;
 	}
 
-	if (pSrc[0]==CHR_Z || pSrc[0]==CHR_z) {
-		++pSrc ;						// skip over trailing 'Z'
-	}
+	if (pSrc[0] == 'Z' || pSrc[0] == 'z') ++pSrc ;		// skip over trailing 'Z'
 
 	uint32_t Secs ;
 	if (flag & DATETIME_YEAR_OK) {						// full timestamp data found?
@@ -647,8 +587,8 @@ char * pcCodeToMessage(int32_t eCode, const eTable_t * eTable) {
 
 #define	controlSIZE_FLAGS_BUF		(24 * 60)
 
-int32_t	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[], char * pcBuf, size_t BufSize) {
-	int32_t	pos, idx, BufLen = 0 ;
+int	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[], char * pcBuf, size_t BufSize) {
+	int	pos, idx, BufLen = 0 ;
 	uint32_t	CurMask, ColCode ;
 	for (pos = 31, idx = 31, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos, --idx) {
 		if (Mask & CurMask) {
@@ -662,14 +602,14 @@ int32_t	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const 
 	return BufLen ;
 }
 
-char *	pcBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[]) {
+char * pcBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[]) {
 	char * pcBuf = malloc(controlSIZE_FLAGS_BUF) ;
 	xBitMapDecodeChanges(Val1, Val2, Mask, pMesArray, pcBuf, controlSIZE_FLAGS_BUF) ;
 	return pcBuf ;
 }
 
-int32_t	xBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[], char * pBuf, size_t BufSize) {
-	int32_t	pos, idx, BufLen = 0 ;
+int	xBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[], char * pBuf, size_t BufSize) {
+	int	pos, idx, BufLen = 0 ;
 	uint32_t	CurMask ;
 	for (pos = 31, idx = 31, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos, --idx) {
 		if (Mask & CurMask) {
@@ -694,13 +634,13 @@ char * pcBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArra
  * @param	pMesArray - pointer to array of messages (1 per bit SET in the mask)
  * return	none
  */
-void	vBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[]) {
-	int32_t	pos, idx ;
+void vBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[]) {
+	int	pos, idx ;
 	uint32_t	CurMask ;
 	if (Mask) {
 		for (pos = 31, idx = 0, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos) {
-			if (CurMask & Mask & Value)		printfx(" |%02d|%s|", pos, pMesArray[idx]) ;
-			if (CurMask & Mask)				idx++ ;
+			if (CurMask & Mask & Value) printfx(" |%02d|%s|", pos, pMesArray[idx]) ;
+			if (CurMask & Mask) idx++ ;
 		}
 	}
 }
@@ -714,11 +654,11 @@ void	vBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[]
  * @param	pMesArray - pointer to array of messages (1 per bit SET in the mask)
  * return	none
  */
-void	vBitMapReport(char * pName, uint32_t Value, uint32_t Mask, const char * pMesArray[]) {
+void vBitMapReport(char * pName, uint32_t Value, uint32_t Mask, const char * pMesArray[]) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pMesArray)) ;
-	if (pName != NULL)		printfx(" %s 0x%02x:", pName, Value) ;
+	if (pName != NULL) printfx(" %s 0x%02x:", pName, Value) ;
 	vBitMapDecode(Value, Mask, pMesArray) ;
-	if (pName != NULL)		printfx("\n") ;
+	if (pName != NULL) printfx("\n") ;
 }
 
 /**
@@ -730,13 +670,13 @@ void	vBitMapReport(char * pName, uint32_t Value, uint32_t Mask, const char * pMe
  * @param	iWidth
  * @return
  */
-int32_t	xStringValueMap(const char * pString, char * pBuf, uint32_t uValue, int32_t iWidth) {
+int	xStringValueMap(const char * pString, char * pBuf, uint32_t uValue, int32_t iWidth) {
 	IF_myASSERT(debugPARAM, halCONFIG_inFLASH(pString) && halCONFIG_inSRAM(pBuf) && (iWidth <= 32) && (strnlen(pString, 33) <= iWidth)) ;
 	uint32_t uMask = 0x8000 >> (32 - iWidth) ;
-	int32_t Idx ;
+	int Idx ;
 	for (Idx = 0; Idx < iWidth; ++Idx, ++pString, ++pBuf, uMask >>= 1)
-		*pBuf = (uValue | uMask) ? *pString : CHR_MINUS ;
-	*pBuf = CHR_NUL ;
+		*pBuf = (uValue | uMask) ? *pString : '-' ;
+	*pBuf = 0 ;
 	return Idx ;
 }
 

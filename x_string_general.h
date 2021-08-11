@@ -1,31 +1,13 @@
 /*
- * Copyright 2014-19 Andre M Maree / KSS Technologies (Pty) Ltd.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
- * and associated documentation files (the "Software"), to deal in the Software without restriction,
- * including without limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all copies or
- * substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
- * BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
- * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- */
-
-/*
+ * Copyright 2014-21 Andre M. Maree / KSS Technologies (Pty) Ltd.
  * x_string_general.h
  */
 
 #pragma once
 
-#include	<stdint.h>
-#include	<stddef.h>
+#include	"definitions.h"
+
+#include	<time.h>
 #include	<stdbool.h>
 
 #ifdef __cplusplus
@@ -84,9 +66,7 @@ int	xStringParseEncoded(char * pStr, char * pDst) ;
 int	xStringSkipDelim(char * pSrc, const char * pDel, int MaxLen) ;
 int	xStringFindDelim(char * pSrc, const char * pDlm, int xMax) ;
 char * pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag, int MaxLen) ;
-struct tm ;
 char * pcStringParseDateTime(char * buf, uint64_t * pTStamp, struct tm * ptm) ;
-char * pcCodeToMessage(int eCode, const eTable_t * eTable) ;
 
 int	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[], char * pBuf, size_t BufSize) ;
 char * pcBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[]) ;
@@ -98,7 +78,7 @@ void vBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[]
 void vBitMapReport(char * Name, uint32_t Value, uint32_t Width, const char ** pMesArray) ;
 int	xStringValueMap(const char * pString, char * pBuf, uint32_t uValue, int iWidth) ;
 
-void 	x_string_general_test(void) ;
+void  x_string_general_test(void) ;
 
 #ifdef __cplusplus
 }

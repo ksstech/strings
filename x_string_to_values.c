@@ -1,37 +1,16 @@
 /*
- * Copyright 2014-20 Andre M Maree / KSS Technologies (Pty) Ltd.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
- * and associated documentation files (the "Software"), to deal in the Software without restriction,
- * including without limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all copies or
- * substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
- * BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
- * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- */
-
-/*
+ * Copyright 2014-21 Andre M. Maree / KSS Technologies (Pty) Ltd.
  * x_string_to_values.c
  */
 
 #include	"hal_config.h"
 #include	"x_string_general.h"
 #include	"x_string_to_values.h"
-#include	"x_values_convert.h"
 #include	"printfx.h"									// +x_definitions +stdarg +stdint +stdio
 #include	"syslog.h"
 #include	"x_errors_events.h"
 
-#include	"lwip/def.h"
-
+#include	<netinet/in.h>
 #include	<math.h>
 
 #define	debugFLAG					0x4000
@@ -57,16 +36,14 @@
  * \brief		If ASSERT not defined, no range checking done on parameters
  * 				If only converted value required as return, *d can be made NULL ;
  */
-uint64_t char2u64(uint8_t * pSrc, uint64_t * pDst, uint32_t Len) {
-	IF_myASSERT(debugPARAM, pSrc && INRANGE(1, Len, 8, uint32_t)) ;
-	uint64_t	x64Val = 0ULL ;
+uint64_t char2u64(uint8_t * pSrc, uint64_t * pDst, int Len) {
+	IF_myASSERT(debugPARAM, pSrc && INRANGE(1, Len, 8, int)) ;
+	uint64_t x64Val = 0ULL ;
 	while (Len--) {
 		x64Val <<= 8 ;
 		x64Val += (uint64_t) *pSrc++ ;
 	}
-	if (pDst) {
-		*pDst = x64Val ;
-	}
+	if (pDst) *pDst = x64Val ;
 	return x64Val ;
 }
 
@@ -76,30 +53,22 @@ uint64_t char2u64(uint8_t * pSrc, uint64_t * pDst, uint32_t Len) {
  * @param xBase		base to handle 10/16
  * @return			if valid value, 0x00 -> 0x09 [0x0F] else -1
  */
-int32_t	xHexCharToValue(uint8_t cChr, int32_t xBase) {
-	if (INRANGE(CHR_0, cChr, CHR_9, uint8_t)) {
-		return cChr - CHR_0 ;
-	}
+int	xHexCharToValue(uint8_t cChr, int xBase) {
+	if (INRANGE('0', cChr, '9', uint8_t)) return cChr - '0' ;
 	if (xBase == BASE16) {
-		if (INRANGE(CHR_A, cChr, CHR_F, uint8_t)) {
-			return cChr - CHR_A + 10 ;
-		}
-		if (INRANGE(CHR_a, cChr, CHR_f, uint8_t)) {
-			return cChr - CHR_a + 10 ;
-		}
-		if (cChr == CHR_O || cChr == CHR_o) {		// XXX TEMP fix for capture error
-			SL_ERR("chr= 0x%x '%c'", cChr, cChr) ;
-			return 0 ;
-		}
+		if (INRANGE('A', cChr, 'F', uint8_t)) return cChr - 'A' + 10 ;
+		if (INRANGE('a', cChr, 'f', uint8_t)) return cChr - 'a' + 10 ;
+		// XXX TEMP fix for capture error
+		if (cChr == 'O' || cChr == 'o') { PRINT("chr= 0x%x '%c'", cChr, cChr); return 0; }
 	}
 	return erFAILURE ;
 }
 
-uint64_t xStringParseX64(char *pSrc, uint8_t * pDst, uint32_t xLen) {
+uint64_t xStringParseX64(char *pSrc, uint8_t * pDst, int xLen) {
 	IF_PRINT(debugPARSE_X64, "%.*s", xLen, pSrc) ;
 	uint64_t xTemp = 0 ;
 	uint8_t	x8Value = 0 ;
-	int32_t iRV ;
+	int iRV ;
 	while (xLen && *pSrc) {
 		iRV = xHexCharToValue(*pSrc, BASE16) ;
 		if (iRV == erFAILURE) {							// invalid char
@@ -133,7 +102,7 @@ uint64_t xStringParseX64(char *pSrc, uint8_t * pDst, uint32_t xLen) {
  * \return		updated pointer in source buffer to 1st non '0' -> '9' character
  * 				pcFAILURE is no valid value found to parse
  */
-char *	pcStringParseU64(char * pSrc, uint64_t * pDst, int32_t * pSign, const char * pDel) {
+char * pcStringParseU64(char * pSrc, uint64_t * pDst, int32_t * pSign, const char * pDel) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inSRAM(pDst) && halCONFIG_inSRAM(pSign)) ;
 	uint64_t Base = 10 ;								// default to decimal
 	*pSign 	= 0 ;										// set sign as not provided
@@ -143,15 +112,15 @@ char *	pcStringParseU64(char * pSrc, uint64_t * pDst, int32_t * pSign, const cha
 	}
 
 	// check for sign at start
-	if (*pSrc == CHR_MINUS) {							// NEGative sign?
+	if (*pSrc == '-') {									// NEGative sign?
 		*pSign = -1 ;									// yes, flag accordingly
 		++pSrc ;										// & skip over sign
 
-	} else if (*pSrc == CHR_PLUS) {						// POSitive sign?
+	} else if (*pSrc == '+') {							// POSitive sign?
 		*pSign = 1 ;									// yes, flag accordingly
 		++pSrc ;										// & skip over sign
 
-	} else if (*pSrc == CHR_X || *pSrc == CHR_x) {		// HEXadecimal format ?
+	} else if (*pSrc == 'X' || *pSrc == 'x') {			// HEXadecimal format ?
 		Base = 16 ;
 		++pSrc ;										// & skip over hex format
 	}
@@ -160,7 +129,7 @@ char *	pcStringParseU64(char * pSrc, uint64_t * pDst, int32_t * pSign, const cha
 	if (xHexCharToValue(*pSrc, Base) == erFAILURE)  return pcFAILURE ;
 	// now scan string and convert to value
 	*pDst = 0ULL ;						// set default value as ZERO
-	int32_t		Value ;
+	int	Value ;
 	while (*pSrc) {
 		if ((Value = xHexCharToValue(*pSrc, Base)) == erFAILURE) break ;
 		*pDst *= Base ;
@@ -181,41 +150,41 @@ char *	pcStringParseU64(char * pSrc, uint64_t * pDst, int32_t * pSign, const cha
  *				'd' is pointer to where double result must be stored
  * \return		pointer to 1st unprocessed (non numeric) char
  */
-char *	pcStringParseF64(char *pSrc, double * pDst, int32_t * pSign, const char * pDel) {
-	uint64_t	u64Val ;
+char * pcStringParseF64(char *pSrc, double * pDst, int * pSign, const char * pDel) {
+	uint64_t u64Val ;
 	// parse the integer portion
 	char * pTmp = pcStringParseU64(pSrc, &u64Val, pSign, " ") ;
 	if (pTmp == pcFAILURE) return pTmp ;
 	double dVal = u64Val ;
 	u64Val = 0 ;
-	int32_t	scale = 0 ;
+	int	scale = 0 ;
 	// handle fractional portion if decimal '.' & number follow
-	if ((*pTmp == CHR_FULLSTOP) && (pTmp[1] >= CHR_0) && (pTmp[1] <= CHR_9)) {
+	if ((*pTmp == '.') && (pTmp[1] >= '0') && (pTmp[1] <= '9')) {
 		pTmp++ ;										// skip the '.'
 		do {
 			u64Val *= 10.0 ;							// adjust decimal scale
-			u64Val += *pTmp++ - CHR_0 ;					// add fraction as part of integer (x10)
+			u64Val += *pTmp++ - '0' ;					// add fraction as part of integer (x10)
 			scale-- ;									// adjust power to scale down with later
-		} while (*pTmp >= CHR_0 && *pTmp <= CHR_9) ;	// do as long as numeric chars there
+		} while (*pTmp >= '0' && *pTmp <= '9') ;		// do as long as numeric chars there
 	}
-	double dFrac	= u64Val ;
-	dFrac	*= pow(10.0, scale) ;
+	double dFrac = u64Val ;
+	dFrac *= pow(10.0, scale) ;
 
 	// handle exponent
-	int32_t	subscale = 0 ;
-	int32_t	signsubscale = 1 ;
-	if ((*pTmp == CHR_e) || (*pTmp == CHR_E)) {			// exponent?
+	int	subscale = 0 ;
+	int	signsubscale = 1 ;
+	if ((*pTmp == 'E') || (*pTmp == 'e')) {				// exponent?
 		pTmp++ ;										// yes, skip indicator
-		if (*pTmp == CHR_PLUS) { 						// if positive
+		if (*pTmp == '+') { 							// if positive
 			pTmp++ ;									// skip
 		} else {
-			if (*pTmp == CHR_MINUS) {					// if negative
+			if (*pTmp == '-') {							// if negative
 				signsubscale = -1 ;						// save the sign
 				pTmp++ ;								// and skip over
 			}
 		}
-		while (*pTmp >= CHR_0 && *pTmp <= CHR_9) {		// while we have numeric chars
-			subscale = (subscale * 10) + (*pTmp++ - CHR_0) ;	// update the exponent value
+		while (*pTmp >= '0' && *pTmp <= '9') {			// while we have numeric chars
+			subscale = (subscale * 10) + (*pTmp++ - '0') ;	// update the exponent value
 		}
 	}
 
@@ -233,26 +202,26 @@ char *	pcStringParseF64(char *pSrc, double * pDst, int32_t * pSign, const char *
  * @param[out]	x64Ptr - pointer to the location where value is to be stored
  * @return		FAILPTR if no valid value or keyword found else updated pointer to next character to be parsed
  */
-char *	pcStringParseX64(char * pSrc, x64_t * px64Val, vf_e VarForm, const char * pDel) {
+char * pcStringParseX64(char * pSrc, x64_t * px64Val, vf_e VarForm, const char * pDel) {
 	char *	ptr1 ;
-	int32_t	Sign ;
-	px_t	px ;
+	int	Sign ;
+	px_t px ;
 	px.px64	= px64Val ;
-	if (VarForm == vfFXX) ptr1	= pcStringParseF64(pSrc, px.pf64, &Sign, pDel) ;
-	else ptr1	= pcStringParseU64(pSrc, px.pu64, &Sign, pDel) ;
+	if (VarForm == vfFXX) ptr1 = pcStringParseF64(pSrc, px.pf64, &Sign, pDel) ;
+	else ptr1 = pcStringParseU64(pSrc, px.pu64, &Sign, pDel) ;
 	EQ_RETURN(ptr1, pcFAILURE)
 
 	// ensure NO SIGN is specified if unsigned is requested, and no error returned
 	if (Sign && (VarForm == vfUXX)) {
 		*px.pu64	= 0ULL ;
-		SL_ERR("Uxx cannot have +/- sign") ;
+		PRINT("Uxx cannot have +/- sign") ;
 		return pcFAILURE ;
 	}
 	if ((VarForm == vfIXX) && (Sign == -1)) *px.pi64 *= Sign ;
 	return ptr1 ;
 }
 
-char *	pcStringParseValue(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize, const char * pDel) {
+char * pcStringParseValue(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize, const char * pDel) {
 	// assume we might find a 64bit value, so plan accordingly
 	x64_t	x64Val ;
 	IF_PRINT(debugPARSE_VALUE, "'%.3s' ->", pSrc) ;
@@ -260,7 +229,7 @@ char *	pcStringParseValue(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize, cons
 	EQ_RETURN(ptr1, pcFAILURE)
 
 	// if what we were asked to scan is less than 64bit in size, scale it up/down...
-	if (VarSize < vs64B) x64Val	= xValuesScaleX64(x64Val, VarForm, VarSize) ;	// XXX not logical
+	if (VarSize < vs64B) x64Val	= xValuesScaleX64(x64Val, VarForm, VarSize);
 
 	// store at destination based on size
 	switch(VarSize) {
@@ -268,9 +237,7 @@ char *	pcStringParseValue(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize, cons
 	case vs16B:	*px.pu16= x64Val.x16[0].u16 ;	break ;
 	case vs32B:	*px.pu32= x64Val.x32[0].u32 ;	break ;
 	case vs64B:	*px.pu64= x64Val.u64 ;			break ;
-	default:	SL_ERR(debugAPPL_PLACE) ;
 	}
-	IF_EXEC_4(debugPARSE_VALUE, vValuesReportXxx, NULL, px, VarForm, VarSize) ;
 	return ptr1 ;
 }
 
@@ -285,7 +252,7 @@ char *	pcStringParseValue(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize, cons
  * @param x32Hi		upper limit valid value
  * @return			pointer to next char to process or pcFAILURE
  */
-char *	pcStringParseValueRange(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize, const char * pDel, x32_t x32Lo, x32_t x32Hi) {
+char * pcStringParseValueRange(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize, const char * pDel, x32_t x32Lo, x32_t x32Hi) {
 	x64_t	x64Val ;
 	char * pTmp	= pcStringParseX64(pSrc, &x64Val, VarForm, pDel) ;
 	EQ_RETURN(pTmp, pcFAILURE)
@@ -299,30 +266,23 @@ char *	pcStringParseValueRange(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize,
 	IF_EXEC_4(debugPARSE_VALUE, xCV_ReportValue, " Hi=", x64Hi, VarForm, VarSize) ;
 	switch(VarForm) {
 	case vfUXX:
-		if ((x64Val.u64 < x64Lo.u64) || (x64Val.u64 > x64Hi.u64)) {
-			return pcFAILURE ;
-		}
+		if ((x64Val.u64 < x64Lo.u64) || (x64Val.u64 > x64Hi.u64)) return pcFAILURE ;
 		break ;
 	case vfIXX:
-		if ((x64Val.i64 < x64Lo.i64) || (x64Val.i64 > x64Hi.i64)) {
-			return pcFAILURE ;
-		}
+		if ((x64Val.i64 < x64Lo.i64) || (x64Val.i64 > x64Hi.i64)) return pcFAILURE ;
 		break ;
 	case vfFXX:
-		if ((x64Val.f64 < x64Lo.f64) || (x64Val.f64 > x64Hi.f64)) {
-			return pcFAILURE ;
-		}
+		if ((x64Val.f64 < x64Lo.f64) || (x64Val.f64 > x64Hi.f64)) return pcFAILURE ;
 		break ;
 	case vfSXX:
-	default:
-		SL_ERR(debugAPPL_PLACE) ;
+		IF_myASSERT(debugPARAM, 0);
 		return pcFAILURE ;
 	}
-	vValuesStoreX64_Xxx(x64Val, px, VarForm, VarSize) ;		// XXX
+	vValuesStoreX64_Xxx(x64Val, px, VarForm, VarSize);
 	return pTmp ;
 }
 
-char *	pcStringParseValues(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize, const char * pDel, int32_t Count) {
+char * pcStringParseValues(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize, const char * pDel, int Count) {
 	while(Count--) {
 		char * ptr1	= pcStringParseValue(pSrc, px, VarForm, VarSize, pDel) ;
 		EQ_RETURN(ptr1, pcFAILURE)
@@ -331,24 +291,23 @@ char *	pcStringParseValues(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize, con
 		case vs16B:	++px.px16 ;			break ;
 		case vs32B:	++px.px32 ;			break ;
 		case vs64B:	++px.px64 ;			break ;
-		default:	SL_ERR(debugAPPL_PLACE) ;
 		}
 		pSrc	= ptr1 ;								// set starting pointer ready for the next
 	}
 	return pSrc ;
 }
 
-char *	pcStringParseNumber(char * pSrc, px_t px) {
+char * pcStringParseNumber(char * pSrc, px_t px) {
 	char * pTmp = pSrc ;
 	*px.pi32 = 0 ;
-	while (*pSrc && INRANGE(CHR_0, *pSrc, CHR_9, int32_t)) {
+	while (*pSrc && INRANGE('0', *pSrc, '9', int)) {
 		*px.pi32	*= 10 ;
-		*px.pi32	+= *pSrc++ - CHR_0 ;
+		*px.pi32	+= *pSrc++ - '0' ;
 	}
 	return (pTmp == pSrc) ? pcFAILURE : pSrc ;
 }
 
-char *	pcStringParseNumberRange(char * pSrc, px_t px, int32_t Min, int32_t Max) {
+char * pcStringParseNumberRange(char * pSrc, px_t px, int Min, int Max) {
 	pSrc = pcStringParseNumber(pSrc, px) ;
 	return (INRANGE(Min, *px.pi32, Max, int32_t) == 1) ? pSrc : pcFAILURE ;
 }
@@ -359,56 +318,52 @@ char *	pcStringParseNumberRange(char * pSrc, px_t px, int32_t Min, int32_t Max) 
  * @param	pVal
  * @return	pcFAILURE or pointer to 1st char after the IP address
  */
-char *	pcStringParseIpAddr(char * pSrc, px_t px) {
+char * pcStringParseIpAddr(char * pSrc, px_t px) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inSRAM(px.pu32)) ;
 	char * pcRV = pSrc ;
 	*px.pu32 = 0 ;
-	for(int32_t i = 0; i < 4; ++i) {
+	for(int i = 0; i < 4; ++i) {
 		uint32_t u32Val = 0 ;
 		const char * pccTmp = (i == 0) ? " " : "." ;
-		pcRV = pcStringParseValueRange(pSrc = pcRV, (px_t) &u32Val, vfUXX, vs32B, pccTmp, (x32_t) UINT8_MIN, (x32_t) UINT8_MAX) ;
-		EQ_GOTO(pcRV, pcFAILURE, exit) ;
-//		PRINT("i=%d  '%s' -> '%s'  0x%08x  %-I  ", i, pSrc, pcRV, u32Val, u32Val) ;
+		pcRV = pcStringParseValueRange(pSrc = pcRV, (px_t) &u32Val, vfUXX, vs32B, pccTmp, (x32_t) 0, (x32_t) 255) ;
+		if (pcRV == pcFAILURE) return pcFAILURE ;
 		*px.pu32	<<= 8 ;
 		*px.pu32	+= u32Val ;
-		if (*pcRV == CHR_FULLSTOP) {
-			++pcRV ;
-		}
+		if (*pcRV == '.') ++pcRV ;
 	}
-	*px.pu32	= htonl(*px.pu32) ;
+	*px.pu32 = htonl(*px.pu32) ;
 	IF_PRINT(debugRESULT, "IP : %#-I\n", *px.pu32) ;
-exit:
 	return pcRV ;
 }
 
-void	x_string_values_test(void) {
-	x64_t	x64Val ;
+void x_string_values_test(void) {
+	x64_t x64Val ;
 	// Test error if sign present for vfUXX
-	SL_INFO("Sign test") ;
+	PRINT("Sign test\n") ;
 	pcStringParseValue((char *) "123456", (px_t) &x64Val, vfUXX, vs08B, " ") ;
 	pcStringParseValue((char *) "+123456", (px_t) &x64Val, vfUXX, vs16B, " ") ;
 	pcStringParseValue((char *) "-123456", (px_t) &x64Val, vfUXX, vs32B, " ") ;
 	pcStringParseValue((char *) "123456", (px_t) &x64Val, vfUXX, vs64B, " ") ;
 	// Unsigned round down
-	SL_INFO("U-8/16/32 test") ;
+	PRINT("U-8/16/32 test\n") ;
 	pcStringParseValue((char *) "257", (px_t) &x64Val, vfUXX, vs08B, " ") ;
 	pcStringParseValue((char *) "65537", (px_t) &x64Val, vfUXX, vs16B, " ") ;
 	pcStringParseValue((char *) "4294967297", (px_t) &x64Val, vfUXX, vs32B, " ") ;
 	// Signed round down
-	SL_INFO("I8 signed test") ;
+	PRINT("I8 signed test\n") ;
 	pcStringParseValue((char *) "130", (px_t) &x64Val, vfIXX, vs08B, " ") ;
 	pcStringParseValue((char *) "-130", (px_t) &x64Val, vfIXX, vs08B, " ") ;
 	pcStringParseValue((char *) "+130", (px_t) &x64Val, vfIXX, vs08B, " ") ;
-	SL_INFO("I16 signed test") ;
+	PRINT("I16 signed test\n") ;
 	pcStringParseValue((char *) "32770", (px_t) &x64Val, vfIXX, vs16B, " ") ;
 	pcStringParseValue((char *) "+32770", (px_t) &x64Val, vfIXX, vs16B, " ") ;
 	pcStringParseValue((char *) "-32770", (px_t) &x64Val, vfIXX, vs16B, " ") ;
-	SL_INFO("I32 signed test") ;
+	PRINT("I32 signed test\n") ;
 	pcStringParseValue((char *) "2147483660", (px_t) &x64Val, vfIXX, vs32B, " ") ;
 	pcStringParseValue((char *) "+2147483660", (px_t) &x64Val, vfIXX, vs32B, " ") ;
 	pcStringParseValue((char *) "-2147483660", (px_t) &x64Val, vfIXX, vs32B, " ") ;
 	// Float round down
-	SL_INFO("F32 test") ;
+	PRINT("F32 test\n") ;
 	pcStringParseValue((char *) "1.1", (px_t) &x64Val, vfFXX, vs32B, " ") ;
 	pcStringParseValue((char *) "123.123", (px_t) &x64Val, vfFXX, vs32B, " ") ;
 	pcStringParseValue((char *) "123456.123456", (px_t) &x64Val, vfFXX, vs32B, " ") ;
@@ -417,9 +372,9 @@ void	x_string_values_test(void) {
 	pcStringParseValue((char *) "+1234567890.1234567", (px_t) &x64Val, vfFXX, vs32B, " ") ;
 	pcStringParseValue((char *) "-1234567890.1234567", (px_t) &x64Val, vfFXX, vs32B, " ") ;
 	// Double no round
-	SL_INFO("F64 test") ;
+	PRINT("F64 test\n") ;
 	pcStringParseValue((char *) "12345678901234567.123456789", (px_t) &x64Val, vfFXX, vs64B, " ") ;
 	// Version format
-	SL_INFO("4x U8 test") ;
+	PRINT("4x U8 test\n") ;
 	pcStringParseValues((char *) "11.22.33.44", (px_t) &x64Val, vfUXX, vs08B, " .", 4) ;
 }
