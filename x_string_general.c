@@ -559,7 +559,7 @@ int	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char
 }
 
 char * pcBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[]) {
-	char * pcBuf = malloc(controlSIZE_FLAGS_BUF) ;
+	char * pcBuf = pvRtosMalloc(controlSIZE_FLAGS_BUF) ;
 	xBitMapDecodeChanges(Val1, Val2, Mask, pMesArray, pcBuf, controlSIZE_FLAGS_BUF) ;
 	return pcBuf ;
 }
@@ -577,7 +577,7 @@ int	xBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[],
 }
 
 char * pcBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[]) {
-	char * pcBuf = malloc(controlSIZE_FLAGS_BUF) ;
+	char * pcBuf = pvRtosMalloc(controlSIZE_FLAGS_BUF) ;
 	xBitMapDecode(Value, Mask, pMesArray, pcBuf, controlSIZE_FLAGS_BUF) ;
 	return pcBuf ;
 }
