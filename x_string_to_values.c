@@ -244,31 +244,32 @@ char * pcStringParseParam(char * pSrc, px_t pX, cvi_e cvI) {
  * @param x32Hi		upper limit valid value
  * @return			pointer to next char to process or pcFAILURE
  */
-char * pcStringParseValueRange(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize, const char * pDel, x32_t x32Lo, x32_t x32Hi) {
-	x64_t	x64Val ;
-	char * pTmp	= pcStringParseX64(pSrc, &x64Val, VarForm, pDel) ;
-	EQ_RETURN(pTmp, pcFAILURE)
-
-	// Lo & Hi values MUST be full 32bit width..
-	x64_t x64Lo = xValuesUpscaleX32_X64(x32Lo, VarForm) ;
-	x64_t x64Hi = xValuesUpscaleX32_X64(x32Hi, VarForm) ;
-	IF_PRINT(debugPARSE_VALUE, " '%.*s'", pTmp - pSrc, pSrc) ;
-	IF_EXEC_4(debugPARSE_VALUE, xCV_ReportValue, " Val=", x64Val, VarForm, VarSize) ;
-	IF_EXEC_4(debugPARSE_VALUE, xCV_ReportValue, " Lo=", x64Lo, VarForm, VarSize) ;
-	IF_EXEC_4(debugPARSE_VALUE, xCV_ReportValue, " Hi=", x64Hi, VarForm, VarSize) ;
-	switch(VarForm) {
-	case vfUXX:
-		if ((x64Val.u64 < x64Lo.u64) || (x64Val.u64 > x64Hi.u64)) return pcFAILURE ;
-		break ;
-	case vfIXX:
-		if ((x64Val.i64 < x64Lo.i64) || (x64Val.i64 > x64Hi.i64)) return pcFAILURE ;
-		break ;
-	case vfFXX:
-		if ((x64Val.f64 < x64Lo.f64) || (x64Val.f64 > x64Hi.f64)) return pcFAILURE ;
-		break ;
-	case vfSXX:
-		IF_myASSERT(debugPARAM, 0);
-		return pcFAILURE ;
+char * pcStringParseValueRange(char * pSrc, px_t pX, vf_e cvF, vs_e cvS, const char * pDel, x32_t x32Lo, x32_t x32Hi) {
+	char * pTmp = pcStringParseValue(pSrc, pX, cvF, cvS, pDel) ;
+	if (pTmp != pcFAILURE) {
+		x64_t x64Val= xValuesUpscaleXxx_X64(pX, cvF, cvS) ;
+		x64_t x64Lo = xValuesUpscaleXxx_X64((px_t) &x32Lo, cvF, vs32B) ;
+		x64_t x64Hi = xValuesUpscaleXxx_X64((px_t) &x32Hi, cvF, vs32B) ;
+		IF_PRINT(debugPARSE_VALUE, "  '%.*s'", pTmp - pSrc, pSrc) ;
+		IF_EXEC_4(debugPARSE_VALUE, xCV_ReportValue, "  Val=", x64Val, cvF, cvS) ;
+		IF_EXEC_4(debugPARSE_VALUE, xCV_ReportValue, "  Lo=", x64Lo, cvF, cvS) ;
+		IF_EXEC_4(debugPARSE_VALUE, xCV_ReportValue, "  Hi=", x64Hi, cvF, cvS) ;
+		switch(cvF) {
+		case vfUXX:
+			if ((x64Val.u64 < x64Lo.u64) || (x64Val.u64 > x64Hi.u64)) return pcFAILURE ;
+			break ;
+		case vfIXX:
+			if ((x64Val.i64 < x64Lo.i64) || (x64Val.i64 > x64Hi.i64)) return pcFAILURE ;
+			break ;
+		case vfFXX:
+			if ((x64Val.f64 < x64Lo.f64) || (x64Val.f64 > x64Hi.f64)) return pcFAILURE ;
+			break ;
+		case vfSXX:
+			IF_myASSERT(debugPARAM, 0);
+			return pcFAILURE ;
+		}
+		IF_PRINT(debugPARSE_VALUE, "\n");
+		vValuesStoreX64_Xxx(x64Val, pX, cvF, cvS);
 	}
 	vValuesStoreX64_Xxx(x64Val, px, VarForm, VarSize);
 	return pTmp ;
