@@ -229,14 +229,6 @@ char * pcStringParseValue(char * pSrc, px_t pX, vf_e cvF, vs_e cvS, const char *
 	return pTmp ;
 }
 
-	// store at destination based on size
-	switch(VarSize) {
-	case vs08B:	*px.pu8	= x64Val.x8[0].u8 ;		break ;
-	case vs16B:	*px.pu16= x64Val.x16[0].u16 ;	break ;
-	case vs32B:	*px.pu32= x64Val.x32[0].u32 ;	break ;
-	case vs64B:	*px.pu64= x64Val.u64 ;			break ;
-	}
-	return ptr1 ;
 }
 
 /**
