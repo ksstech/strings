@@ -136,6 +136,7 @@ char * pcStringParseU64(char * pSrc, uint64_t * pDst, int * pSign, const char * 
 		*pDst += Value ;
 		++pSrc ;
 	}
+	IF_PRINT(debugPARSE_VALUE, " %llu / %lld / 0x%llx", *pDst, *pDst * *pSign, *pDst, *pDst) ;
 	return pSrc ;
 }
 
