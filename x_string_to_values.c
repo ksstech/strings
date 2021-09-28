@@ -102,7 +102,7 @@ uint64_t xStringParseX64(char *pSrc, uint8_t * pDst, int xLen) {
  * \return		updated pointer in source buffer to 1st non '0' -> '9' character
  * 				pcFAILURE is no valid value found to parse
  */
-char * pcStringParseU64(char * pSrc, uint64_t * pDst, int32_t * pSign, const char * pDel) {
+char * pcStringParseU64(char * pSrc, uint64_t * pDst, int * pSign, const char * pDel) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inSRAM(pDst) && halCONFIG_inSRAM(pSign)) ;
 	uint64_t Base = 10 ;								// default to decimal
 	*pSign 	= 0 ;										// set sign as not provided
@@ -202,34 +202,32 @@ char * pcStringParseF64(char *pSrc, double * pDst, int * pSign, const char * pDe
  * @param[out]	x64Ptr - pointer to the location where value is to be stored
  * @return		FAILPTR if no valid value or keyword found else updated pointer to next character to be parsed
  */
-char * pcStringParseX64(char * pSrc, x64_t * px64Val, vf_e VarForm, const char * pDel) {
-	char *	ptr1 ;
+char * pcStringParseX64(char * pSrc, x64_t * px64Val, vf_e cvF, const char * pDel) {
+	char *	pTmp ;
 	int	Sign ;
-	px_t px ;
-	px.px64	= px64Val ;
-	if (VarForm == vfFXX) ptr1 = pcStringParseF64(pSrc, px.pf64, &Sign, pDel) ;
-	else ptr1 = pcStringParseU64(pSrc, px.pu64, &Sign, pDel) ;
-	EQ_RETURN(ptr1, pcFAILURE)
+	px_t pX ;
+	pX.px64	= px64Val ;
+	if (cvF == vfFXX) pTmp = pcStringParseF64(pSrc, pX.pf64, &Sign, pDel) ;
+	else pTmp = pcStringParseU64(pSrc, pX.pu64, &Sign, pDel) ;
+	EQ_RETURN(pTmp, pcFAILURE)
 
 	// ensure NO SIGN is specified if unsigned is requested, and no error returned
-	if (Sign && (VarForm == vfUXX)) {
-		*px.pu64	= 0ULL ;
-		PRINT("Uxx cannot have +/- sign") ;
+	if (Sign && (cvF == vfUXX)) {
+		*pX.pu64	= 0ULL ;
+		PRINT("  Uxx cannot have +/- sign") ;
 		return pcFAILURE ;
 	}
-	if ((VarForm == vfIXX) && (Sign == -1)) *px.pi64 *= Sign ;
-	return ptr1 ;
+	if ((cvF == vfIXX) && (Sign == -1)) *pX.pi64 *= Sign ;
+	return pTmp ;
 }
 
-char * pcStringParseValue(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize, const char * pDel) {
-	// assume we might find a 64bit value, so plan accordingly
+char * pcStringParseValue(char * pSrc, px_t pX, vf_e cvF, vs_e cvS, const char * pDel) {
 	x64_t	x64Val ;
 	IF_PRINT(debugPARSE_VALUE, "'%.3s' ->", pSrc) ;
-	char * ptr1	= pcStringParseX64(pSrc, &x64Val, VarForm, pDel) ;
-	EQ_RETURN(ptr1, pcFAILURE)
-
-	// if what we were asked to scan is less than 64bit in size, scale it up/down...
-	if (VarSize < vs64B) x64Val	= xValuesScaleX64(x64Val, VarForm, VarSize);
+	char * pTmp	= pcStringParseX64(pSrc, &x64Val, cvF, pDel) ;
+	if (pTmp != pcFAILURE) vValuesStoreX64_Xxx(x64Val, pX, cvF, cvS) ;
+	return pTmp ;
+}
 
 	// store at destination based on size
 	switch(VarSize) {
@@ -244,9 +242,9 @@ char * pcStringParseValue(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize, cons
 /**
  * pcStringParseValueRange
  * @param pSrc		string buffer to parse from
- * @param px		pointer to oocation where value to be stored
- * @param VarForm	vfUXX / vfIXX / vfFXX / vfSXX
- * @param VarSize	vs08B / vs16B / vs32B / vs64B
+ * @param pX		pointer to location where value to be stored
+ * @param cvF	vfUXX / vfIXX / vfFXX / vfSXX
+ * @param cvS	vs08B / vs16B / vs32B / vs64B
  * @param pDel		valid delimiters to skip over /verify against
  * @param x32Lo		lower limit valid value
  * @param x32Hi		upper limit valid value
@@ -282,34 +280,34 @@ char * pcStringParseValueRange(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize,
 	return pTmp ;
 }
 
-char * pcStringParseValues(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize, const char * pDel, int Count) {
+char * pcStringParseValues(char * pSrc, px_t pX, vf_e cvF, vs_e cvS, const char * pDel, int Count) {
 	while(Count--) {
-		char * ptr1	= pcStringParseValue(pSrc, px, VarForm, VarSize, pDel) ;
-		EQ_RETURN(ptr1, pcFAILURE)
 		switch(VarSize) {								// adjust the pointer based on the size of the destination storage
 		case vs08B:	++px.px8 ;			break ;
 		case vs16B:	++px.px16 ;			break ;
 		case vs32B:	++px.px32 ;			break ;
 		case vs64B:	++px.px64 ;			break ;
 		}
-		pSrc	= ptr1 ;								// set starting pointer ready for the next
+		char * pTmp	= pcStringParseValue(pSrc, pX, cvF, cvS, pDel) ;
+		EQ_RETURN(pTmp, pcFAILURE);
+		pSrc	= pTmp ;								// set starting pointer ready for the next
 	}
 	return pSrc ;
 }
 
-char * pcStringParseNumber(char * pSrc, px_t px) {
+char * pcStringParseNumber(char * pSrc, px_t pX) {
 	char * pTmp = pSrc ;
-	*px.pi32 = 0 ;
+	*pX.pi32 = 0 ;
 	while (*pSrc && INRANGE('0', *pSrc, '9', int)) {
-		*px.pi32	*= 10 ;
-		*px.pi32	+= *pSrc++ - '0' ;
+		*pX.pi32	*= 10 ;
+		*pX.pi32	+= *pSrc++ - '0' ;
 	}
 	return (pTmp == pSrc) ? pcFAILURE : pSrc ;
 }
 
-char * pcStringParseNumberRange(char * pSrc, px_t px, int Min, int Max) {
-	pSrc = pcStringParseNumber(pSrc, px) ;
-	return (INRANGE(Min, *px.pi32, Max, int32_t) == 1) ? pSrc : pcFAILURE ;
+char * pcStringParseNumberRange(char * pSrc, px_t pX, int Min, int Max) {
+	pSrc = pcStringParseNumber(pSrc, pX) ;
+	return (INRANGE(Min, *pX.pi32, Max, int32_t) == 1) ? pSrc : pcFAILURE ;
 }
 
 /**
@@ -318,21 +316,21 @@ char * pcStringParseNumberRange(char * pSrc, px_t px, int Min, int Max) {
  * @param	pVal
  * @return	pcFAILURE or pointer to 1st char after the IP address
  */
-char * pcStringParseIpAddr(char * pSrc, px_t px) {
-	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inSRAM(px.pu32)) ;
+char * pcStringParseIpAddr(char * pSrc, px_t pX) {
+	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inSRAM(pX.pu32)) ;
 	char * pcRV = pSrc ;
-	*px.pu32 = 0 ;
+	*pX.pu32 = 0 ;
 	for(int i = 0; i < 4; ++i) {
 		uint32_t u32Val = 0 ;
 		const char * pccTmp = (i == 0) ? " " : "." ;
 		pcRV = pcStringParseValueRange(pSrc = pcRV, (px_t) &u32Val, vfUXX, vs32B, pccTmp, (x32_t) 0, (x32_t) 255) ;
 		if (pcRV == pcFAILURE) return pcFAILURE ;
-		*px.pu32	<<= 8 ;
-		*px.pu32	+= u32Val ;
+		*pX.pu32	<<= 8 ;
+		*pX.pu32	+= u32Val ;
 		if (*pcRV == '.') ++pcRV ;
 	}
-	*px.pu32 = htonl(*px.pu32) ;
-	IF_PRINT(debugRESULT, "IP : %#-I\n", *px.pu32) ;
+	*pX.pu32 = htonl(*pX.pu32) ;
+	IF_PRINT(debugRESULT, "IP : %#-I\n", *pX.pu32) ;
 	return pcRV ;
 }
 
