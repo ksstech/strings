@@ -7,7 +7,7 @@
 
 #include	"x_string_general.h"
 #include	"x_string_to_values.h"
-
+#include	"FreeRTOS_Support.h"
 #include	"printfx.h"									// +x_definitions +stdarg +stdint +stdio
 #include	"syslog.h"
 
@@ -62,10 +62,9 @@ int	xstrnlen(const char * s, int len) {
 }
 
 /**
- * xstrlen
- * @brief	calculate the length of the string
- * @param	char *s		pointer to the string
- * @return	int32_t		length of the string up to but excl the terminating '\0'
+ * calculate the length of the string
+ * @param	char *s	- pointer to the string
+ * @return	length of the string up to but excl the terminating '\0'
  */
 int	xstrlen(const char * s) {
 	int l ;
@@ -290,7 +289,7 @@ int	xStringFindDelim(char * pSrc, const char * pDlm, int xMax) {
 }
 
 /**
- * pcStringParseToken() - copies next single token from source buffer to destination buffer
+ * Copies next single token from source buffer to destination buffer
  * @brief		does NOT automatically work on assuption that string is NULL terminated, hence requires MaxLen
  * @brief		if MaxLen specified as NULL, assume string is terminated and calculate length.
  * @brief		skips specified delimiters (if any)
@@ -302,15 +301,12 @@ int	xStringFindDelim(char * pSrc, const char * pDlm, int xMax) {
  * @return		pointer to next character to be processed...
  */
 char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag, int MaxLen) {
-	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pDst)) ;
-	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc)) ;
-	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pDel)) ;
-	IF_myASSERT(debugPARAM, *pDel != 0);
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pDst) && halCONFIG_inMEM(pSrc) && halCONFIG_inMEM(pDel) && *pDel != 0);
 	// If no length supplied
 	if (MaxLen == 0) MaxLen = xstrlen((const char *) pSrc) ;			// assume NULL terminated and calculate length
 	if (MaxLen == 0) return pcFAILURE ;
 
-	int32_t CurLen = xStringSkipDelim(pSrc, pDel, MaxLen) ;
+	int CurLen = xStringSkipDelim(pSrc, pDel, MaxLen) ;
 	IF_TRACK(debugPARSE_TOKEN, "pS='%s'  Lmax=%d  Lcur=%d\n", pSrc, MaxLen, CurLen) ;
 	MaxLen	-= CurLen ;
 	pSrc	+= CurLen ;
@@ -552,7 +548,7 @@ int	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char
 			else if (Val1 & CurMask) ColCode = xpfSGR(colourFG_RED, 0, 0, 0) ;
 			else if (Val2 & CurMask) ColCode = xpfSGR(colourFG_GREEN, 0, 0, 0) ;
 			else ColCode = 0 ;
-			if (ColCode) BufLen += snprintfx(pcBuf+BufLen, BufSize-BufLen, " %C%s%C", ColCode, pMesArray[idx], attrRESET) ;
+			if (ColCode) BufLen += snprintfx(pcBuf+BufLen, BufSize-BufLen, " %C%s%C", ColCode, pMesArray[idx], 0) ;
 		}
 	}
 	return BufLen ;
@@ -568,10 +564,8 @@ int	xBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[],
 	int	pos, idx, BufLen = 0 ;
 	uint32_t	CurMask ;
 	for (pos = 31, idx = 31, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos, --idx) {
-		if (Mask & CurMask) {
-			if (Value & CurMask)
-				BufLen += snprintfx(pBuf + BufLen, BufSize - BufLen, "  %s", pMesArray[idx]) ;
-		}
+		if ((Mask & CurMask) && (Value & CurMask))
+			BufLen += snprintfx(pBuf + BufLen, BufSize - BufLen, "  %s", pMesArray[idx]) ;
 	}
 	return BufLen ;
 }
