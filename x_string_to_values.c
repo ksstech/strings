@@ -282,14 +282,9 @@ char * pcStringParseValueRange(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize,
 
 char * pcStringParseValues(char * pSrc, px_t pX, vf_e cvF, vs_e cvS, const char * pDel, int Count) {
 	while(Count--) {
-		switch(VarSize) {								// adjust the pointer based on the size of the destination storage
-		case vs08B:	++px.px8 ;			break ;
-		case vs16B:	++px.px16 ;			break ;
-		case vs32B:	++px.px32 ;			break ;
-		case vs64B:	++px.px64 ;			break ;
-		}
 		char * pTmp	= pcStringParseValue(pSrc, pX, cvF, cvS, pDel) ;
 		EQ_RETURN(pTmp, pcFAILURE);
+		pX = pxCV_AddressNext(pX, cvS);
 		pSrc	= pTmp ;								// set starting pointer ready for the next
 	}
 	return pSrc ;
