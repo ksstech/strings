@@ -271,7 +271,6 @@ char * pcStringParseValueRange(char * pSrc, px_t pX, vf_e cvF, vs_e cvS, const c
 		IF_PRINT(debugPARSE_VALUE, "\n");
 		vValuesStoreX64_Xxx(x64Val, pX, cvF, cvS);
 	}
-	vValuesStoreX64_Xxx(x64Val, px, VarForm, VarSize);
 	return pTmp ;
 }
 
