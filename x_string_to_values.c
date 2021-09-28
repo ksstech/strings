@@ -229,6 +229,8 @@ char * pcStringParseValue(char * pSrc, px_t pX, vf_e cvF, vs_e cvS, const char *
 	return pTmp ;
 }
 
+char * pcStringParseParam(char * pSrc, px_t pX, cvi_e cvI) {
+	return pcStringParseValue(pSrc, pX, xCV_Index2Form(cvI), xCV_Index2Size(cvI), sepSPACE_COMMA) ;
 }
 
 /**
