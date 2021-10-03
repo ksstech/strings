@@ -279,7 +279,7 @@ char * pcStringParseValues(char * pSrc, px_t pX, vf_e cvF, vs_e cvS, const char 
 	while(Count--) {
 		char * pTmp	= pcStringParseValue(pSrc, pX, cvF, cvS, pDel) ;
 		EQ_RETURN(pTmp, pcFAILURE);
-		pX = pxCV_AddressNext(pX, cvS);
+		pX = pxCV_AddressNextWithSize(pX, cvS);
 		pSrc	= pTmp ;								// set starting pointer ready for the next
 	}
 	return pSrc ;
