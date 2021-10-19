@@ -544,10 +544,14 @@ int	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char
 	uint32_t	CurMask, ColCode ;
 	for (pos = 31, idx = 31, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos, --idx) {
 		if (Mask & CurMask) {
-			if ((Val1 & CurMask) && (Val2 & CurMask)) ColCode = xpfSGR(colourFG_WHITE, 0, 0, 0) ;
-			else if (Val1 & CurMask) ColCode = xpfSGR(colourFG_RED, 0, 0, 0) ;
-			else if (Val2 & CurMask) ColCode = xpfSGR(colourFG_GREEN, 0, 0, 0) ;
-			else ColCode = 0 ;
+			if ((Val1 & CurMask) && (Val2 & CurMask))
+				ColCode = xpfSGR(colourFG_WHITE, 0, 0, 0) ;
+			else if (Val1 & CurMask)
+				ColCode = xpfSGR(colourFG_RED, 0, 0, 0) ;
+			else if (Val2 & CurMask)
+				ColCode = xpfSGR(colourFG_GREEN, 0, 0, 0) ;
+			else
+				ColCode = 0 ;
 			if (ColCode) BufLen += snprintfx(pcBuf+BufLen, BufSize-BufLen, " %C%s%C", ColCode, pMesArray[idx], 0) ;
 		}
 	}
