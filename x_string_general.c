@@ -307,11 +307,11 @@ char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag,
 	if (MaxLen == 0) return pcFAILURE ;
 
 	int CurLen = xStringSkipDelim(pSrc, pDel, MaxLen) ;
-	IF_TRACK(debugPARSE_TOKEN, "pS='%s'  Lmax=%d  Lcur=%d\n", pSrc, MaxLen, CurLen) ;
+	IF_TL(debugPARSE_TOKEN, "pS='%s'  Lmax=%d  Lcur=%d\n", pSrc, MaxLen, CurLen) ;
 	MaxLen	-= CurLen ;
 	pSrc	+= CurLen ;
 
-	IF_TRACK(debugPARSE_TOKEN, "pS='%s'  Lmax=%d  Lcur=%d\n", pSrc, MaxLen, CurLen) ;
+	IF_TL(debugPARSE_TOKEN, "pS='%s'  Lmax=%d  Lcur=%d\n", pSrc, MaxLen, CurLen) ;
 	while (*pSrc && MaxLen--) {							// while not separator/terminator char or end of string
 		if (xinstring(pDel, *pSrc) != erFAILURE) break;	// check if current char a delim
 		*pDst = (flag < 0) ? tolower((int)*pSrc) : (flag > 0) ? toupper((int)*pSrc) : *pSrc ;
@@ -319,7 +319,7 @@ char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag,
 		++pSrc ;
 	}
 	*pDst = 0;
-	IF_TRACK(debugPARSE_TOKEN, "pS='%s'  Lmax=%d  Lcur=%d  pD='%s'\n", pSrc, MaxLen, CurLen, pDst) ;
+	IF_TL(debugPARSE_TOKEN, "pS='%s'  Lmax=%d  Lcur=%d  pD='%s'\n", pSrc, MaxLen, CurLen, pDst) ;
 	return pSrc ;										// pointer to NULL or next char to be processed..
 }
 
