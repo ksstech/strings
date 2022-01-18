@@ -540,8 +540,8 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 #define	controlSIZE_FLAGS_BUF		(24 * 60)
 
 int	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[], char * pcBuf, size_t BufSize) {
-	int	pos, idx, BufLen = 0 ;
-	uint32_t	CurMask, ColCode ;
+	int	pos, idx, BufLen = 0;
+	uint32_t CurMask, ColCode;
 	for (pos = 31, idx = 31, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos, --idx) {
 		if (Mask & CurMask) {
 			if ((Val1 & CurMask) && (Val2 & CurMask))
@@ -552,7 +552,8 @@ int	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char
 				ColCode = colourFG_GREEN;
 			else
 				ColCode = 0 ;
-			if (ColCode) BufLen += snprintfx(pcBuf+BufLen, BufSize-BufLen, " %C%s%C", ColCode, pMesArray[idx], 0) ;
+			if (ColCode)
+				BufLen += snprintfx(pcBuf+BufLen, BufSize-BufLen, " %C%s%C", ColCode, pMesArray[idx], 0) ;
 		}
 	}
 	return BufLen ;
@@ -593,8 +594,10 @@ void vBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[]
 	uint32_t	CurMask ;
 	if (Mask) {
 		for (pos = 31, idx = 0, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos) {
-			if (CurMask & Mask & Value) printfx(" |%02d|%s|", pos, pMesArray[idx]) ;
-			if (CurMask & Mask) idx++ ;
+			if (CurMask & Mask & Value)
+				printf(" |%02d|%s|", pos, pMesArray[idx]) ;
+			if (CurMask & Mask)
+				idx++ ;
 		}
 	}
 }
@@ -610,9 +613,11 @@ void vBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[]
  */
 void vBitMapReport(char * pName, uint32_t Value, uint32_t Mask, const char * pMesArray[]) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pMesArray)) ;
-	if (pName != NULL) printfx(" %s 0x%02x:", pName, Value) ;
+	if (pName != NULL)
+		printf(" %s 0x%02x:", pName, Value) ;
 	vBitMapDecode(Value, Mask, pMesArray) ;
-	if (pName != NULL) printfx("\n") ;
+	if (pName != NULL)
+		printf("\n") ;
 }
 
 /**
