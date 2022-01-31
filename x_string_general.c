@@ -3,13 +3,14 @@
  * x_string_general.c
  */
 
-#include	"hal_config.h"
+#include	"hal_variables.h"
 
 #include	"x_string_general.h"
 #include	"x_string_to_values.h"
 #include	"FreeRTOS_Support.h"
 #include	"printfx.h"									// +x_definitions +stdarg +stdint +stdio
 #include	"syslog.h"
+#include	"options.h"
 
 #include	"x_errors_events.h"
 #include	"x_time.h"
@@ -309,19 +310,19 @@ char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag,
 		return pcFAILURE ;
 
 	int CurLen = xStringSkipDelim(pSrc, pDel, MaxLen) ;
-	IF_TL(debugPARSE_TOKEN, "pS='%s'  Lmax=%d  Lcur=%d\n", pSrc, MaxLen, CurLen) ;
+	IF_TL(debugTRACK && ioB1GET(ioToken), "pS='%s'  Lmax=%d  Lcur=%d\n", pSrc, MaxLen, CurLen) ;
 	MaxLen	-= CurLen ;
 	pSrc	+= CurLen ;
 
-	IF_TL(debugPARSE_TOKEN, "pS='%s'  Lmax=%d  Lcur=%d\n", pSrc, MaxLen, CurLen) ;
 	while (*pSrc && MaxLen--) {							// while not separator/terminator char or end of string
 		if (xinstring(pDel, *pSrc) != erFAILURE) break;	// check if current char a delim
+	IF_TL(debugTRACK && ioB1GET(ioToken), "pS='%s'  Lmax=%d  Lcur=%d\n", pSrc, MaxLen, CurLen) ;
 		*pDst = (flag < 0) ? tolower((int)*pSrc) : (flag > 0) ? toupper((int)*pSrc) : *pSrc ;
 		++pDst ;
 		++pSrc ;
 	}
 	*pDst = 0;
-	IF_TL(debugPARSE_TOKEN, "pS='%s'  Lmax=%d  Lcur=%d  pD='%s'\n", pSrc, MaxLen, CurLen, pDst) ;
+	IF_TL(debugTRACK && ioB1GET(ioToken), "pS='%s'  Lmax=%d  Lcur=%d  pD='%s'\n", pSrc, MaxLen, CurLen, pDst) ;
 	return pSrc ;										// pointer to NULL or next char to be processed..
 }
 
