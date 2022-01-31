@@ -303,8 +303,10 @@ int	xStringFindDelim(char * pSrc, const char * pDlm, int xMax) {
 char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag, int MaxLen) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pDst) && halCONFIG_inMEM(pSrc) && halCONFIG_inMEM(pDel) && *pDel != 0);
 	// If no length supplied
-	if (MaxLen == 0) MaxLen = xstrlen((const char *) pSrc) ;			// assume NULL terminated and calculate length
-	if (MaxLen == 0) return pcFAILURE ;
+	if (MaxLen == 0)
+		MaxLen = xstrlen((const char *) pSrc) ;			// assume NULL terminated and calculate length
+	if (MaxLen == 0)
+		return pcFAILURE ;
 
 	int CurLen = xStringSkipDelim(pSrc, pDel, MaxLen) ;
 	IF_TL(debugPARSE_TOKEN, "pS='%s'  Lmax=%d  Lcur=%d\n", pSrc, MaxLen, CurLen) ;
