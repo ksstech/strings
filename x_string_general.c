@@ -312,8 +312,8 @@ char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag,
 	MaxLen	-= CurLen ;
 	pSrc	+= CurLen ;
 
-	while (*pSrc && MaxLen--) {							// while not separator/terminator char or end of string
 	IF_TL(debugTRACK && ioB1GET(ioToken), "pS='%s'  Lmax=%d  Lcur=%d\n", pSrc, MaxLen, CurLen) ;
+	while (*pSrc && --MaxLen) {						// while not separator/terminator char or end of string
 		if (xinstring(pDel, *pSrc) != erFAILURE) 		// current char a delim?
 			break;
 		*pDst = (flag < 0) ? tolower((int)*pSrc) : (flag > 0) ? toupper((int)*pSrc) : *pSrc ;
