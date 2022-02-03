@@ -44,7 +44,6 @@ int	xstrverify(char * pStr, char cMin, char cMax, char cNum) {
 	}
 	return erSUCCESS ;
 }
-
 /**
  * xstrnlen() - calculate the length of the string up to max len specified
  * @param[in]	s		pointer to the string
@@ -301,6 +300,7 @@ int	xStringFindDelim(char * pSrc, const char * pDlm, int xMax) {
  */
 char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag, int MaxLen) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pDst) && halCONFIG_inMEM(pSrc) && halCONFIG_inMEM(pDel) && *pDel != 0);
+	IF_TL(debugTRACK && ioB1GET(ioToken), "pS='%s'  Lmax=%d\n", pSrc, MaxLen) ;
 	// If no length supplied
 	if (MaxLen == 0)
 		MaxLen = xstrlen((const char *) pSrc) ;			// assume NULL terminated and calculate length
@@ -308,7 +308,6 @@ char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag,
 		return pcFAILURE ;
 
 	int CurLen = xStringSkipDelim(pSrc, pDel, MaxLen) ;
-	IF_TL(debugTRACK && ioB1GET(ioToken), "pS='%s'  Lmax=%d  Lcur=%d\n", pSrc, MaxLen, CurLen) ;
 	MaxLen	-= CurLen ;
 	pSrc	+= CurLen ;
 
@@ -540,35 +539,45 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 
 #define	controlSIZE_FLAGS_BUF		(24 * 60)
 
-int	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[], char * pcBuf, size_t BufSize) {
+int	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[], int Flag, char * pcBuf, size_t BufSize) {
 	int	pos, idx, BufLen = 0;
-	uint32_t CurMask, ColCode;
+	uint32_t CurMask, C1, C2;
+	const char * pFormat = (Flag & bmdcCOLOUR) ? " %C%s%C" : " %c%s%c";
 	for (pos = 31, idx = 31, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos, --idx) {
 		if (Mask & CurMask) {
-			if ((Val1 & CurMask) && (Val2 & CurMask))
-				ColCode = colourFG_WHITE;
-			else if (Val1 & CurMask)
-				ColCode = colourFG_RED;
-			else if (Val2 & CurMask)
-				ColCode = colourFG_GREEN;
-			else
-				ColCode = 0 ;
-			if (ColCode)
-				BufLen += snprintfx(pcBuf+BufLen, BufSize-BufLen, " %C%s%C", ColCode, pMesArray[idx], 0) ;
+			if ((Val1 & CurMask) && (Val2 & CurMask)) {	// No change, was 1 still 1
+				C1 = (Flag & bmdcCOLOUR) ? colourFG_WHITE : CHR_TILDE;
+				C2 = (Flag & bmdcCOLOUR) ? attrRESET : CHR_TILDE;
+			} else if (Val1 & CurMask) {				// 1 -> 0
+				C1 = (Flag & bmdcCOLOUR) ? colourFG_RED : CHR_UNDERSCORE;
+				C2 = (Flag & bmdcCOLOUR) ? attrRESET : CHR_UNDERSCORE;
+			} else if (Val2 & CurMask) {				// 0 -> 1
+				C1 = (Flag & bmdcCOLOUR) ? colourFG_GREEN : CHR_CARET ;
+				C2 = (Flag & bmdcCOLOUR) ? attrRESET : CHR_CARET;
+			} else {									// No change, was 0 still 0
+				C1 = 0;
+			}
+			if (C1)	{							// only show if true or changed
+				BufLen += snprintfx(pcBuf+BufLen, BufSize-BufLen, pFormat,
+					C1, pMesArray[idx], C2);
+			}
 		}
 	}
+	if (Flag & bmdcNEWLINE)
+		BufLen += snprintfx(pcBuf+BufLen, BufSize-BufLen, "\n");
+
 	return BufLen ;
 }
 
-char * pcBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[]) {
+char * pcBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[], int Flag) {
 	char * pcBuf = pvRtosMalloc(controlSIZE_FLAGS_BUF) ;
-	xBitMapDecodeChanges(Val1, Val2, Mask, pMesArray, pcBuf, controlSIZE_FLAGS_BUF) ;
+	xBitMapDecodeChanges(Val1, Val2, Mask, pMesArray, Flag, pcBuf, controlSIZE_FLAGS_BUF) ;
 	return pcBuf ;
 }
 
 int	xBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[], char * pBuf, size_t BufSize) {
 	int	pos, idx, BufLen = 0 ;
-	uint32_t	CurMask ;
+	uint32_t CurMask ;
 	for (pos = 31, idx = 31, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos, --idx) {
 		if ((Mask & CurMask) && (Value & CurMask))
 			BufLen += snprintfx(pBuf + BufLen, BufSize - BufLen, "  %s", pMesArray[idx]) ;

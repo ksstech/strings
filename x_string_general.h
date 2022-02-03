@@ -14,6 +14,9 @@
 extern "C" {
 #endif
 
+// ########################################### MACROS ##############################################
+
+
 // ############################## Used for String <> DATETIME conversions ##########################
 
 #define	DATETIME_YDAY_OK			BIT29MASK
@@ -30,7 +33,12 @@ extern "C" {
 #define	DATETIME_HMS_MASK			(DATETIME_HOUR_OK | DATETIME_MIN_OK | DATETIME_SEC_OK)
 #define	DATETIME_YMDHMS_MASK		(DATETIME_YMD_MASK | DATETIME_HMS_MASK)
 
-// ########################################### MACROS ##############################################
+// ####################################### enumeration #############################################
+
+enum {
+	bmdcCOLOUR	= (1 << 0),
+	bmdcNEWLINE = (1 << 1),
+};
 
 // ##################################### string operations #########################################
 
@@ -53,8 +61,8 @@ int	xStringFindDelim(char * pSrc, const char * pDlm, int xMax) ;
 char * pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag, int MaxLen) ;
 char * pcStringParseDateTime(char * buf, uint64_t * pTStamp, struct tm * ptm) ;
 
-int	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[], char * pBuf, size_t BufSize) ;
-char * pcBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[]) ;
+int	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[], int Flag, char * pBuf, size_t BufSize) ;
+char * pcBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[], int Flag) ;
 
 int	xBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[], char * pBuf, size_t BufSize) ;
 char * pcBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[]) ;
