@@ -54,12 +54,16 @@ uint64_t char2u64(uint8_t * pSrc, uint64_t * pDst, int Len) {
  * @return			if valid value, 0x00 -> 0x09 [0x0F] else -1
  */
 int	xHexCharToValue(uint8_t cChr, int xBase) {
-	if (INRANGE('0', cChr, '9', uint8_t)) return cChr - '0' ;
+	if (INRANGE('0', cChr, '9', uint8_t))
+		return cChr - '0' ;
 	if (xBase == BASE16) {
-		if (INRANGE('A', cChr, 'F', uint8_t)) return cChr - 'A' + 10 ;
-		if (INRANGE('a', cChr, 'f', uint8_t)) return cChr - 'a' + 10 ;
+		if (INRANGE('A', cChr, 'F', uint8_t))
+			return cChr - 'A' + 10 ;
+		if (INRANGE('a', cChr, 'f', uint8_t))
+			return cChr - 'a' + 10 ;
 		// XXX TEMP fix for capture error
-		if (cChr == 'O' || cChr == 'o') { PRINT("chr= 0x%x '%c'", cChr, cChr); return 0; }
+		if (cChr == 'O' || cChr == 'o') {
+			PRINT("chr= 0x%x '%c'", cChr, cChr); return 0; }
 	}
 	return erFAILURE ;
 }
