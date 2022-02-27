@@ -55,7 +55,8 @@ int xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) ;
 int	xstrcmp(const char * s1, const char * s2, bool Exact) ;
 int	xstrindex(char *, char * *) ;
 
-int	xStringParseEncoded(char * pStr, char * pDst) ;
+int	xStringParseEncoded(char * pDst, char * pSrc);
+int	xStringParseUnicode(char * pDst, char * pSrc, size_t Len);
 int	xStringSkipDelim(char * pSrc, const char * pDel, int MaxLen) ;
 int	xStringFindDelim(char * pSrc, const char * pDlm, int xMax) ;
 char * pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag, int MaxLen) ;

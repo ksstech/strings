@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-21 Andre M. Maree / KSS Technologies (Pty) Ltd.
+ * Copyright 2014-22 Andre M. Maree / KSS Technologies (Pty) Ltd.
  * x_string_general.c
  */
 
@@ -199,40 +199,76 @@ int	xstrindex(char * key, char * array[]) {
 // ############################### string parsing routines #########################################
 
 /**
- * xStringParseEncoded()
  * @brief	parse an encoded string (optionally in-place) to a non-encoded string
  * @return	erFAILURE if illegal/unexpected characters encountered
  * 			erSUCCESS if a zero length string encountered
  * 			1 or greater = length of the parsed string
  */
-int	xStringParseEncoded(char * pStr, char * pDst) {
-	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pStr)) ;
+int	xStringParseEncoded(char * pDst, char * pSrc) {
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pSrc)) ;
 	int iRV = 0 ;
 	if (pDst == NULL) {
-		pDst = pStr ;
+		pDst = pSrc ;
 	} else {
 		IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pDst)) ;
 	}
-	IF_PRINT(debugPARSE_ENCODED, "%s  ", pStr) ;
-	while(*pStr != 0) {
-		if (*pStr == '%' ) {						// escape char?
-			int Val1 = xHexCharToValue(*++pStr, BASE16) ;	// yes, parse 1st value
+	IF_PRINT(debugPARSE_ENCODED, "%s  ", pSrc) ;
+	while(*pSrc != 0) {
+		if (*pSrc == '%' ) {						// escape char?
+			int Val1 = xHexCharToValue(*++pSrc, BASE16) ;	// yes, parse 1st value
 			if (Val1 == erFAILURE)
 				return erFAILURE;
-			int Val2 = xHexCharToValue(*++pStr, BASE16) ;	// parse 2nd value
+			int Val2 = xHexCharToValue(*++pSrc, BASE16) ;	// parse 2nd value
 			if (Val2 == erFAILURE)
 				return erFAILURE ;
 			IF_PRINT(debugPARSE_ENCODED, "[%d+%d=%d]  ", Val1, Val2, (Val1 << 4) + Val2) ;
 			*pDst++ = (Val1 << 4) + Val2 ;				// calc & store final value
-			++pStr ;									// step to next char
+			++pSrc ;									// step to next char
 		} else {
-			*pDst++ = *pStr++ ;							// copy as is to (new) position
+			*pDst++ = *pSrc++ ;							// copy as is to (new) position
 		}
 		++iRV ;											// & adjust count...
 	}
 	*pDst = 0;
-	IF_PRINT(debugPARSE_ENCODED, "%s\n", pStr-iRV) ;
+	IF_PRINT(debugPARSE_ENCODED, "%s\n", pSrc-iRV) ;
 	return iRV ;
+}
+
+int	xStringParseUnicode(char * pDst, char * pSrc, size_t Len) {
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pSrc));
+	IF_myASSERT(debugPARAM && (pDst != NULL), halCONFIG_inSRAM(pDst));
+	int iRV = 0;
+	if (pDst == NULL) {
+		pDst = pSrc;
+	}
+	IF_LLPRINT(debugPARSE_ENCODED, "%s  ", pSrc);
+	while(*pSrc != 0 && (iRV < Len)) {
+		if (*pSrc == '\\' && *(pSrc+1) == CHR_u) {		// escape chars?
+			int Val = 0;
+			for (int i = 2; i < 6; ++i) {
+				int iRV2 = xHexCharToValue(pSrc[i], BASE16);
+				IF_LLPRINT(debugPARSE_ENCODED, "%c/%d/%d  ",pSrc[i], iRV2, Val);
+				if (iRV2 == erFAILURE)
+					return iRV2;
+				Val <<= 4;
+				Val += iRV2;
+			}
+			if (Val > 255) {
+				*pDst++ = Val >> 8;
+				++iRV;
+			}
+			*pDst++ = Val & 0xFF;
+			pSrc += 6;
+			IF_LLPRINT(debugPARSE_ENCODED, "%d  ", Val);
+		} else {
+			*pDst++ = *pSrc++;							// copy as is to (new) position
+		}
+		++iRV;											// & adjust count...
+	}
+	if (iRV < Len)
+		*pDst = 0;
+	IF_LLPRINT(debugPARSE_ENCODED, "%.*s\n", iRV, pDst-iRV);
+	return iRV;
 }
 
 #define	stringGENERAL_MAX_LEN		2048
