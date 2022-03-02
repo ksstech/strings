@@ -336,7 +336,7 @@ int	xStringFindDelim(char * pSrc, const char * pDlm, int xMax) {
  */
 char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag, int MaxLen) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pDst) && halCONFIG_inMEM(pSrc) && halCONFIG_inMEM(pDel) && *pDel != 0);
-	IF_TL(debugTRACK && ioB1GET(ioToken), "pS='%s'  Lmax=%d\n", pSrc, MaxLen) ;
+	IF_PL(debugTRACK && ioB1GET(ioToken), "pS='%s'  Lmax=%d\n", pSrc, MaxLen) ;
 	// If no length supplied
 	if (MaxLen == 0)
 		MaxLen = xstrlen((const char *) pSrc) ;			// assume NULL terminated and calculate length
@@ -347,7 +347,7 @@ char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag,
 	MaxLen	-= CurLen ;
 	pSrc	+= CurLen ;
 
-	IF_TL(debugTRACK && ioB1GET(ioToken), "pS='%s'  Lmax=%d  Lcur=%d\n", pSrc, MaxLen, CurLen) ;
+	IF_PL(debugTRACK && ioB1GET(ioToken), "pS='%s'  Lmax=%d  Lcur=%d\n", pSrc, MaxLen, CurLen) ;
 	while (*pSrc && --MaxLen) {						// while not separator/terminator char or end of string
 		if (xinstring(pDel, *pSrc) != erFAILURE) 		// current char a delim?
 			break;
@@ -356,7 +356,7 @@ char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag,
 		++pSrc ;
 	}
 	*pDst = 0;
-	IF_TL(debugTRACK && ioB1GET(ioToken), "pS='%s'  Lmax=%d  Lcur=%d  pD='%s'\n", pSrc, MaxLen, CurLen, pDst) ;
+	IF_PL(debugTRACK && ioB1GET(ioToken), "pS='%s'  Lmax=%d  Lcur=%d  pD='%s'\n", pSrc, MaxLen, CurLen, pDst) ;
 	return pSrc ;										// pointer to NULL or next char to be processed..
 }
 
