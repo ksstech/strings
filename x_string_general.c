@@ -206,11 +206,10 @@ int	xstrindex(char * key, char * array[]) {
  */
 int	xStringParseEncoded(char * pDst, char * pSrc) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pSrc)) ;
+	IF_myASSERT(debugPARAM && (pDst != NULL), halCONFIG_inSRAM(pDst));
 	int iRV = 0 ;
 	if (pDst == NULL) {
 		pDst = pSrc ;
-	} else {
-		IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pDst)) ;
 	}
 	IF_PRINT(debugPARSE_ENCODED, "%s  ", pSrc) ;
 	while(*pSrc != 0) {
@@ -699,7 +698,7 @@ int	xStringValueMap(const char * pString, char * pBuf, uint32_t uValue, int32_t 
 void x_string_general_test(void) {
 #if		(stringTEST_FLAG)
 	struct	tm	sTM ;
-	TSZ_t	sTSZ ;
+	tsz_t	sTSZ ;
 #endif
 
 #if		(stringTEST_EPOCH)
