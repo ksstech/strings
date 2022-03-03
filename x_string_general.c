@@ -211,7 +211,7 @@ int	xStringParseEncoded(char * pDst, char * pSrc) {
 	if (pDst == NULL) {
 		pDst = pSrc ;
 	}
-	IF_PRINT(debugPARSE_ENCODED, "%s  ", pSrc) ;
+	IF_P(debugPARSE_ENCODED, "%s  ", pSrc) ;
 	while(*pSrc != 0) {
 		if (*pSrc == '%' ) {						// escape char?
 			int Val1 = xHexCharToValue(*++pSrc, BASE16) ;	// yes, parse 1st value
@@ -220,7 +220,7 @@ int	xStringParseEncoded(char * pDst, char * pSrc) {
 			int Val2 = xHexCharToValue(*++pSrc, BASE16) ;	// parse 2nd value
 			if (Val2 == erFAILURE)
 				return erFAILURE ;
-			IF_PRINT(debugPARSE_ENCODED, "[%d+%d=%d]  ", Val1, Val2, (Val1 << 4) + Val2) ;
+			IF_P(debugPARSE_ENCODED, "[%d+%d=%d]  ", Val1, Val2, (Val1 << 4) + Val2) ;
 			*pDst++ = (Val1 << 4) + Val2 ;				// calc & store final value
 			++pSrc ;									// step to next char
 		} else {
@@ -229,7 +229,7 @@ int	xStringParseEncoded(char * pDst, char * pSrc) {
 		++iRV ;											// & adjust count...
 	}
 	*pDst = 0;
-	IF_PRINT(debugPARSE_ENCODED, "%s\n", pSrc-iRV) ;
+	IF_P(debugPARSE_ENCODED, "%s\n", pSrc-iRV) ;
 	return iRV ;
 }
 
@@ -240,13 +240,13 @@ int	xStringParseUnicode(char * pDst, char * pSrc, size_t Len) {
 	if (pDst == NULL) {
 		pDst = pSrc;
 	}
-	IF_LLPRINT(debugPARSE_ENCODED, "%s  ", pSrc);
+	IF_RP(debugPARSE_ENCODED, "%s  ", pSrc);
 	while(*pSrc != 0 && (iRV < Len)) {
 		if (*pSrc == '\\' && *(pSrc+1) == CHR_u) {		// escape chars?
 			int Val = 0;
 			for (int i = 2; i < 6; ++i) {
 				int iRV2 = xHexCharToValue(pSrc[i], BASE16);
-				IF_LLPRINT(debugPARSE_ENCODED, "%c/%d/%d  ",pSrc[i], iRV2, Val);
+				IF_RP(debugPARSE_ENCODED, "%c/%d/%d  ",pSrc[i], iRV2, Val);
 				if (iRV2 == erFAILURE)
 					return iRV2;
 				Val <<= 4;
@@ -258,7 +258,7 @@ int	xStringParseUnicode(char * pDst, char * pSrc, size_t Len) {
 			}
 			*pDst++ = Val & 0xFF;
 			pSrc += 6;
-			IF_LLPRINT(debugPARSE_ENCODED, "%d  ", Val);
+			IF_RP(debugPARSE_ENCODED, "%d  ", Val);
 		} else {
 			*pDst++ = *pSrc++;							// copy as is to (new) position
 		}
@@ -266,7 +266,7 @@ int	xStringParseUnicode(char * pDst, char * pSrc, size_t Len) {
 	}
 	if (iRV < Len)
 		*pDst = 0;
-	IF_LLPRINT(debugPARSE_ENCODED, "%.*s\n", iRV, pDst-iRV);
+	IF_RP(debugPARSE_ENCODED, "%.*s\n", iRV, pDst-iRV);
 	return iRV;
 }
 
@@ -289,7 +289,7 @@ int	xStringSkipDelim(char * pSrc, const char * pDel, int MaxLen) {
 		IF_myASSERT(debugRESULT, MaxLen < stringGENERAL_MAX_LEN) ;		// just a check to verify not understated
 	}
 
-	IF_PRINT(debugDELIM, " '%.4s'", pSrc) ;
+	IF_P(debugDELIM, " '%.4s'", pSrc) ;
 	// continue skipping over valid terminator characters
 	int	CurLen = 0 ;
 	while ((xinstring(pDel, *pSrc) != erFAILURE) && (CurLen < MaxLen)) {
@@ -297,7 +297,7 @@ int	xStringSkipDelim(char * pSrc, const char * pDel, int MaxLen) {
 		++CurLen ;
 	}
 
-	IF_PRINT(debugDELIM, "->'%.4s'", pSrc) ;
+	IF_P(debugDELIM, "->'%.4s'", pSrc) ;
 	return CurLen ;								// number of delimiters skipped over
 }
 
@@ -400,9 +400,9 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 	// check CCYY?MM? ahead
 	TPact = xStringFindDelim(pSrc, delimDATE1, sizeof("CCYY")) ;
 	NPact = (TPact > 0) ? xStringFindDelim(pSrc+TPact+1, delimDATE1, sizeof("MM")) : 0 ;
-	IF_PRINT(debugTRACK && ioB1GET(ioToken), "C: TPact=%d  NPact=%d", TPact, NPact) ;
+	IF_P(debugTRACK && ioB1GET(ioToken), "C: TPact=%d  NPact=%d", TPact, NPact) ;
 	if (NPact >= 1) {
-		IF_PRINT(debugTRACK && ioB1GET(ioToken), "  Yr '%.*s'", TPact, pSrc) ;
+		IF_P(debugTRACK && ioB1GET(ioToken), "  Yr '%.*s'", TPact, pSrc) ;
 		pSrc = pcStringParseValueRange(pSrc, (px_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) YEAR_BASE_MAX) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
 		// Cater for CCYY vs YY form
@@ -410,22 +410,22 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 		flag |= DATETIME_YEAR_OK ;						// mark as done
 		++pSrc ;										// skip over separator
 	}
-	IF_PRINT(debugTRACK && ioB1GET(ioToken), "  Val=%d\n", psTM->tm_year) ;
+	IF_P(debugTRACK && ioB1GET(ioToken), "  Val=%d\n", psTM->tm_year) ;
 
 	// check for MM?DD? ahead
 	TPact = xStringFindDelim(pSrc, delimDATE1, sizeof("MM")) ;
 	NPact = (TPact > 0) ? xStringFindDelim(pSrc+TPact+1, delimDATE2, sizeof("DD")) : 0 ;
-	IF_PRINT(debugTRACK && ioB1GET(ioToken), "M: TPact=%d  NPact=%d", TPact, NPact) ;
+	IF_P(debugTRACK && ioB1GET(ioToken), "M: TPact=%d  NPact=%d", TPact, NPact) ;
 
 	if ((flag & DATETIME_YEAR_OK) || (NPact == 2) || (NPact == 0 && TPact > 0 && pSrc[TPact+3] == 0)) {
-		IF_PRINT(debugTRACK && ioB1GET(ioToken), "  Mon '%.*s'", TPact, pSrc) ;
+		IF_P(debugTRACK && ioB1GET(ioToken), "  Mon '%.*s'", TPact, pSrc) ;
 		pSrc = pcStringParseValueRange(pSrc, (px_t) &Value, vfIXX, vs32B, NULL, (x32_t) 1, (x32_t) MONTHS_IN_YEAR) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_mon = Value - 1 ;						// make 0 relative
 		flag |= DATETIME_MON_OK ;						// mark as done
 		++pSrc ;										// skip over separator
 	}
-	IF_PRINT(debugTRACK && ioB1GET(ioToken), "  Val=%d\n", psTM->tm_mon) ;
+	IF_P(debugTRACK && ioB1GET(ioToken), "  Val=%d\n", psTM->tm_mon) ;
 
 	if (flag & (DATETIME_YEAR_OK | DATETIME_MON_OK)) {
 		TPmax = sizeof("DD") ;
@@ -436,16 +436,16 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 	}
 	TPact = xStringFindDelim(pSrc, delimDATE2, TPmax) ;
 	NPact = (TPact < 1 && pSrc[1] == 0) ? 1 : (TPact < 1 && pSrc[2] == 0) ? 2 : 0 ;
-	IF_PRINT(debugTRACK && ioB1GET(ioToken), "D: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
+	IF_P(debugTRACK && ioB1GET(ioToken), "D: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
 
 	if ((flag & DATETIME_MON_OK) || (TPact > 0 && tolower((int) pSrc[TPact]) == 't')) {
-		IF_PRINT(debugTRACK && ioB1GET(ioToken), "  Day '%.*s'", TPact, pSrc) ;
+		IF_P(debugTRACK && ioB1GET(ioToken), "  Day '%.*s'", TPact, pSrc) ;
 		pSrc = pcStringParseValueRange(pSrc, (px_t) &Value, vfIXX, vs32B, NULL, (x32_t) 1, (x32_t) TPlim) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_mday = Value ;
 		flag |= DATETIME_MDAY_OK ;						// mark as done
 	}
-	IF_PRINT(debugTRACK && ioB1GET(ioToken), "  Val=%d\n", psTM->tm_mday) ;
+	IF_P(debugTRACK && ioB1GET(ioToken), "  Val=%d\n", psTM->tm_mday) ;
 
 	// calculate day of year ONLY if yyyy-mm-dd read in...
 	if (flag == (DATETIME_YEAR_OK | DATETIME_MON_OK | DATETIME_MDAY_OK)) {
@@ -466,17 +466,17 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 	}
 	TPact = xStringFindDelim(pSrc, delimTIME1, TPmax) ;
 	NPact = (TPact > 0) ? xStringFindDelim(pSrc+TPact+1, delimTIME2, sizeof("HH")) : 0 ;
-	IF_PRINT(debugTRACK && ioB1GET(ioToken), "H: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
+	IF_P(debugTRACK && ioB1GET(ioToken), "H: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
 
 	if (NPact > 0) {
-		IF_PRINT(debugTRACK && ioB1GET(ioToken), "  Hr '%.*s'", TPact, pSrc) ;
+		IF_P(debugTRACK && ioB1GET(ioToken), "  Hr '%.*s'", TPact, pSrc) ;
 		pSrc = pcStringParseValueRange(pSrc, (px_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) TPlim) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_hour = Value ;
 		flag	|= DATETIME_HOUR_OK ;					// mark as done
 		++pSrc ;										// skip over separator
 	}
-	IF_PRINT(debugTRACK && ioB1GET(ioToken), "  Val=%d\n", psTM->tm_hour) ;
+	IF_P(debugTRACK && ioB1GET(ioToken), "  Val=%d\n", psTM->tm_hour) ;
 
 	// check for MM?SS?
 	// [M..]M{m:}[S]S{s.Zz }
@@ -489,17 +489,17 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 	}
 	TPact = xStringFindDelim(pSrc, delimTIME2, TPmax) ;
 	NPact = (TPact > 0) ? xStringFindDelim(pSrc+TPact+1, delimTIME3, sizeof("SS")) : 0 ;
-	IF_PRINT(debugTRACK && ioB1GET(ioToken), "M: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
+	IF_P(debugTRACK && ioB1GET(ioToken), "M: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
 
 	if ((flag & DATETIME_HOUR_OK) || (NPact == 2) || (NPact == 0 && TPact > 0 && pSrc[TPact+3] == 0)) {
-		IF_PRINT(debugTRACK && ioB1GET(ioToken), "  Min '%.*s'", TPact, pSrc) ;
+		IF_P(debugTRACK && ioB1GET(ioToken), "  Min '%.*s'", TPact, pSrc) ;
 		pSrc = pcStringParseValueRange(pSrc, (px_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) TPlim) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_min = Value ;
 		flag	|= DATETIME_MIN_OK ;					// mark as done
 		++pSrc ;										// skip over separator
 	}
-	IF_PRINT(debugTRACK && ioB1GET(ioToken), "  Val=%d\n", psTM->tm_min) ;
+	IF_P(debugTRACK && ioB1GET(ioToken), "  Val=%d\n", psTM->tm_min) ;
 
 	/*
 	 * To support parsing of long (>60s) RELATIVE time period we must support values
@@ -518,16 +518,16 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 	}
 	TPact = xStringFindDelim(pSrc, delimTIME3, TPmax) ;
 	NPact = (TPact < 1) ? xstrlen(pSrc) : 0 ;
-	IF_PRINT(debugTRACK && ioB1GET(ioToken), "S: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
+	IF_P(debugTRACK && ioB1GET(ioToken), "S: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
 
 	if ((flag & DATETIME_MIN_OK) || (TPact > 0) || (INRANGE(1, NPact, --TPmax, int32_t))) {
-		IF_PRINT(debugTRACK && ioB1GET(ioToken), "  Sec '%.*s'", TPact, pSrc) ;
+		IF_P(debugTRACK && ioB1GET(ioToken), "  Sec '%.*s'", TPact, pSrc) ;
 		pSrc = pcStringParseValueRange(pSrc, (px_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) TPlim) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
 		psTM->tm_sec = Value ;
 		flag	|= DATETIME_SEC_OK ;					// mark as done
 	}
-	IF_PRINT(debugTRACK && ioB1GET(ioToken), "  Val=%d\n", psTM->tm_sec) ;
+	IF_P(debugTRACK && ioB1GET(ioToken), "  Val=%d\n", psTM->tm_sec) ;
 
 	// check for [.0{...}Z] and skip as appropriate
 	int32_t uSecs = 0 ;
@@ -543,13 +543,13 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 			if (OUTSIDE(1, NPact, --TPmax , int32_t)) return pcFAILURE;
 			TPact = NPact ;
 		}
-		IF_PRINT(debugTRACK && ioB1GET(ioToken), " uS '%.*s'", TPact, pSrc) ;
+		IF_P(debugTRACK && ioB1GET(ioToken), " uS '%.*s'", TPact, pSrc) ;
 		pSrc = pcStringParseValueRange(pSrc, (px_t) &uSecs, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) (MICROS_IN_SECOND-1)) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
 		TPact = 6 - TPact ;
 		while (TPact--) uSecs *= 10;
 		flag |= DATETIME_MSEC_OK ;						// mark as done
-		IF_PRINT(debugTRACK && ioB1GET(ioToken), "  Val=%d\n", uSecs) ;
+		IF_P(debugTRACK && ioB1GET(ioToken), "  Val=%d\n", uSecs) ;
 	}
 
 	if (pSrc[0] == 'Z' || pSrc[0] == 'z') ++pSrc ;		// skip over trailing 'Z'
@@ -563,7 +563,7 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 		Secs = xTimeCalcSeconds(psTM, 1) ;
 	}
 	*pTStamp = xTimeMakeTimestamp(Secs, uSecs) ;
-	IF_PRINT(debugTRACK && ioB1GET(ioToken), "flag=%p  uS=%'llu  wday=%d  yday=%d  %04d/%02d/%02d  %dh%02dm%02ds\n",
+	IF_P(debugTRACK && ioB1GET(ioToken), "flag=%p  uS=%'llu  wday=%d  yday=%d  %04d/%02d/%02d  %dh%02dm%02ds\n",
 								flag, *pTStamp, psTM->tm_wday, psTM->tm_yday,
 								psTM->tm_year, psTM->tm_mon, psTM->tm_mday,
 								psTM->tm_hour, psTM->tm_min, psTM->tm_sec) ;
