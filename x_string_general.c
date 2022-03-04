@@ -572,7 +572,7 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 
 // ############################## Bitmap to string decode functions ################################
 
-#define	controlSIZE_FLAGS_BUF		(24 * 60)
+#define	controlSIZE_FLAGS_BUF		(24 * 10)
 
 int	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[], int Flag, char * pcBuf, size_t BufSize) {
 	int	pos, idx, BufLen = 0;
