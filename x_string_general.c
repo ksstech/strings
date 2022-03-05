@@ -646,7 +646,7 @@ void vBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[]
 	if (Mask) {
 		for (pos = 31, idx = 0, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos) {
 			if (CurMask & Mask & Value)
-				printf(" |%02d|%s|", pos, pMesArray[idx]) ;
+				P(" |%02d|%s|", pos, pMesArray[idx]) ;
 			if (CurMask & Mask)
 				idx++ ;
 		}
@@ -665,10 +665,10 @@ void vBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[]
 void vBitMapReport(char * pName, uint32_t Value, uint32_t Mask, const char * pMesArray[]) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pMesArray)) ;
 	if (pName != NULL)
-		printf(" %s 0x%02x:", pName, Value) ;
+		P(" %s 0x%02x:", pName, Value) ;
 	vBitMapDecode(Value, Mask, pMesArray) ;
 	if (pName != NULL)
-		printf("\n") ;
+		P("\n") ;
 }
 
 /**
