@@ -108,12 +108,11 @@ uint64_t xStringParseX64(char *pSrc, uint8_t * pDst, int xLen) {
  */
 char * pcStringParseU64(char * pSrc, uint64_t * pDst, int * pSign, const char * pDel) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inSRAM(pDst) && halCONFIG_inSRAM(pSign)) ;
+	IF_myASSERT(debugPARAM && pDel, halCONFIG_inMEM(pDel)) ;
 	uint64_t Base = 10 ;								// default to decimal
 	*pSign 	= 0 ;										// set sign as not provided
-	if (pDel) {
-		IF_myASSERT(debugPARAM, halCONFIG_inMEM(pDel)) ;
-		pSrc += xStringSkipDelim(pSrc, pDel, sizeof("+18,446,744,073,709,551,615")) ;
-	}
+	if (pDel)
+		pSrc += xStringSkipDelim(pSrc, pDel, sizeof("+18,446,744,073,709,551,615"));
 
 	// check for sign at start
 	if (*pSrc == '-') {									// NEGative sign?
@@ -130,7 +129,8 @@ char * pcStringParseU64(char * pSrc, uint64_t * pDst, int * pSign, const char * 
 	}
 
 	// ensure something there to parse
-	if (xHexCharToValue(*pSrc, Base) == erFAILURE)  return pcFAILURE ;
+	if (xHexCharToValue(*pSrc, Base) == erFAILURE)
+		return pcFAILURE;
 	// now scan string and convert to value
 	*pDst = 0ULL ;						// set default value as ZERO
 	int	Value ;
@@ -159,7 +159,8 @@ char * pcStringParseF64(char *pSrc, double * pDst, int * pSign, const char * pDe
 	uint64_t u64Val ;
 	// parse the integer portion
 	char * pTmp = pcStringParseU64(pSrc, &u64Val, pSign, " ") ;
-	if (pTmp == pcFAILURE) return pTmp ;
+	if (pTmp == pcFAILURE)
+		return pTmp ;
 	double dVal = u64Val ;
 	u64Val = 0 ;
 	int	scale = 0 ;
@@ -194,9 +195,12 @@ char * pcStringParseF64(char *pSrc, double * pDst, int * pSign, const char * pDe
 	}
 
 	// calculate the actual value (number = +/- number.fraction * 10^+/- exponent)
-	if (subscale) *pDst = (dVal + dFrac) * pow(10.0 , (subscale * signsubscale)) ;
-	else *pDst = dVal + dFrac ;
-	if (*pSign < 0) *pDst *= -1.0 ;
+	if (subscale)
+		*pDst = (dVal + dFrac) * pow(10.0 , (subscale * signsubscale)) ;
+	else
+		*pDst = dVal + dFrac ;
+	if (*pSign < 0)
+		*pDst *= -1.0 ;
 	IF_P(debugPARSE_F64, "Input: %*s dInt=%f dFrac=%f Scale=%d SubScale=%d F64=%f\n", pTmp - pSrc, pSrc, dVal, dFrac, scale, subscale, *pDst) ;
 	return pTmp ;
 }
@@ -212,8 +216,10 @@ char * pcStringParseX64(char * pSrc, x64_t * px64Val, vf_e cvF, const char * pDe
 	int	Sign ;
 	px_t pX ;
 	pX.px64	= px64Val ;
-	if (cvF == vfFXX) pTmp = pcStringParseF64(pSrc, pX.pf64, &Sign, pDel) ;
-	else pTmp = pcStringParseU64(pSrc, pX.pu64, &Sign, pDel) ;
+	if (cvF == vfFXX)
+		pTmp = pcStringParseF64(pSrc, pX.pf64, &Sign, pDel) ;
+	else
+		pTmp = pcStringParseU64(pSrc, pX.pu64, &Sign, pDel) ;
 	EQ_RETURN(pTmp, pcFAILURE)
 
 	// ensure NO SIGN is specified if unsigned is requested, and no error returned
@@ -222,16 +228,18 @@ char * pcStringParseX64(char * pSrc, x64_t * px64Val, vf_e cvF, const char * pDe
 		P("  Uxx cannot have +/- sign") ;
 		return pcFAILURE ;
 	}
-	if ((cvF == vfIXX) && (Sign == -1)) *pX.pi64 *= Sign ;
+	if ((cvF == vfIXX) && (Sign == -1))
+		*pX.pi64 *= Sign ;
 	return pTmp ;
 }
 
 char * pcStringParseValue(char * pSrc, px_t pX, vf_e cvF, vs_e cvS, const char * pDel) {
-	x64_t	x64Val ;
-	IF_P(debugPARSE_VALUE, "'%.3s' ->", pSrc) ;
-	char * pTmp	= pcStringParseX64(pSrc, &x64Val, cvF, pDel) ;
-	if (pTmp != pcFAILURE) vValuesStoreX64_Xxx(x64Val, pX, cvF, cvS) ;
-	return pTmp ;
+	x64_t x64Val;
+	IF_P(debugPARSE_VALUE, "'%.3s' ->", pSrc);
+	char * pTmp	= pcStringParseX64(pSrc, &x64Val, cvF, pDel);
+	if (pTmp != pcFAILURE)
+		vValuesStoreX64_Xxx(x64Val, pX, cvF, cvS);
+	return pTmp;
 }
 
 char * pcStringParseParam(char * pSrc, px_t pX, cvi_e cvI) {

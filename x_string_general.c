@@ -34,21 +34,23 @@
 #define	debugRESULT					(debugFLAG_GLOBAL & debugFLAG & 0x8000)
 
 /**
- * xstrverify() - verify to a maximum number of characters that each character is within a range
+ * @brief	verify to a maximum number of characters that each character is within a range
  * @return	erSUCCESS if cNum or fewer chars tested OK and a NUL is reached
  */
 int	xstrverify(char * pStr, char cMin, char cMax, char cNum) {
 	if (*pStr == 0) return erFAILURE;
 	while (cNum--) {
-		if (OUTSIDE(cMin, *pStr, cMax, char)) return erFAILURE;
+		if (OUTSIDE(cMin, *pStr, cMax, char))
+			return erFAILURE;
 	}
 	return erSUCCESS ;
 }
+
 /**
- * xstrnlen() - calculate the length of the string up to max len specified
- * @param[in]	s		pointer to the string
- * @param[in]	len		maximum length to check for/return
- * @return		length of the string excl the terminating '\0'
+ * @brief	calculate the length of the string up to max len specified
+ * @param	s		pointer to the string
+ * @param	len		maximum length to check for/return
+ * @return	length of the string excl the terminating '\0'
  */
 int	xstrnlen(const char * s, int len) {
 	int l ;
@@ -57,7 +59,7 @@ int	xstrnlen(const char * s, int len) {
 }
 
 /**
- * calculate the length of the string
+ * @brief	calculate the length of the string
  * @param	char *s	- pointer to the string
  * @return	length of the string up to but excl the terminating '\0'
  */
@@ -68,7 +70,6 @@ int	xstrlen(const char * s) {
 }
 
 /**
- * xstrncpy
  * @brief	Copies from s2 to s1 until either 'n' chars copied or '\000' reached in s2
  * 			String will ONLY be terminated if less than maximum characters copied.
  * @param	s1 - pointer to destination uint8_t array (string)
@@ -83,32 +84,33 @@ int	xstrncpy(char * pDst, char * pSrc, int xLen ) {
 		*pDst++ = *pSrc++ ;								// copy across and adjust both pointers
 		Cnt++ ;											// adjust length copied
 	}
-	if (Cnt < xLen)	*pDst = 0;							// if space left, terminate
+	if (Cnt < xLen)
+		*pDst = 0;										// if space left, terminate
 	return Cnt ;
 }
 
 int	xmemrev(char * pMem, size_t Size) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pMem) && Size > 1) ;
-	if (pMem == NULL || *pMem == 0 || Size < 2) return erFAILURE;
+	if (pMem == NULL || *pMem == 0 || Size < 2)
+		return erFAILURE;
 	char * pRev = pMem + Size - 1 ;
-#if		(stringXMEMREV_XOR == 1)
+	#if (stringXMEMREV_XOR == 1)
 	for (char * pFwd = pMem; pRev > pFwd; ++pFwd, --pRev) {
 		*pFwd ^= *pRev ;
 		*pRev ^= *pFwd ;
 		*pFwd ^= *pRev ;
 	}
-#else
+	#else
 	while (pMem < pRev) {
 		char cTemp = *pMem ;
 		*pMem++	= *pRev ;
 		*pRev--	= cTemp ;
 	}
-#endif
+	#endif
 	return erSUCCESS ;
 }
 
 /**
- * xstrrev
  * @param  str is a pointer to the string to be reversed
  * @return none
  * @brief  perform 'in-place' start <-> end character reversal
@@ -116,7 +118,6 @@ int	xmemrev(char * pMem, size_t Size) {
 void xstrrev(char * pStr) { xmemrev(pStr, xstrlen(pStr)); }
 
 /**
- * xinstring()
  * @brief		determine position of character in string (if at all)
  * @param		pStr - pointer to string to scan
  * 				cChr - the character match to find
@@ -124,14 +125,16 @@ void xstrrev(char * pStr) { xmemrev(pStr, xstrlen(pStr)); }
  * 				FAILURE if no match found, or cChr is NULL
  */
 int	xinstring(const char * pStr, char cChr) {
-	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pStr)) ;
-	if (cChr == 0) return erFAILURE;
-	int	pos = 0 ;
+	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pStr));
+	if (cChr == 0)
+		return erFAILURE;
+	int	pos = 0;
 	while (*pStr) {
-		if (*pStr++ == cChr) return pos ;
+		if (*pStr++ == cChr)
+			return pos;
 		pos++ ;
 	}
-	return erFAILURE ;
+	return erFAILURE;
 }
 
 /**
@@ -146,9 +149,11 @@ int	xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(s1) && halCONFIG_inMEM(s2) && xLen < 1024) ;
 	while (*s1 && *s2 && xLen) {
 		if (Exact == true) {
-			if (*s1 != *s2) break;
+			if (*s1 != *s2)
+				break;
 		} else {
-			if (toupper((int)*s1) != toupper((int)*s2)) break ;
+			if (toupper((int)*s1) != toupper((int)*s2))
+				break;
 		}
 		++s1 ;
 		++s2 ;
@@ -158,8 +163,7 @@ int	xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) {
 }
 
 /**
- * xstrcmp() compare two strings
- * @brief	 based on flag case in/sensitive
+ * @brief	compare two strings based on flag case in/sensitive
  * @param	s1, s2 - pointers to strings to be compared
  * 			flag - true for exact match, else upper/lower case difference ignored
  * @return	true or false based on comparison
@@ -168,9 +172,11 @@ int	xstrcmp(const char * s1, const char * s2, bool Exact) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(s1) && halCONFIG_inMEM(s2)) ;
 	while (*s1 && *s2) {
 		if (Exact) {
-			if (*s1 != *s2) break;
+			if (*s1 != *s2)
+				break;
 		} else {
-			if (toupper((int)*s1) != toupper((int)*s2)) break;
+			if (toupper((int)*s1) != toupper((int)*s2))
+				break;
 		}
 		++s1 ;
 		++s2 ;
@@ -179,7 +185,6 @@ int	xstrcmp(const char * s1, const char * s2, bool Exact) {
 }
 
 /**
- * xstrindex
  * @brief	determine array index of specified string in specified string array
  * 			expects the array to be null terminated
  * @param	key	- pointer to key string to find
@@ -190,7 +195,8 @@ int	xstrcmp(const char * s1, const char * s2, bool Exact) {
 int	xstrindex(char * key, char * array[]) {
 	int	i = 0 ;
 	while (array[i]) {
-		if (strcasecmp(key, array[i]) == 0)	return i;	// strings match, return index
+		if (strcasecmp(key, array[i]) == 0)
+			return i;									// strings match, return index
 		++i ;
 	}
 	return erFAILURE ;
