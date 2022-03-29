@@ -1,22 +1,21 @@
 /*
- * Copyright 2014-22 Andre M. Maree / KSS Technologies (Pty) Ltd.
- * x_string_general.c
+ * Copyright (c) 2014-22 Andre M. Maree / KSS Technologies (Pty) Ltd.
  */
 
-#include	"hal_variables.h"
+#include <string.h>
+#include <ctype.h>
 
-#include	"x_string_general.h"
-#include	"x_string_to_values.h"
-#include	"FreeRTOS_Support.h"
-#include	"printfx.h"									// +x_definitions +stdarg +stdint +stdio
-#include	"syslog.h"
-#include	"options.h"
+#include "hal_variables.h"
 
-#include	"x_errors_events.h"
-#include	"x_time.h"
+#include "x_string_general.h"
+#include "x_string_to_values.h"
+#include "FreeRTOS_Support.h"
+#include "printfx.h"									// +x_definitions +stdarg +stdint +stdio
+#include "syslog.h"
+#include "options.h"
 
-#include	<string.h>
-#include	<ctype.h>
+#include "x_errors_events.h"
+#include "x_time.h"
 
 #define	debugFLAG					0xF000
 
@@ -33,17 +32,30 @@
 #define	debugPARAM					(debugFLAG_GLOBAL & debugFLAG & 0x4000)
 #define	debugRESULT					(debugFLAG_GLOBAL & debugFLAG & 0x8000)
 
+#ifndef stringMAX_LEN
+	#define	stringMAX_LEN			2048
+#endif
+
+#define	controlSIZE_FLAGS_BUF		(24 * 10)
+
+#define	delimDATE1	"-/"
+#define	delimDATE2	"t "
+#define	delimTIME1	"h:"
+#define	delimTIME2	"m:"
+#define	delimTIME3	"sz. "
+
 /**
  * @brief	verify to a maximum number of characters that each character is within a range
  * @return	erSUCCESS if cNum or fewer chars tested OK and a NUL is reached
  */
 int	xstrverify(char * pStr, char cMin, char cMax, char cNum) {
-	if (*pStr == 0) return erFAILURE;
+	if (*pStr == 0)
+		return erFAILURE;
 	while (cNum--) {
 		if (OUTSIDE(cMin, *pStr, cMax, char))
 			return erFAILURE;
 	}
-	return erSUCCESS ;
+	return erSUCCESS;
 }
 
 /**
@@ -276,23 +288,21 @@ int	xStringParseUnicode(char * pDst, char * pSrc, size_t Len) {
 	return iRV;
 }
 
-#define	stringGENERAL_MAX_LEN		2048
-
 /**
- * xStringSkipDelim() - skips specified delimiters (if any)
- * @brief		does NOT automatically work on assumption that string is NULL terminated, hence requires MaxLen
- * @brief		ONLY if MaxLen specified as NULL, assume string is terminated and calculate length.
+ * @brief	skips specified delimiters (if any)
+ * @brief	does NOT automatically work on assumption that string is NULL terminated, hence requires MaxLen
+ * @brief	ONLY if MaxLen specified as NULL, assume string is terminated and calculate length.
  * @param[in]	pSrc - pointer to source buffer
  * @param[in]	pDel - pointer to string of valid delimiters
  * @param[in]	MaxLen - maximum number of characters in buffer
  * @return		number of delimiters (to be) skipped
  */
-int	xStringSkipDelim(char * pSrc, const char * pDel, int MaxLen) {
-	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inMEM(pDel)) ;
+int	xStringSkipDelim(char * pSrc, const char * pDel, size_t MaxLen) {
+	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inMEM(pDel));
 	// If no length supplied
 	if (MaxLen == 0) {
-		MaxLen = xstrnlen(pSrc, stringGENERAL_MAX_LEN) ;// assume NULL terminated and calculate length
-		IF_myASSERT(debugRESULT, MaxLen < stringGENERAL_MAX_LEN) ;		// just a check to verify not understated
+		MaxLen = xstrnlen(pSrc, stringMAX_LEN);	// assume NULL terminated and calculate length
+		IF_myASSERT(debugRESULT, MaxLen < stringMAX_LEN) ;		// just a check to verify not understated
 	}
 
 	IF_P(debugDELIM, " '%.4s'", pSrc) ;
@@ -310,7 +320,8 @@ int	xStringSkipDelim(char * pSrc, const char * pDel, int MaxLen) {
 int	xStringFindDelim(char * pSrc, const char * pDlm, int xMax) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inFLASH(pDlm)) ;
 	int xPos = 0 ;
-	if (xMax == 0) xMax = xstrlen(pSrc);
+	if (xMax == 0)
+		xMax = xstrlen(pSrc);
 	while (*pSrc && xMax) {
 		int	xSrc = isupper((int) *pSrc) ? tolower((int) *pSrc) : (int) *pSrc ;
 		const char * pTmp = pDlm ;
@@ -339,37 +350,23 @@ int	xStringFindDelim(char * pSrc, const char * pDlm, int xMax) {
  * @param[in]	MaxLen - maximum number of characters in buffer
  * @return		pointer to next character to be processed...
  */
-char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag, int MaxLen) {
-	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pDst) && halCONFIG_inMEM(pSrc) && halCONFIG_inMEM(pDel) && *pDel != 0);
-	IF_PL(debugTRACK && ioB1GET(ioToken), "pS='%s'  Lmax=%d\n", pSrc, MaxLen) ;
-	// If no length supplied
-	if (MaxLen == 0)
-		MaxLen = xstrlen((const char *) pSrc) ;			// assume NULL terminated and calculate length
-	if (MaxLen == 0)
-		return pcFAILURE ;
-
-	int CurLen = xStringSkipDelim(pSrc, pDel, MaxLen) ;
-	MaxLen	-= CurLen ;
-	pSrc	+= CurLen ;
-
-	IF_PL(debugTRACK && ioB1GET(ioToken), "pS='%s'  Lmax=%d  Lcur=%d\n", pSrc, MaxLen, CurLen) ;
-	while (*pSrc && --MaxLen) {						// while not separator/terminator char or end of string
-		if (xinstring(pDel, *pSrc) != erFAILURE) 		// current char a delim?
+char * pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag, size_t sDst) {
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pDst) && halCONFIG_inMEM(pSrc) && halCONFIG_inMEM(pDel) && *pDel && sDst);
+	IF_P(debugTRACK && ioB1GET(ioToken), "pSrc='%s'", pSrc);
+	pSrc += xStringSkipDelim(pSrc, pDel, 0);			// skip over leading delims
+	IF_P(debugTRACK && ioB1GET(ioToken), " -> '%s'", pSrc);
+	char * pTmp = pDst;
+	do {
+		if ((*pSrc == 0) || xinstring(pDel, *pSrc) != erFAILURE) 	// end of token?
 			break;
-		*pDst = (flag < 0) ? tolower((int)*pSrc) : (flag > 0) ? toupper((int)*pSrc) : *pSrc ;
-		++pDst ;
-		++pSrc ;
-	}
-	*pDst = 0;
-	IF_PL(debugTRACK && ioB1GET(ioToken), "pS='%s'  Lmax=%d  Lcur=%d  pD='%s'\n", pSrc, MaxLen, CurLen, pDst) ;
-	return pSrc ;										// pointer to NULL or next char to be processed..
+		*pTmp = (flag < 0) ? tolower((int)*pSrc) : (flag > 0) ? toupper((int)*pSrc) : *pSrc;
+		++pTmp;
+		++pSrc;
+	} while (--sDst > 1);			// leave space for terminator
+	*pTmp = 0;
+	IF_P(debugTRACK && ioB1GET(ioToken), " -> '%s'  pDst='%s'\n", pSrc, pDst);
+	return pSrc;					// pointer to NULL or next char [delimiter?] to be processed..
 }
-
-#define	delimDATE1	"-/"
-#define	delimDATE2	"t "
-#define	delimTIME1	"h:"
-#define	delimTIME2	"m:"
-#define	delimTIME3	"sz. "
 
 /**
  * pcStringParseDateTime()
@@ -392,16 +389,16 @@ char *	pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag,
  *					Friday, 31-Dec-99 23:59:59 GMT
  *					Fri Dec 31 23:59:59 1999
  */
-char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) {
+char * pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inSRAM(pTStamp) && halCONFIG_inSRAM(psTM)) ;
-	uint32_t	flag = 0 ;
+	uint32_t flag = 0;
 	/* TPmax	= ThisPar max length+1
 	 * TPact	= ThisPar actual length ( <0=error  0=not found  >0=length )
 	 * NPact	= NextPar actual length
 	 * TPlim	= ThisPar max value */
-	int32_t		Value, TPmax, TPact, NPact, TPlim ;
-	memset(psTM, 0, sizeof(struct tm)) ;				// ensure all start as 0
-	while (*pSrc == ' ') ++pSrc ;						// make sure no leading spaces ....
+	int32_t	Value, TPmax, TPact, NPact, TPlim;
+	memset(psTM, 0, sizeof(struct tm));					// ensure all start as 0
+	while (*pSrc == ' ') ++pSrc;						// make sure no leading spaces ....
 
 	// check CCYY?MM? ahead
 	TPact = xStringFindDelim(pSrc, delimDATE1, sizeof("CCYY")) ;
@@ -568,17 +565,14 @@ char *	pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 	} else {
 		Secs = xTimeCalcSeconds(psTM, 1) ;
 	}
-	*pTStamp = xTimeMakeTimestamp(Secs, uSecs) ;
-	IF_P(debugTRACK && ioB1GET(ioToken), "flag=%p  uS=%'llu  wday=%d  yday=%d  %04d/%02d/%02d  %dh%02dm%02ds\n",
-								flag, *pTStamp, psTM->tm_wday, psTM->tm_yday,
-								psTM->tm_year, psTM->tm_mon, psTM->tm_mday,
-								psTM->tm_hour, psTM->tm_min, psTM->tm_sec) ;
-	return pSrc ;
+	*pTStamp = xTimeMakeTimestamp(Secs, uSecs);
+	IF_P(debugTRACK && ioB1GET(ioToken), "flag=%p  uS=%'llu  wday=%d  yday=%d  y=%d  m=%d  d=%d  %dh%02dm%02ds\n",
+			flag, *pTStamp, psTM->tm_wday, psTM->tm_yday, psTM->tm_year, psTM->tm_mon,
+			psTM->tm_mday, psTM->tm_hour, psTM->tm_min, psTM->tm_sec);
+	return pSrc;
 }
 
 // ############################## Bitmap to string decode functions ################################
-
-#define	controlSIZE_FLAGS_BUF		(24 * 10)
 
 int	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[], int Flag, char * pcBuf, size_t BufSize) {
 	int	pos, idx, BufLen = 0;
@@ -692,23 +686,35 @@ int	xStringValueMap(const char * pString, char * pBuf, uint32_t uValue, int32_t 
 
 // #################################################################################################
 
-#define		stringTEST_FLAG			0x0000
+#define	stringTEST_FLAG			0x0000
 
-#define		stringTEST_EPOCH		(stringTEST_FLAG & 0x0001)
-#define		stringTEST_DATES		(stringTEST_FLAG & 0x0002)
-#define		stringTEST_TIMES		(stringTEST_FLAG & 0x0004)
-#define		stringTEST_DTIME		(stringTEST_FLAG & 0x0008)
+#define	stringTEST_EPOCH		(stringTEST_FLAG & 0x0001)
+#define	stringTEST_DATES		(stringTEST_FLAG & 0x0002)
+#define	stringTEST_TIMES		(stringTEST_FLAG & 0x0004)
+#define	stringTEST_DTIME		(stringTEST_FLAG & 0x0008)
 
-#define		stringTEST_RELDAT		(stringTEST_FLAG & 0x0010)
+#define	stringTEST_RELDAT		(stringTEST_FLAG & 0x0010)
+#define	stringTEST_PARSE		(stringTEST_FLAG & 0x0020)
 
 void x_string_general_test(void) {
-#if		(stringTEST_FLAG)
-	struct	tm	sTM ;
-	tsz_t	sTSZ ;
+#if	(stringTEST_FLAG & (stringTEST_EPOCH|stringTEST_DATES|stringTEST_TIMES|stringTEST_DTIME|stringTEST_RELDAT))
+	struct	tm	sTM;
+	tsz_t	sTSZ;
 #endif
 
-#if		(stringTEST_EPOCH)
-	char	test[64] ;
+#if (stringTEST_PARSE)
+	char caSrc[] = ";,Twenty*Two*Character_s ,;Twenty_Three_Characters, ;_Twenty_Four_Characters_, ; _Twenty_Five_Character[s] ;,";
+	char caBuf[24];
+	ioB1SET(ioToken,1);
+	char * pTmp = pcStringParseToken(caBuf, caSrc, " ,;", 0, sizeof(caBuf));
+	pTmp = pcStringParseToken(caBuf, pTmp, " ,;", 0, sizeof(caBuf));
+	pTmp = pcStringParseToken(caBuf, pTmp, " ,;", 0, sizeof(caBuf));
+	pTmp = pcStringParseToken(caBuf, pTmp, " ,;", 0, sizeof(caBuf));
+	pTmp = pcStringParseToken(caBuf, pTmp, " ,;", 0, sizeof(caBuf));
+#endif
+
+#if	(stringTEST_EPOCH)
+	chartest[64] ;
 	sTSZ.usecs	= xTimeMakeTimestamp(SECONDS_IN_EPOCH_PAST, 0) ;
 	xsnprintf(test, sizeof(test), "%.6Z", &sTSZ) ;
 	pcStringParseDateTime(test, &sTSZ.usecs, &sTM) ;
@@ -724,7 +730,7 @@ void x_string_general_test(void) {
 			sTM.tm_hour, sTM.tm_min, sTM.tm_sec, sTM.tm_yday) ;
 #endif
 
-#if		(stringTEST_DATES)
+#if	(stringTEST_DATES)
 	pcStringParseDateTime((char *) "2019/04/15", &sTSZ.usecs, &sTM) ;
 	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\n" : " #%d Passed\n", __LINE__) ;
 	pcStringParseDateTime((char *) "2019/04/15 ", &sTSZ.usecs, &sTM) ;
@@ -744,7 +750,7 @@ void x_string_general_test(void) {
 	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\n" : " #%d Passed\n", __LINE__) ;
 #endif
 
-#if		(stringTEST_TIMES)
+#if	(stringTEST_TIMES)
 	pcStringParseDateTime((char *) "1", &sTSZ.usecs, &sTM) ;
 	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 ? " #%d Failed\n" : " #%d Passed\n", __LINE__) ;
 	pcStringParseDateTime((char *) "1 ", &sTSZ.usecs, &sTM) ;
@@ -775,7 +781,7 @@ void x_string_general_test(void) {
 	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 || sTSZ.usecs != 1000001 ? " #%d Failed\n" : " #%d Passed\n", __LINE__) ;
 #endif
 
-#if		(stringTEST_DTIME)
+#if	(stringTEST_DTIME)
 	pcStringParseDateTime((char *) "2019/04/15T1:23:45.678901Z", &sTSZ.usecs, &sTM) ;
 	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=1 || sTM.tm_min!=23 || sTM.tm_sec!=45 || (sTSZ.usecs % MILLION) != 678901 ? " #%d Failed\n" : " #%d Passed\n", __LINE__) ;
 
@@ -789,7 +795,7 @@ void x_string_general_test(void) {
 	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=1 || sTM.tm_min!=23 || sTM.tm_sec!=45 || (sTSZ.usecs % MILLION) != 678901 ? " #%d Failed\n" : " #%d Passed\n", __LINE__) ;
 #endif
 
-#if		(stringTEST_RELDAT)
+#if	(stringTEST_RELDAT)
 	pcStringParseDateTime((char *) "1/1-1", &sTSZ.usecs, &sTM) ;
 	printfx(sTM.tm_year!=1 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\n" : " #%d Passed\n", __LINE__) ;
 	pcStringParseDateTime((char *) "1-1/1", &sTSZ.usecs, &sTM) ;
