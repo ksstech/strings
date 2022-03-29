@@ -42,37 +42,37 @@ enum {
 
 // ##################################### string operations #########################################
 
-int	xstrverify(char * pStr, char cMin, char cMax, char cNum) ;
-int	xstrlen(const char * s) ;
-int	xstrnlen(const char * s, int len) ;
-int	xstrncpy(char * s1, char * s2, int len ) ;
+int	xstrverify(char * pStr, char cMin, char cMax, char cNum);
+int	xstrlen(const char * s);
+int	xstrnlen(const char * s, int len);
+int	xstrncpy(char * s1, char * s2, int len);
 
-int	xmemrev(char * pMem, size_t Size) ;
-void xstrrev(char * pStr) ;
+int	xmemrev(char * pMem, size_t Size);
+void xstrrev(char * pStr);
 
-int	xinstring(const char * pStr, char cChr) ;
-int xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) ;
-int	xstrcmp(const char * s1, const char * s2, bool Exact) ;
-int	xstrindex(char *, char * *) ;
+int	xinstring(const char * pStr, char cChr);
+int xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact);
+int	xstrcmp(const char * s1, const char * s2, bool Exact);
+int	xstrindex(char *, char * *);
 
 int	xStringParseEncoded(char * pDst, char * pSrc);
-int	xStringParseUnicode(char * pDst, char * pSrc, size_t Len);
-int	xStringSkipDelim(char * pSrc, const char * pDel, int MaxLen) ;
-int	xStringFindDelim(char * pSrc, const char * pDlm, int xMax) ;
-char * pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag, int MaxLen) ;
-char * pcStringParseDateTime(char * buf, uint64_t * pTStamp, struct tm * ptm) ;
+int	xStringParseUnicode(char * pDst, char * pSrc, size_t sDst);
+int	xStringSkipDelim(char * pSrc, const char * pDel, size_t sDst);
+int	xStringFindDelim(char * pSrc, const char * pDlm, int xMax);
+char * pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag, size_t sDst);
+char * pcStringParseDateTime(char * buf, uint64_t * pTStamp, struct tm * ptm);
 
-int	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[], int Flag, char * pBuf, size_t BufSize) ;
-char * pcBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[], int Flag) ;
+int	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[], int Flag, char * pBuf, size_t BufSize);
+char * pcBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[], int Flag);
 
-int	xBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[], char * pBuf, size_t BufSize) ;
-char * pcBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[]) ;
+int	xBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[], char * pBuf, size_t BufSize);
+char * pcBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[]);
 
-void vBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[]) ;
-void vBitMapReport(char * Name, uint32_t Value, uint32_t Width, const char ** pMesArray) ;
-int	xStringValueMap(const char * pString, char * pBuf, uint32_t uValue, int iWidth) ;
+void vBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[]);
+void vBitMapReport(char * Name, uint32_t Value, uint32_t Width, const char ** pMesArray);
+int	xStringValueMap(const char * pString, char * pBuf, uint32_t uValue, int iWidth);
 
-void  x_string_general_test(void) ;
+void  x_string_general_test(void);
 
 #ifdef __cplusplus
 }
