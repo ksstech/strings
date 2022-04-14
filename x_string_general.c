@@ -231,7 +231,7 @@ int	xStringParseEncoded(char * pDst, char * pSrc) {
 	}
 	IF_P(debugPARSE_ENCODED, "%s  ", pSrc) ;
 	while(*pSrc != 0) {
-		if (*pSrc == '%' ) {						// escape char?
+		if (*pSrc == CHR_PERCENT) {						// escape char?
 			int Val1 = xHexCharToValue(*++pSrc, BASE16) ;	// yes, parse 1st value
 			if (Val1 == erFAILURE)
 				return erFAILURE;
@@ -260,7 +260,7 @@ int	xStringParseUnicode(char * pDst, char * pSrc, size_t Len) {
 	}
 	IF_RP(debugPARSE_ENCODED, "%s  ", pSrc);
 	while(*pSrc != 0 && (iRV < Len)) {
-		if (*pSrc == '\\' && *(pSrc+1) == CHR_u) {		// escape chars?
+		if (*pSrc == CHR_BACKSLASH && *(pSrc+1) == CHR_u) {		// escape chars?
 			int Val = 0;
 			for (int i = 2; i < 6; ++i) {
 				int iRV2 = xHexCharToValue(pSrc[i], BASE16);
@@ -398,7 +398,8 @@ char * pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 	 * TPlim	= ThisPar max value */
 	int32_t	Value, TPmax, TPact, NPact, TPlim;
 	memset(psTM, 0, sizeof(struct tm));					// ensure all start as 0
-	while (*pSrc == ' ') ++pSrc;						// make sure no leading spaces ....
+	while (*pSrc == CHR_SPACE)
+		++pSrc;											// make sure no leading spaces ....
 
 	// check CCYY?MM? ahead
 	TPact = xStringFindDelim(pSrc, delimDATE1, sizeof("CCYY")) ;
@@ -441,7 +442,7 @@ char * pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 	NPact = (TPact < 1 && pSrc[1] == 0) ? 1 : (TPact < 1 && pSrc[2] == 0) ? 2 : 0 ;
 	IF_P(debugTRACK && ioB1GET(ioToken), "D: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
 
-	if ((flag & DATETIME_MON_OK) || (TPact > 0 && tolower((int) pSrc[TPact]) == 't')) {
+	if ((flag & DATETIME_MON_OK) || (TPact > 0 && tolower((int) pSrc[TPact]) == CHR_t)) {
 		IF_P(debugTRACK && ioB1GET(ioToken), "  Day '%.*s'", TPact, pSrc) ;
 		pSrc = pcStringParseValueRange(pSrc, (px_t) &Value, vfIXX, vs32B, NULL, (x32_t) 1, (x32_t) TPlim) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
@@ -457,8 +458,8 @@ char * pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 	}
 
 	// skip over 'T' if there
-	if (*pSrc == 'T' || *pSrc == 't' || *pSrc == ' ') ++pSrc;
-
+	if (*pSrc == CHR_T || *pSrc == CHR_t || *pSrc == CHR_SPACE)
+		++pSrc;
 	// check for HH?MM?
 	if (flag & (DATETIME_YEAR_OK | DATETIME_MON_OK | DATETIME_MDAY_OK)) {
 		TPmax = sizeof("HH") ;
@@ -555,7 +556,8 @@ char * pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 		IF_P(debugTRACK && ioB1GET(ioToken), "  Val=%d\n", uSecs) ;
 	}
 
-	if (pSrc[0] == 'Z' || pSrc[0] == 'z') ++pSrc ;		// skip over trailing 'Z'
+	if (pSrc[0] == CHR_Z || pSrc[0] == CHR_z)
+		++pSrc;											// skip over trailing 'Z'
 
 	uint32_t Secs ;
 	if (flag & DATETIME_YEAR_OK) {						// full timestamp data found?
@@ -566,7 +568,7 @@ char * pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 		Secs = xTimeCalcSeconds(psTM, 1) ;
 	}
 	*pTStamp = xTimeMakeTimestamp(Secs, uSecs);
-	IF_P(debugTRACK && ioB1GET(ioToken), "flag=%p  uS=%'llu  wday=%d  yday=%d  y=%d  m=%d  d=%d  %dh%02dm%02ds\n",
+	IF_P(debugTRACK && ioB1GET(ioToken), "flag=%p  uS=%`llu  wday=%d  yday=%d  y=%d  m=%d  d=%d  %dh%02dm%02ds\n",
 			flag, *pTStamp, psTM->tm_wday, psTM->tm_yday, psTM->tm_year, psTM->tm_mon,
 			psTM->tm_mday, psTM->tm_hour, psTM->tm_min, psTM->tm_sec);
 	return pSrc;
@@ -679,7 +681,7 @@ int	xStringValueMap(const char * pString, char * pBuf, uint32_t uValue, int32_t 
 	uint32_t uMask = 0x8000 >> (32 - iWidth) ;
 	int Idx ;
 	for (Idx = 0; Idx < iWidth; ++Idx, ++pString, ++pBuf, uMask >>= 1)
-		*pBuf = (uValue | uMask) ? *pString : '-' ;
+		*pBuf = (uValue | uMask) ? *pString : CHR_MINUS;
 	*pBuf = 0 ;
 	return Idx ;
 }
