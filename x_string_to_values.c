@@ -54,16 +54,18 @@ uint64_t char2u64(uint8_t * pSrc, uint64_t * pDst, int Len) {
  * @return			if valid value, 0x00 -> 0x09 [0x0F] else -1
  */
 int	xHexCharToValue(uint8_t cChr, int xBase) {
-	if (INRANGE('0', cChr, '9', uint8_t))
-		return cChr - '0' ;
+	if (INRANGE(CHR_0, cChr, CHR_9, uint8_t))
+		return cChr - CHR_0;
 	if (xBase == BASE16) {
-		if (INRANGE('A', cChr, 'F', uint8_t))
-			return cChr - 'A' + 10 ;
-		if (INRANGE('a', cChr, 'f', uint8_t))
-			return cChr - 'a' + 10 ;
+		if (INRANGE(CHR_A, cChr, CHR_F, uint8_t))
+			return cChr - CHR_A + 10;
+		if (INRANGE(CHR_a, cChr, CHR_f, uint8_t))
+			return cChr - CHR_a + 10;
 		// XXX TEMP fix for capture error
-		if (cChr == 'O' || cChr == 'o') {
-			P("chr= 0x%x '%c'", cChr, cChr); return 0; }
+		if (cChr == CHR_O || cChr == CHR_o) {
+			P("chr= 0x%x '%c'", cChr, cChr);
+			return 0;
+		}
 	}
 	return erFAILURE ;
 }
@@ -115,15 +117,15 @@ char * pcStringParseU64(char * pSrc, uint64_t * pDst, int * pSign, const char * 
 		pSrc += xStringSkipDelim(pSrc, pDel, sizeof("+18,446,744,073,709,551,615"));
 
 	// check for sign at start
-	if (*pSrc == '-') {									// NEGative sign?
+	if (*pSrc == CHR_MINUS) {							// NEGative sign?
 		*pSign = -1 ;									// yes, flag accordingly
 		++pSrc ;										// & skip over sign
 
-	} else if (*pSrc == '+') {							// POSitive sign?
+	} else if (*pSrc == CHR_PLUS) {						// POSitive sign?
 		*pSign = 1 ;									// yes, flag accordingly
 		++pSrc ;										// & skip over sign
 
-	} else if (*pSrc == 'X' || *pSrc == 'x') {			// HEXadecimal format ?
+	} else if (*pSrc == CHR_X || *pSrc == CHR_x) {		// HEXadecimal format ?
 		Base = 16 ;
 		++pSrc ;										// & skip over hex format
 	}
@@ -165,13 +167,13 @@ char * pcStringParseF64(char *pSrc, double * pDst, int * pSign, const char * pDe
 	u64Val = 0 ;
 	int	scale = 0 ;
 	// handle fractional portion if decimal '.' & number follow
-	if ((*pTmp == '.') && (pTmp[1] >= '0') && (pTmp[1] <= '9')) {
+	if ((*pTmp == CHR_FULLSTOP) && (pTmp[1] >= CHR_0) && (pTmp[1] <= CHR_9)) {
 		pTmp++ ;										// skip the '.'
 		do {
 			u64Val *= 10.0 ;							// adjust decimal scale
-			u64Val += *pTmp++ - '0' ;					// add fraction as part of integer (x10)
+			u64Val += *pTmp++ - CHR_0;					// add fraction as part of integer (x10)
 			scale-- ;									// adjust power to scale down with later
-		} while (*pTmp >= '0' && *pTmp <= '9') ;		// do as long as numeric chars there
+		} while (*pTmp >= CHR_0 && *pTmp <= CHR_9);		// do as long as numeric chars there
 	}
 	double dFrac = u64Val ;
 	dFrac *= pow(10.0, scale) ;
@@ -179,18 +181,18 @@ char * pcStringParseF64(char *pSrc, double * pDst, int * pSign, const char * pDe
 	// handle exponent
 	int	subscale = 0 ;
 	int	signsubscale = 1 ;
-	if ((*pTmp == 'E') || (*pTmp == 'e')) {				// exponent?
+	if ((*pTmp == CHR_E) || (*pTmp == CHR_e)) {			// exponent?
 		pTmp++ ;										// yes, skip indicator
-		if (*pTmp == '+') { 							// if positive
+		if (*pTmp == CHR_PLUS) { 						// if positive
 			pTmp++ ;									// skip
 		} else {
-			if (*pTmp == '-') {							// if negative
+			if (*pTmp == CHR_MINUS) {					// if negative
 				signsubscale = -1 ;						// save the sign
 				pTmp++ ;								// and skip over
 			}
 		}
-		while (*pTmp >= '0' && *pTmp <= '9') {			// while we have numeric chars
-			subscale = (subscale * 10) + (*pTmp++ - '0') ;	// update the exponent value
+		while (*pTmp >= CHR_0 && *pTmp <= CHR_9) {		// while we have numeric chars
+			subscale = (subscale * 10) + (*pTmp++ - CHR_0);	// update the exponent value
 		}
 	}
 
@@ -300,9 +302,9 @@ char * pcStringParseValues(char * pSrc, px_t pX, vf_e cvF, vs_e cvS, const char 
 char * pcStringParseNumber(char * pSrc, px_t pX) {
 	char * pTmp = pSrc ;
 	*pX.pi32 = 0 ;
-	while (*pSrc && INRANGE('0', *pSrc, '9', int)) {
+	while (*pSrc && INRANGE(CHR_0, *pSrc, CHR_9, int)) {
 		*pX.pi32	*= 10 ;
-		*pX.pi32	+= *pSrc++ - '0' ;
+		*pX.pi32	+= *pSrc++ - CHR_0;
 	}
 	return (pTmp == pSrc) ? pcFAILURE : pSrc ;
 }
@@ -329,7 +331,8 @@ char * pcStringParseIpAddr(char * pSrc, px_t pX) {
 		if (pcRV == pcFAILURE) return pcFAILURE ;
 		*pX.pu32	<<= 8 ;
 		*pX.pu32	+= u32Val ;
-		if (*pcRV == '.') ++pcRV ;
+		if (*pcRV == CHR_FULLSTOP)
+			++pcRV;
 	}
 	*pX.pu32 = htonl(*pX.pu32) ;
 	IF_P(debugRESULT, "IP : %#-I\n", *pX.pu32) ;
