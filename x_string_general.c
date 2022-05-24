@@ -391,7 +391,7 @@ char * pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag,
  */
 char * pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inSRAM(pTStamp) && halCONFIG_inSRAM(psTM)) ;
-	uint32_t flag = 0;
+	u32_t flag = 0;
 	/* TPmax	= ThisPar max length+1
 	 * TPact	= ThisPar actual length ( <0=error  0=not found  >0=length )
 	 * NPact	= NextPar actual length
@@ -559,7 +559,7 @@ char * pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 	if (pSrc[0] == CHR_Z || pSrc[0] == CHR_z)
 		++pSrc;											// skip over trailing 'Z'
 
-	uint32_t Secs ;
+	u32_t Secs ;
 	if (flag & DATETIME_YEAR_OK) {						// full timestamp data found?
 		psTM->tm_wday = (xTimeCalcDaysToDate(psTM) + timeEPOCH_DAY_0_NUM) % DAYS_IN_WEEK ;
 		psTM->tm_yday = xTimeCalcDaysYTD(psTM) ;
@@ -576,9 +576,9 @@ char * pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 
 // ############################## Bitmap to string decode functions ################################
 
-int	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[], int Flag, char * pcBuf, size_t BufSize) {
+int	xBitMapDecodeChanges(u32_t Val1, u32_t Val2, u32_t Mask, const char * const pMesArray[], int Flag, char * pcBuf, size_t BufSize) {
 	int	pos, idx, BufLen = 0;
-	uint32_t CurMask, C1, C2;
+	u32_t CurMask, C1, C2;
 	const char * pFormat = (Flag & bmdcCOLOUR) ? " %C%s%C" : " %c%s%c";
 	for (pos = 31, idx = 31, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos, --idx) {
 		if (Mask & CurMask) {
@@ -606,15 +606,15 @@ int	xBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char
 	return BufLen ;
 }
 
-char * pcBitMapDecodeChanges(uint32_t Val1, uint32_t Val2, uint32_t Mask, const char * const pMesArray[], int Flag) {
+char * pcBitMapDecodeChanges(u32_t Val1, u32_t Val2, u32_t Mask, const char * const pMesArray[], int Flag) {
 	char * pcBuf = pvRtosMalloc(controlSIZE_FLAGS_BUF) ;
 	xBitMapDecodeChanges(Val1, Val2, Mask, pMesArray, Flag, pcBuf, controlSIZE_FLAGS_BUF) ;
 	return pcBuf ;
 }
 
-int	xBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[], char * pBuf, size_t BufSize) {
+int	xBitMapDecode(u32_t Value, u32_t Mask, const char * const pMesArray[], char * pBuf, size_t BufSize) {
 	int	pos, idx, BufLen = 0 ;
-	uint32_t CurMask ;
+	u32_t CurMask ;
 	for (pos = 31, idx = 31, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos, --idx) {
 		if ((Mask & CurMask) && (Value & CurMask))
 			BufLen += snprintfx(pBuf + BufLen, BufSize - BufLen, "  %s", pMesArray[idx]) ;
@@ -622,7 +622,7 @@ int	xBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[],
 	return BufLen ;
 }
 
-char * pcBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[]) {
+char * pcBitMapDecode(u32_t Value, u32_t Mask, const char * const pMesArray[]) {
 	char * pcBuf = pvRtosMalloc(controlSIZE_FLAGS_BUF) ;
 	xBitMapDecode(Value, Mask, pMesArray, pcBuf, controlSIZE_FLAGS_BUF) ;
 	return pcBuf ;
@@ -636,9 +636,9 @@ char * pcBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArra
  * @param	pMesArray - pointer to array of messages (1 per bit SET in the mask)
  * return	none
  */
-void vBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[]) {
+void vBitMapDecode(u32_t Value, u32_t Mask, const char * const pMesArray[]) {
 	int	pos, idx ;
-	uint32_t	CurMask ;
+	u32_t	CurMask ;
 	if (Mask) {
 		for (pos = 31, idx = 0, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos) {
 			if (CurMask & Mask & Value)
@@ -658,7 +658,7 @@ void vBitMapDecode(uint32_t Value, uint32_t Mask, const char * const pMesArray[]
  * @param	pMesArray - pointer to array of messages (1 per bit SET in the mask)
  * return	none
  */
-void vBitMapReport(char * pName, uint32_t Value, uint32_t Mask, const char * pMesArray[]) {
+void vBitMapReport(char * pName, u32_t Value, u32_t Mask, const char * pMesArray[]) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pMesArray)) ;
 	if (pName != NULL)
 		P(" %s 0x%02x:", pName, Value) ;
@@ -676,9 +676,9 @@ void vBitMapReport(char * pName, uint32_t Value, uint32_t Mask, const char * pMe
  * @param	iWidth
  * @return
  */
-int	xStringValueMap(const char * pString, char * pBuf, uint32_t uValue, int32_t iWidth) {
+int	xStringValueMap(const char * pString, char * pBuf, u32_t uValue, int32_t iWidth) {
 	IF_myASSERT(debugPARAM, halCONFIG_inFLASH(pString) && halCONFIG_inSRAM(pBuf) && (iWidth <= 32) && (strnlen(pString, 33) <= iWidth)) ;
-	uint32_t uMask = 0x8000 >> (32 - iWidth) ;
+	u32_t uMask = 0x8000 >> (32 - iWidth) ;
 	int Idx ;
 	for (Idx = 0; Idx < iWidth; ++Idx, ++pString, ++pBuf, uMask >>= 1)
 		*pBuf = (uValue | uMask) ? *pString : CHR_MINUS;

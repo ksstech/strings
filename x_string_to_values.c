@@ -36,12 +36,12 @@
  * \brief		If ASSERT not defined, no range checking done on parameters
  * 				If only converted value required as return, *d can be made NULL ;
  */
-uint64_t char2u64(uint8_t * pSrc, uint64_t * pDst, int Len) {
+u64_t char2u64(char * pSrc, u64_t * pDst, int Len) {
 	IF_myASSERT(debugPARAM, pSrc && INRANGE(1, Len, 8, int)) ;
-	uint64_t x64Val = 0ULL ;
+	u64_t x64Val = 0ULL ;
 	while (Len--) {
 		x64Val <<= 8 ;
-		x64Val += (uint64_t) *pSrc++ ;
+		x64Val += (u64_t) *pSrc++ ;
 	}
 	if (pDst) *pDst = x64Val ;
 	return x64Val ;
@@ -53,13 +53,13 @@ uint64_t char2u64(uint8_t * pSrc, uint64_t * pDst, int Len) {
  * @param xBase		base to handle 10/16
  * @return			if valid value, 0x00 -> 0x09 [0x0F] else -1
  */
-int	xHexCharToValue(uint8_t cChr, int xBase) {
-	if (INRANGE(CHR_0, cChr, CHR_9, uint8_t))
+int	xHexCharToValue(char cChr, int xBase) {
+	if (INRANGE(CHR_0, cChr, CHR_9, char))
 		return cChr - CHR_0;
 	if (xBase == BASE16) {
-		if (INRANGE(CHR_A, cChr, CHR_F, uint8_t))
+		if (INRANGE(CHR_A, cChr, CHR_F, char))
 			return cChr - CHR_A + 10;
-		if (INRANGE(CHR_a, cChr, CHR_f, uint8_t))
+		if (INRANGE(CHR_a, cChr, CHR_f, char))
 			return cChr - CHR_a + 10;
 		// XXX TEMP fix for capture error
 		if (cChr == CHR_O || cChr == CHR_o) {
@@ -70,10 +70,10 @@ int	xHexCharToValue(uint8_t cChr, int xBase) {
 	return erFAILURE ;
 }
 
-uint64_t xStringParseX64(char *pSrc, uint8_t * pDst, int xLen) {
+u64_t xStringParseX64(char *pSrc, char * pDst, int xLen) {
 	IF_P(debugPARSE_X64, "%.*s", xLen, pSrc) ;
-	uint64_t xTemp = 0 ;
-	uint8_t	x8Value = 0 ;
+	u64_t xTemp = 0 ;
+	u8_t x8Value = 0 ;
 	int iRV ;
 	while (xLen && *pSrc) {
 		iRV = xHexCharToValue(*pSrc, BASE16) ;
@@ -108,10 +108,10 @@ uint64_t xStringParseX64(char *pSrc, uint8_t * pDst, int xLen) {
  * \return		updated pointer in source buffer to 1st non '0' -> '9' character
  * 				pcFAILURE is no valid value found to parse
  */
-char * pcStringParseU64(char * pSrc, uint64_t * pDst, int * pSign, const char * pDel) {
+char * pcStringParseU64(char * pSrc, u64_t * pDst, int * pSign, const char * pDel) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inSRAM(pDst) && halCONFIG_inSRAM(pSign)) ;
 	IF_myASSERT(debugPARAM && pDel, halCONFIG_inMEM(pDel)) ;
-	uint64_t Base = 10 ;								// default to decimal
+	u64_t Base = 10 ;								// default to decimal
 	*pSign 	= 0 ;										// set sign as not provided
 	if (pDel)
 		pSrc += xStringSkipDelim(pSrc, pDel, sizeof("+18,446,744,073,709,551,615"));
@@ -158,7 +158,7 @@ char * pcStringParseU64(char * pSrc, uint64_t * pDst, int * pSign, const char * 
  * \return		pointer to 1st unprocessed (non numeric) char
  */
 char * pcStringParseF64(char *pSrc, double * pDst, int * pSign, const char * pDel) {
-	uint64_t u64Val ;
+	u64_t u64Val ;
 	// parse the integer portion
 	char * pTmp = pcStringParseU64(pSrc, &u64Val, pSign, " ") ;
 	if (pTmp == pcFAILURE)
@@ -322,10 +322,10 @@ char * pcStringParseNumberRange(char * pSrc, px_t pX, int Min, int Max) {
  */
 char * pcStringParseIpAddr(char * pSrc, px_t pX) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inSRAM(pX.pu32)) ;
-	char * pcRV = pSrc ;
+	char * pcRV = (char *)pSrc ;
 	*pX.pu32 = 0 ;
 	for(int i = 0; i < 4; ++i) {
-		uint32_t u32Val = 0 ;
+		u32_t u32Val = 0 ;
 		const char * pccTmp = (i == 0) ? " " : "." ;
 		pcRV = pcStringParseValueRange(pSrc = pcRV, (px_t) &u32Val, vfUXX, vs32B, pccTmp, (x32_t) 0, (x32_t) 255) ;
 		if (pcRV == pcFAILURE) return pcFAILURE ;

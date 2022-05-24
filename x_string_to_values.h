@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-21 Andre M. Maree / KSS Technologies (Pty) Ltd.
+ * Copyright (c) 2014-22 Andre M. Maree / KSS Technologies (Pty) Ltd.
  * x_string_to_values.h
  */
 
@@ -13,10 +13,10 @@ extern "C" {
 
 // ################################### Public functions ############################################
 
-uint64_t char2u64(uint8_t *, uint64_t *, int) ;
-uint64_t xStringParseX64(char *, uint8_t *, int) ;
-int	xHexCharToValue(uint8_t, int) ;
-char * pcStringParseU64(char * pSrc, uint64_t * pVal, int * pSign, const char * pDel) ;
+u64_t char2u64(char *, u64_t *, int) ;
+u64_t xStringParseX64(char *, char *, int) ;
+int	xHexCharToValue(char, int) ;
+char * pcStringParseU64(char * pSrc, u64_t * pVal, int * pSign, const char * pDel) ;
 char * pcStringParseF64(char *pSrc, double * pDst, int * pSign, const char * pDel) ;
 char * pcStringParseX64(char * pSrc, x64_t * px64Val, vf_e VarForm, const char * pDel) ;
 char * pcStringParseValue(char * pSrc, px_t px, vf_e VarForm, vs_e VarSize, const char * pDel) ;
