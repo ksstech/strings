@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include	"definitions.h"
+#include "x_time.h"
 
 #ifdef __cplusplus
 extern "C" {
