@@ -57,7 +57,7 @@ int	xStringParseUnicode(char * pDst, char * pSrc, size_t sDst);
 int	xStringSkipDelim(char * pSrc, const char * pDel, size_t sDst);
 int	xStringFindDelim(char * pSrc, const char * pDlm, int xMax);
 char * pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag, size_t sDst);
-char * pcStringParseDateTime(char * buf, uint64_t * pTStamp, struct tm * ptm);
+char * pcStringParseDateTime(char * buf, u64_t * pTStamp, struct tm * ptm);
 
 int	xBitMapDecodeChanges(u32_t Val1, u32_t Val2, u32_t Mask, const char * const pMesArray[], int Flag, char * pBuf, size_t BufSize);
 char * pcBitMapDecodeChanges(u32_t Val1, u32_t Val2, u32_t Mask, const char * const pMesArray[], int Flag);
