@@ -676,7 +676,7 @@ void vBitMapReport(char * pName, u32_t Value, u32_t Mask, const char * pMesArray
  * @param	iWidth
  * @return
  */
-int	xStringValueMap(const char * pString, char * pBuf, u32_t uValue, int32_t iWidth) {
+int	xStringValueMap(const char * pString, char * pBuf, u32_t uValue, int iWidth) {
 	IF_myASSERT(debugPARAM, halCONFIG_inFLASH(pString) && halCONFIG_inSRAM(pBuf) && (iWidth <= 32) && (strnlen(pString, 33) <= iWidth)) ;
 	u32_t uMask = 0x8000 >> (32 - iWidth) ;
 	int Idx ;
