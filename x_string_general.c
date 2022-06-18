@@ -610,11 +610,14 @@ char * pcBitMapDecodeChanges(u32_t Val1, u32_t Val2, u32_t Mask, const char * co
 }
 
 int	xBitMapDecode(u32_t Value, u32_t Mask, const char * const pMesArray[], char * pBuf, size_t BufSize) {
-	int	pos, idx, BufLen = 0 ;
-	u32_t CurMask ;
+	int	pos, idx, BufLen = 0;
+	u32_t CurMask;
+	u8_t Pad = CHR_NUL;
 	for (pos = 31, idx = 31, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos, --idx) {
-		if ((Mask & CurMask) && (Value & CurMask))
-			BufLen += snprintfx(pBuf + BufLen, BufSize - BufLen, "  %s", pMesArray[idx]) ;
+		if ((Mask & CurMask) && (Value & CurMask)) {
+			BufLen += snprintfx(pBuf + BufLen, BufSize - BufLen, "%c%s", Pad, pMesArray[idx]);
+			Pad = CHR_SPACE;
+		}
 	}
 	return BufLen ;
 }
