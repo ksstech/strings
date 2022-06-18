@@ -339,16 +339,13 @@ int	xStringFindDelim(char * pSrc, const char * pDlm, int xMax) {
 }
 
 /**
- * Copies next single token from source buffer to destination buffer
- * @brief		does NOT automatically work on assuption that string is NULL terminated, hence requires MaxLen
- * @brief		if MaxLen specified as NULL, assume string is terminated and calculate length.
- * @brief		skips specified delimiters (if any)
- * @param[in]	pDst - pointer to destination buffer
- * @param[in]	pSrc - pointer to source buffer
- * @param[in]	pDel - pointer to string of valid delimiters
- * @param[in]	flag - (< 0) force lower case, (= 0) no conversion (> 0) force upper case
- * @param[in]	MaxLen - maximum number of characters in buffer
- * @return		pointer to next character to be processed...
+ * @brief	Copies token from source buffer to destination buffer
+ * @param	pDst - pointer to destination buffer
+ * @param	pSrc - pointer to source buffer
+ * @param	pDel - pointer to possible (leading) delimiters (to be skipped)
+ * @param	flag - (< 0) force lower case, (= 0) no conversion (> 0) force upper case
+ * @param	MaxLen - maximum number of characters in buffer
+ * @return	pointer to next character to be processed...
  */
 char * pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag, size_t sDst) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pDst) && halCONFIG_inMEM(pSrc) && halCONFIG_inMEM(pDel) && *pDel && sDst);
