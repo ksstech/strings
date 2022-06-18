@@ -260,7 +260,7 @@ char * pcStringParseParam(char * pSrc, px_t pX, cvi_e cvI) {
  * @return			pointer to next char to process or pcFAILURE
  */
 char * pcStringParseValueRange(char * pSrc, px_t pX, vf_e cvF, vs_e cvS, const char * pDel, x32_t x32Lo, x32_t x32Hi) {
-	char * pTmp = pcStringParseValue(pSrc, pX, cvF, cvS, pDel) ;
+	char * pTmp = pcStringParseValue(pSrc, pX, cvF, cvS, pDel);
 	if (pTmp != pcFAILURE) {
 		x64_t x64Val= xValuesUpscaleXxx_X64(pX, cvF, cvS) ;
 		x64_t x64Lo = xValuesUpscaleXxx_X64((px_t) &x32Lo, cvF, vs32B) ;
@@ -271,13 +271,16 @@ char * pcStringParseValueRange(char * pSrc, px_t pX, vf_e cvF, vs_e cvS, const c
 		IF_EXEC_4(debugPARSE_VALUE, xCV_ReportValue, "  Hi=", x64Hi, cvF, cvS) ;
 		switch(cvF) {
 		case vfUXX:
-			if ((x64Val.u64 < x64Lo.u64) || (x64Val.u64 > x64Hi.u64)) return pcFAILURE ;
+			if ((x64Val.u64 < x64Lo.u64) || (x64Val.u64 > x64Hi.u64))
+				return pcFAILURE ;
 			break ;
 		case vfIXX:
-			if ((x64Val.i64 < x64Lo.i64) || (x64Val.i64 > x64Hi.i64)) return pcFAILURE ;
+			if ((x64Val.i64 < x64Lo.i64) || (x64Val.i64 > x64Hi.i64))
+				return pcFAILURE ;
 			break ;
 		case vfFXX:
-			if ((x64Val.f64 < x64Lo.f64) || (x64Val.f64 > x64Hi.f64)) return pcFAILURE ;
+			if ((x64Val.f64 < x64Lo.f64) || (x64Val.f64 > x64Hi.f64))
+				return pcFAILURE ;
 			break ;
 		case vfSXX:
 			IF_myASSERT(debugPARAM, 0);
