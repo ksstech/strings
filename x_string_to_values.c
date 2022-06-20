@@ -1,7 +1,10 @@
 /*
- * Copyright 2014-21 Andre M. Maree / KSS Technologies (Pty) Ltd.
  * x_string_to_values.c
+ * Copyright 2014-22 (c) Andre M. Maree / KSS Technologies (Pty) Ltd.
  */
+
+#include	<netinet/in.h>
+#include	<math.h>
 
 #include	"hal_config.h"
 #include	"x_string_general.h"
@@ -9,9 +12,6 @@
 #include	"printfx.h"									// +x_definitions +stdarg +stdint +stdio
 #include	"syslog.h"
 #include	"x_errors_events.h"
-
-#include	<netinet/in.h>
-#include	<math.h>
 
 #define	debugFLAG					0x4000
 
@@ -61,8 +61,7 @@ int	xHexCharToValue(char cChr, int xBase) {
 			return cChr - CHR_A + 10;
 		if (INRANGE(CHR_a, cChr, CHR_f, char))
 			return cChr - CHR_a + 10;
-		// XXX TEMP fix for capture error
-		if (cChr == CHR_O || cChr == CHR_o) {
+		if (cChr == CHR_O || cChr == CHR_o) {			// XXX TEMP fix for capture error
 			P("chr= 0x%x '%c'", cChr, cChr);
 			return 0;
 		}
@@ -115,29 +114,23 @@ char * pcStringParseU64(char * pSrc, u64_t * pDst, int * pSign, const char * pDe
 	*pSign 	= 0 ;										// set sign as not provided
 	if (pDel)
 		pSrc += xStringSkipDelim(pSrc, pDel, sizeof("+18,446,744,073,709,551,615"));
-
-	// check for sign at start
 	if (*pSrc == CHR_MINUS) {							// NEGative sign?
 		*pSign = -1 ;									// yes, flag accordingly
 		++pSrc ;										// & skip over sign
-
 	} else if (*pSrc == CHR_PLUS) {						// POSitive sign?
 		*pSign = 1 ;									// yes, flag accordingly
 		++pSrc ;										// & skip over sign
-
 	} else if (*pSrc == CHR_X || *pSrc == CHR_x) {		// HEXadecimal format ?
 		Base = 16 ;
 		++pSrc ;										// & skip over hex format
 	}
-
-	// ensure something there to parse
-	if (xHexCharToValue(*pSrc, Base) == erFAILURE)
+	if (xHexCharToValue(*pSrc, Base) == erFAILURE)		// ensure something there to parse
 		return pcFAILURE;
-	// now scan string and convert to value
-	*pDst = 0ULL ;						// set default value as ZERO
+	*pDst = 0ULL ;					// set default value as ZERO
 	int	Value ;
-	while (*pSrc) {
-		if ((Value = xHexCharToValue(*pSrc, Base)) == erFAILURE) break ;
+	while (*pSrc) {					// now scan string and convert to value
+		if ((Value = xHexCharToValue(*pSrc, Base)) == erFAILURE)
+			break;
 		*pDst *= Base ;
 		*pDst += Value ;
 		++pSrc ;
@@ -331,7 +324,8 @@ char * pcStringParseIpAddr(char * pSrc, px_t pX) {
 		u32_t u32Val = 0 ;
 		const char * pccTmp = (i == 0) ? " " : "." ;
 		pcRV = pcStringParseValueRange(pSrc = pcRV, (px_t) &u32Val, vfUXX, vs32B, pccTmp, (x32_t) 0, (x32_t) 255) ;
-		if (pcRV == pcFAILURE) return pcFAILURE ;
+		if (pcRV == pcFAILURE)
+			return pcFAILURE ;
 		*pX.pu32	<<= 8 ;
 		*pX.pu32	+= u32Val ;
 		if (*pcRV == CHR_FULLSTOP)
