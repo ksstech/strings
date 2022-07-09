@@ -70,29 +70,29 @@ int	xHexCharToValue(char cChr, int xBase) {
 }
 
 u64_t xStringParseX64(char *pSrc, char * pDst, int xLen) {
-	IF_P(debugPARSE_X64, "%.*s", xLen, pSrc) ;
-	u64_t xTemp = 0 ;
-	u8_t x8Value = 0 ;
-	int iRV ;
+	IF_P(debugPARSE_X64, "%.*s", xLen, pSrc);
+	u64_t xTemp = 0;
+	u8_t x8Value = 0;
+	int iRV;
 	while (xLen && *pSrc) {
-		iRV = xHexCharToValue(*pSrc, BASE16) ;
+		iRV = xHexCharToValue(*pSrc, BASE16);
 		if (iRV == erFAILURE) {							// invalid char
 			SL_ERR("Invalid source Src=%s  Dst=%s", pSrc, pDst) ;
-			break ;										// yes, stop parsing
+			break;										// yes, stop parsing
 		}
-		x8Value += iRV ;								// nope, add to value
+		x8Value += iRV;									// nope, add to value
 		if (xLen % 2) {									// odd length boundary?
-			xTemp	<<= 8 ;
-			xTemp += x8Value ;
-			*pDst++ = x8Value ;							// store the value
-			x8Value = 0 ;								// and reset for next 2 chars -> 2 nibbles
+			xTemp <<= 8;
+			xTemp += x8Value;
+			*pDst++ = x8Value;							// store the value
+			x8Value = 0;								// and reset for next 2 chars -> 2 nibbles
 		} else {
-			x8Value <<= 4 ;
+			x8Value <<= 4;
 		}
-		++pSrc ;
-		--xLen ;
+		++pSrc;
+		--xLen;
 	}
-	return xTemp ;
+	return xTemp;
 }
 
 /**
