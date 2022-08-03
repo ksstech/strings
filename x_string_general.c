@@ -117,7 +117,7 @@ int	xmemrev(char * pMem, size_t Size) {
 void xstrrev(char * pStr) { xmemrev(pStr, xstrlen(pStr)); }
 
 /**
- * @brief		determine position of character in string (if at all)
+ * @brief	determine position of character in string (if at all)
  * @param		pStr - pointer to string to scan
  * 				cChr - the character match to find
  * @return		0 -> n the index into the string where the char is found
@@ -137,11 +137,10 @@ int	strchr_i(const char * pStr, char cChr) {
 }
 
 /**
- * xstrncmp() compare two strings
- * @brief	 based on flag case in/sensitive
- * @param s1, s2	pointers to strings to be compared
- * @param xLen		maximum length to compare (non null terminated string)
- * @param flag		true for exact match, else upper/lower case difference ignored
+ * @brief	based on flag case in/sensitive
+ * @param	s1/2 - pointers to strings to be compared
+ * @param	xLen - maximum length to compare (non null terminated string)
+ * @param	flag - true for exact match, else upper/lower case difference ignored
  * @return			true or false based on comparison
  */
 int	xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) {
