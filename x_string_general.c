@@ -303,7 +303,7 @@ int	xStringSkipDelim(char * pSrc, const char * pDel, size_t MaxLen) {
 	return CurLen ;								// number of delimiters skipped over
 }
 
-int	xStringFindDelim(char * pSrc, const char * pDlm, int xMax) {
+int	xStringFindDelim(char * pSrc, const char * pDlm, size_t xMax) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inFLASH(pDlm)) ;
 	int xPos = 0 ;
 	if (xMax == 0)
