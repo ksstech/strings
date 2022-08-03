@@ -50,7 +50,7 @@ int	xstrverify(char * pStr, char cMin, char cMax, char cNum) {
 	if (*pStr == 0)
 		return erFAILURE;
 	while (cNum--) {
-		if (OUTSIDE(cMin, *pStr, cMax, char))
+		if (OUTSIDE(cMin, *pStr, cMax))
 			return erFAILURE;
 	}
 	return erSUCCESS;
@@ -394,7 +394,7 @@ char * pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 		pSrc = pcStringParseValueRange(pSrc, (px_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) YEAR_BASE_MAX) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
 		// Cater for CCYY vs YY form
-		psTM->tm_year = INRANGE(YEAR_BASE_MIN, Value, YEAR_BASE_MAX, int32_t) ? Value - YEAR_BASE_MIN : Value ;
+		psTM->tm_year = INRANGE(YEAR_BASE_MIN, Value, YEAR_BASE_MAX) ? Value - YEAR_BASE_MIN : Value ;
 		flag |= DATETIME_YEAR_OK ;						// mark as done
 		++pSrc ;										// skip over separator
 	}
@@ -508,7 +508,7 @@ char * pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 	NPact = (TPact < 1) ? xstrlen(pSrc) : 0 ;
 	IF_P(debugTRACK && ioB1GET(ioToken), "S: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
 
-	if ((flag & DATETIME_MIN_OK) || (TPact > 0) || (INRANGE(1, NPact, --TPmax, int32_t))) {
+	if ((flag & DATETIME_MIN_OK) || (TPact > 0) || (INRANGE(1, NPact, --TPmax))) {
 		IF_P(debugTRACK && ioB1GET(ioToken), "  Sec '%.*s'", TPact, pSrc) ;
 		pSrc = pcStringParseValueRange(pSrc, (px_t) &Value, vfIXX, vs32B, NULL, (x32_t) 0, (x32_t) TPlim) ;
 		EQ_RETURN(pSrc, pcFAILURE) ;
@@ -524,7 +524,7 @@ char * pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) 
 	if (TPact == 0) {
 		++pSrc ;										// skip over '.'
 		TPact = xStringFindDelim(pSrc, "z ", TPmax) ;	// find position of Z/z in buffer
-		if (OUTSIDE(1, TPact, TPmax, int32_t)) {
+		if (OUTSIDE(1, TPact, TPmax)) {
 		/* XXX valid terminator not found, but maybe a NUL ?
 		 * still a problem, what about junk after the last number ? */
 			NPact = xstrlen(pSrc) ;
