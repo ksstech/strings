@@ -527,7 +527,8 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 		/* XXX valid terminator not found, but maybe a NUL ?
 		 * still a problem, what about junk after the last number ? */
 			NPact = xstrlen(pSrc) ;
-			if (OUTSIDE(1, NPact, --TPmax , int32_t)) return pcFAILURE;
+			if (OUTSIDE(1, NPact, --TPmax))
+				return pcFAILURE;
 			TPact = NPact ;
 		}
 		IF_P(debugTRACK && ioB1GET(ioToken), " uS '%.*s'", TPact, pSrc) ;
