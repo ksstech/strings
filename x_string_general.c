@@ -134,7 +134,7 @@ void xstrrev(char * pStr) { xmemrev(pStr, xstrlen(pStr)); }
  * @return		0 -> n the index into the string where the char is found
  * 				FAILURE if no match found, or cChr is NULL
  */
-int	xinstring(const char * pStr, char cChr) {
+int	strchr_i(const char * pStr, char cChr) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pStr));
 	if (cChr == 0)
 		return erFAILURE;

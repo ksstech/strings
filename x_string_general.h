@@ -47,7 +47,7 @@ int	xstrncpy(char * s1, char * s2, int len);
 int	xmemrev(char * pMem, size_t Size);
 void xstrrev(char * pStr);
 
-int	xinstring(const char * pStr, char cChr);
+int	strchr_i(const char * pStr, char cChr);
 int xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact);
 int	xstrcmp(const char * s1, const char * s2, bool Exact);
 int	xstrindex(char *, char * *);
