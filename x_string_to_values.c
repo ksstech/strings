@@ -307,7 +307,7 @@ char * pcStringParseNumber(char * pSrc, px_t pX) {
 
 char * pcStringParseNumberRange(char * pSrc, px_t pX, int Min, int Max) {
 	pSrc = pcStringParseNumber(pSrc, pX) ;
-	return (INRANGE(Min, *pX.pi32, Max, int32_t) == 1) ? pSrc : pcFAILURE ;
+	return INRANGE(Min, *pX.pi32, Max) ? pSrc : pcFAILURE;
 }
 
 /**
