@@ -37,7 +37,7 @@
  * 				If only converted value required as return, *d can be made NULL ;
  */
 u64_t char2u64(char * pSrc, u64_t * pDst, int Len) {
-	IF_myASSERT(debugPARAM, pSrc && INRANGE(1, Len, 8, int)) ;
+	IF_myASSERT(debugPARAM, pSrc && INRANGE(1, Len, 8));
 	u64_t x64Val = 0ULL ;
 	while (Len--) {
 		x64Val <<= 8 ;
@@ -54,12 +54,12 @@ u64_t char2u64(char * pSrc, u64_t * pDst, int Len) {
  * @return			if valid value, 0x00 -> 0x09 [0x0F] else -1
  */
 int	xHexCharToValue(char cChr, int xBase) {
-	if (INRANGE(CHR_0, cChr, CHR_9, char))
+	if (INRANGE(CHR_0, cChr, CHR_9))
 		return cChr - CHR_0;
 	if (xBase == BASE16) {
-		if (INRANGE(CHR_A, cChr, CHR_F, char))
+		if (INRANGE(CHR_A, cChr, CHR_F))
 			return cChr - CHR_A + 10;
-		if (INRANGE(CHR_a, cChr, CHR_f, char))
+		if (INRANGE(CHR_a, cChr, CHR_f))
 			return cChr - CHR_a + 10;
 		if (cChr == CHR_O || cChr == CHR_o) {			// XXX TEMP fix for capture error
 			P("chr= 0x%x '%c'", cChr, cChr);
@@ -298,7 +298,7 @@ char * pcStringParseValues(char * pSrc, px_t pX, vf_e cvF, vs_e cvS, const char 
 char * pcStringParseNumber(char * pSrc, px_t pX) {
 	char * pTmp = pSrc ;
 	*pX.pi32 = 0 ;
-	while (*pSrc && INRANGE(CHR_0, *pSrc, CHR_9, int)) {
+	while (*pSrc && INRANGE(CHR_0, *pSrc, CHR_9)) {
 		*pX.pi32	*= 10 ;
 		*pX.pi32	+= *pSrc++ - CHR_0;
 	}
