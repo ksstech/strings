@@ -370,7 +370,8 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 	 * TPact	= ThisPar actual length ( <0=error  0=not found  >0=length )
 	 * NPact	= NextPar actual length
 	 * TPlim	= ThisPar max value */
-	int32_t	Value, TPmax, TPact, NPact, TPlim;
+	int	Value, TPlim, TPact, NPact;
+	size_t TPmax;
 	memset(psTM, 0, sizeof(struct tm));					// ensure all start as 0
 	while (*pSrc == CHR_SPACE)
 		++pSrc;											// make sure no leading spaces ....
