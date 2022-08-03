@@ -290,7 +290,6 @@ int	xStringSkipDelim(char * pSrc, const char * pDel, size_t MaxLen) {
 		MaxLen = xstrnlen(pSrc, stringMAX_LEN);	// assume NULL terminated and calculate length
 		IF_myASSERT(debugRESULT, MaxLen < stringMAX_LEN) ;		// just a check to verify not understated
 	}
-
 	IF_P(debugDELIM, " '%.4s'", pSrc) ;
 	// continue skipping over valid terminator characters
 	int	CurLen = 0 ;
@@ -298,7 +297,6 @@ int	xStringSkipDelim(char * pSrc, const char * pDel, size_t MaxLen) {
 		++pSrc ;
 		++CurLen ;
 	}
-
 	IF_P(debugDELIM, "->'%.4s'", pSrc) ;
 	return CurLen ;								// number of delimiters skipped over
 }
