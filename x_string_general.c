@@ -114,7 +114,7 @@ int	xmemrev(char * pMem, size_t Size) {
  * @return none
  * @brief  perform 'in-place' start <-> end character reversal
  */
-void xstrrev(char * pStr) { xmemrev(pStr, xstrlen(pStr)); }
+void xstrrev(char * pStr) { xmemrev(pStr, strlen(pStr)); }
 
 /**
  * @brief	determine position of character in string (if at all)
@@ -307,7 +307,7 @@ int	xStringFindDelim(char * pSrc, const char * pDlm, size_t xMax) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inFLASH(pDlm)) ;
 	int xPos = 0 ;
 	if (xMax == 0)
-		xMax = xstrlen(pSrc);
+		xMax = strlen(pSrc);
 	while (*pSrc && xMax) {
 		int	xSrc = isupper((int) *pSrc) ? tolower((int) *pSrc) : (int) *pSrc ;
 		const char * pTmp = pDlm ;
@@ -504,7 +504,7 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 		TPlim = SECONDS_IN_LEAPYEAR - 1 ;
 	}
 	TPact = xStringFindDelim(pSrc, delimTIME3, TPmax) ;
-	NPact = (TPact < 1) ? xstrlen(pSrc) : 0 ;
+	NPact = (TPact < 1) ? strlen(pSrc) : 0 ;
 	IF_P(debugTRACK && ioB1GET(ioToken), "S: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
 
 	if ((flag & DATETIME_MIN_OK) || (TPact > 0) || (INRANGE(1, NPact, --TPmax))) {
@@ -526,7 +526,7 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 		if (OUTSIDE(1, TPact, TPmax)) {
 		/* XXX valid terminator not found, but maybe a NUL ?
 		 * still a problem, what about junk after the last number ? */
-			NPact = xstrlen(pSrc) ;
+			NPact = strlen(pSrc);
 			if (OUTSIDE(1, NPact, --TPmax))
 				return pcFAILURE;
 			TPact = NPact ;
