@@ -215,7 +215,7 @@ char * pcStringParseX64(char * pSrc, x64_t * px64Val, vf_e cvF, const char * pDe
 		pTmp = pcStringParseF64(pSrc, pX.pf64, &Sign, pDel) ;
 	else
 		pTmp = pcStringParseU64(pSrc, pX.pu64, &Sign, pDel) ;
-	EQ_RETURN(pTmp, pcFAILURE)
+	IF_RETURN_X(pTmp == pcFAILURE, pTmp);
 
 	// ensure NO SIGN is specified if unsigned is requested, and no error returned
 	if (Sign && (cvF == vfUXX)) {
@@ -288,7 +288,7 @@ char * pcStringParseValueRange(char * pSrc, px_t pX, vf_e cvF, vs_e cvS, const c
 char * pcStringParseValues(char * pSrc, px_t pX, vf_e cvF, vs_e cvS, const char * pDel, int Count) {
 	while(Count--) {
 		char * pTmp	= pcStringParseValue(pSrc, pX, cvF, cvS, pDel) ;
-		EQ_RETURN(pTmp, pcFAILURE);
+		IF_RETURN_X(pTmp == pcFAILURE, pTmp);
 		pX = pxCV_AddressNextWithSize(pX, cvS);
 		pSrc	= pTmp ;								// set starting pointer ready for the next
 	}
