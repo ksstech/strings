@@ -69,17 +69,6 @@ int	xstrnlen(const char * s, int len) {
 }
 
 /**
- * @brief	calculate the length of the string
- * @param	char *s	- pointer to the string
- * @return	length of the string up to but excl the terminating '\0'
- */
-int	xstrlen(const char * s) {
-	int l ;
-	for(l = 0; *s != 0; ++s, ++l) ;
-	return l ;
-}
-
-/**
  * @brief	Copies from s2 to s1 until either 'n' chars copied or '\000' reached in s2
  * 			String will ONLY be terminated if less than maximum characters copied.
  * @param	s1 - pointer to destination uint8_t array (string)
