@@ -372,7 +372,7 @@ char * pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag,
  *					Friday, 31-Dec-99 23:59:59 GMT
  *					Fri Dec 31 23:59:59 1999
  */
-char * pcStringParseDateTime(char * pSrc, uint64_t * pTStamp, struct tm * psTM) {
+char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inSRAM(pTStamp) && halCONFIG_inSRAM(psTM)) ;
 	u32_t flag = 0;
 	/* TPmax	= ThisPar max length+1
