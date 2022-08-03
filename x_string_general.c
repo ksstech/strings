@@ -125,15 +125,8 @@ void xstrrev(char * pStr) { xmemrev(pStr, strlen(pStr)); }
  */
 int	strchr_i(const char * pStr, char cChr) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pStr));
-	if (cChr == 0)
-		return erFAILURE;
-	int	pos = 0;
-	while (*pStr) {
-		if (*pStr++ == cChr)
-			return pos;
-		pos++ ;
-	}
-	return erFAILURE;
+	char * pTmp = strchr(pStr,cChr);
+	return (pTmp != NULL) ? (pTmp - pStr) : erFAILURE;
 }
 
 /**
@@ -293,6 +286,7 @@ int	xStringSkipDelim(char * pSrc, const char * pDel, size_t MaxLen) {
 	IF_P(debugDELIM, " '%.4s'", pSrc) ;
 	// continue skipping over valid terminator characters
 	int	CurLen = 0 ;
+	while (strchr(pDel, *pSrc) && (CurLen < MaxLen)) {
 		++pSrc ;
 		++CurLen ;
 	}
@@ -337,6 +331,7 @@ char * pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag,
 	IF_P(debugTRACK && ioB1GET(ioToken), " -> '%s'", pSrc);
 	char * pTmp = pDst;
 	do {
+		if ((*pSrc == 0) || strchr(pDel, *pSrc) != NULL) 			// end of string OR delimiter?
 			break;
 		*pTmp = (flag < 0) ? tolower((int)*pSrc) : (flag > 0) ? toupper((int)*pSrc) : *pSrc;
 		++pTmp;
