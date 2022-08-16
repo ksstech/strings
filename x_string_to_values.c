@@ -206,11 +206,12 @@ char * pcStringParseF64(char *pSrc, double * pDst, int * pSign, const char * pDe
  * @param[out]	x64Ptr - pointer to the location where value is to be stored
  * @return		FAILPTR if no valid value or keyword found else updated pointer to next character to be parsed
  */
-char * pcStringParseX64(char * pSrc, x64_t * px64Val, vf_e cvF, const char * pDel) {
 	char *	pTmp ;
 	int	Sign ;
 	px_t pX ;
 	pX.px64	= px64Val ;
+char * pcStringParseX64(char * pSrc, x64_t * px64Val, cvi_e cvI, const char * pDel) {
+	vf_e cvF = xIndex2Form(cvI);
 	if (cvF == vfFXX)
 		pTmp = pcStringParseF64(pSrc, pX.pf64, &Sign, pDel) ;
 	else
@@ -228,17 +229,17 @@ char * pcStringParseX64(char * pSrc, x64_t * px64Val, vf_e cvF, const char * pDe
 	return pTmp ;
 }
 
-char * pcStringParseValue(char * pSrc, px_t pX, vf_e cvF, vs_e cvS, const char * pDel) {
+char * pcStringParseValue(char * pSrc, px_t pX, cvi_e cvI, const char * pDel) {
 	x64_t x64Val;
 	IF_P(debugPARSE_VALUE, "'%.3s' ->", pSrc);
-	char * pTmp	= pcStringParseX64(pSrc, &x64Val, cvF, pDel);
+	char * pTmp	= pcStringParseX64(pSrc, &x64Val, cvI, pDel);
 	if (pTmp != pcFAILURE)
-		vValuesStoreX64_Xxx(x64Val, pX, cvF, cvS);
+		vx64ValueStore(x64Val, pX, cvI);
 	return pTmp;
 }
 
 char * pcStringParseParam(char * pSrc, px_t pX, cvi_e cvI) {
-	return pcStringParseValue(pSrc, pX, xCV_Index2Form(cvI), xCV_Index2Size(cvI), sepSPACE_COMMA) ;
+	return pcStringParseValue(pSrc, pX, cvI, sepSPACE_COMMA);
 }
 
 /**
@@ -252,16 +253,17 @@ char * pcStringParseParam(char * pSrc, px_t pX, cvi_e cvI) {
  * @param x32Hi		upper limit valid value
  * @return			pointer to next char to process or pcFAILURE
  */
-char * pcStringParseValueRange(char * pSrc, px_t pX, vf_e cvF, vs_e cvS, const char * pDel, x32_t x32Lo, x32_t x32Hi) {
-	char * pTmp = pcStringParseValue(pSrc, pX, cvF, cvS, pDel);
+char * pcStringParseValueRange(char * pSrc, px_t pX, cvi_e cvI, const char * pDel, x32_t x32Lo, x32_t x32Hi) {
+	char * pTmp = pcStringParseValue(pSrc, pX, cvI, pDel);
 	if (pTmp != pcFAILURE) {
-		x64_t x64Val= xValuesUpscaleXxx_X64(pX, cvF, cvS) ;
-		x64_t x64Lo = xValuesUpscaleXxx_X64((px_t) &x32Lo, cvF, vs32B) ;
-		x64_t x64Hi = xValuesUpscaleXxx_X64((px_t) &x32Hi, cvF, vs32B) ;
-		IF_P(debugPARSE_VALUE, "  '%.*s'", pTmp - pSrc, pSrc) ;
-		IF_EXEC_4(debugPARSE_VALUE, xCV_ReportValue, "  Val=", x64Val, cvF, cvS) ;
-		IF_EXEC_4(debugPARSE_VALUE, xCV_ReportValue, "  Lo=", x64Lo, cvF, cvS) ;
-		IF_EXEC_4(debugPARSE_VALUE, xCV_ReportValue, "  Hi=", x64Hi, cvF, cvS) ;
+		vf_e cvF = xIndex2Form(cvI);
+		x64_t x64Val= x64ValueFetch(pX, cvI);
+		x64_t x64Lo = x64ValueFetch((px_t) &x32Lo, xFormSize2Index(cvF, vs32B));
+		x64_t x64Hi = x64ValueFetch((px_t) &x32Hi, xFormSize2Index(cvF, vs32B));
+		IF_P(debugPARSE_VALUE, "  '%.*s'", pTmp - pSrc, pSrc);
+		IF_EXEC_3(debugPARSE_VALUE, xCV_ReportValue, "  Val=", x64Val, cvI);
+		IF_EXEC_3(debugPARSE_VALUE, xCV_ReportValue, "  Lo=", x64Lo, cvI);
+		IF_EXEC_3(debugPARSE_VALUE, xCV_ReportValue, "  Hi=", x64Hi, cvI);
 		switch(cvF) {
 		case vfUXX:
 			if ((x64Val.u64 < x64Lo.u64) || (x64Val.u64 > x64Hi.u64))
@@ -280,17 +282,17 @@ char * pcStringParseValueRange(char * pSrc, px_t pX, vf_e cvF, vs_e cvS, const c
 			return pcFAILURE ;
 		}
 		IF_P(debugPARSE_VALUE, "\r\n");
-		vValuesStoreX64_Xxx(x64Val, pX, cvF, cvS);
+		vx64ValueStore(x64Val, pX, cvI);
 	}
 	return pTmp ;
 }
 
-char * pcStringParseValues(char * pSrc, px_t pX, vf_e cvF, vs_e cvS, const char * pDel, int Count) {
+char * pcStringParseValues(char * pSrc, px_t pX, cvi_e cvI, const char * pDel, int Count) {
 	while(Count--) {
-		char * pTmp	= pcStringParseValue(pSrc, pX, cvF, cvS, pDel) ;
+		char * pTmp	= pcStringParseValue(pSrc, pX, cvI, pDel) ;
 		IF_RETURN_X(pTmp == pcFAILURE, pTmp);
-		pX = pxCV_AddressNextWithSize(pX, cvS);
 		pSrc	= pTmp ;								// set starting pointer ready for the next
+		pX = pxAddrNextWithIndex(pX, cvI);
 	}
 	return pSrc ;
 }
@@ -323,7 +325,7 @@ char * pcStringParseIpAddr(char * pSrc, px_t pX) {
 	for(int i = 0; i < 4; ++i) {
 		u32_t u32Val = 0 ;
 		const char * pccTmp = (i == 0) ? " " : "." ;
-		pcRV = pcStringParseValueRange(pSrc = pcRV, (px_t) &u32Val, vfUXX, vs32B, pccTmp, (x32_t) 0, (x32_t) 255) ;
+		pcRV = pcStringParseValueRange(pSrc = pcRV, (px_t) &u32Val, cvU32, pccTmp, (x32_t) 0, (x32_t) 255) ;
 		if (pcRV == pcFAILURE)
 			return pcFAILURE ;
 		*pX.pu32	<<= 8 ;
@@ -340,41 +342,41 @@ void x_string_values_test(void) {
 	x64_t x64Val ;
 	// Test error if sign present for vfUXX
 	P("Sign test\r\n") ;
-	pcStringParseValue((char *) "123456", (px_t) &x64Val, vfUXX, vs08B, " ") ;
-	pcStringParseValue((char *) "+123456", (px_t) &x64Val, vfUXX, vs16B, " ") ;
-	pcStringParseValue((char *) "-123456", (px_t) &x64Val, vfUXX, vs32B, " ") ;
-	pcStringParseValue((char *) "123456", (px_t) &x64Val, vfUXX, vs64B, " ") ;
+	pcStringParseValue((char *) "123456", (px_t) &x64Val, cvU08, " ") ;
+	pcStringParseValue((char *) "+123456", (px_t) &x64Val, cvU16, " ") ;
+	pcStringParseValue((char *) "-123456", (px_t) &x64Val, cvU32, " ") ;
+	pcStringParseValue((char *) "123456", (px_t) &x64Val, cvU64, " ") ;
 	// Unsigned round down
 	P("U-8/16/32 test\r\n") ;
-	pcStringParseValue((char *) "257", (px_t) &x64Val, vfUXX, vs08B, " ") ;
-	pcStringParseValue((char *) "65537", (px_t) &x64Val, vfUXX, vs16B, " ") ;
-	pcStringParseValue((char *) "4294967297", (px_t) &x64Val, vfUXX, vs32B, " ") ;
+	pcStringParseValue((char *) "257", (px_t) &x64Val, cvU08, " ") ;
+	pcStringParseValue((char *) "65537", (px_t) &x64Val, cvU16, " ") ;
+	pcStringParseValue((char *) "4294967297", (px_t) &x64Val, cvU32, " ") ;
 	// Signed round down
 	P("I8 signed test\r\n") ;
-	pcStringParseValue((char *) "130", (px_t) &x64Val, vfIXX, vs08B, " ") ;
-	pcStringParseValue((char *) "-130", (px_t) &x64Val, vfIXX, vs08B, " ") ;
-	pcStringParseValue((char *) "+130", (px_t) &x64Val, vfIXX, vs08B, " ") ;
+	pcStringParseValue((char *) "130", (px_t) &x64Val, cvI08, " ") ;
+	pcStringParseValue((char *) "-130", (px_t) &x64Val, cvI08, " ") ;
+	pcStringParseValue((char *) "+130", (px_t) &x64Val, cvI08, " ") ;
 	P("I16 signed test\r\n") ;
-	pcStringParseValue((char *) "32770", (px_t) &x64Val, vfIXX, vs16B, " ") ;
-	pcStringParseValue((char *) "+32770", (px_t) &x64Val, vfIXX, vs16B, " ") ;
-	pcStringParseValue((char *) "-32770", (px_t) &x64Val, vfIXX, vs16B, " ") ;
+	pcStringParseValue((char *) "32770", (px_t) &x64Val, cvI16, " ") ;
+	pcStringParseValue((char *) "+32770", (px_t) &x64Val, cvI16, " ") ;
+	pcStringParseValue((char *) "-32770", (px_t) &x64Val, cvI16, " ") ;
 	P("I32 signed test\r\n") ;
-	pcStringParseValue((char *) "2147483660", (px_t) &x64Val, vfIXX, vs32B, " ") ;
-	pcStringParseValue((char *) "+2147483660", (px_t) &x64Val, vfIXX, vs32B, " ") ;
-	pcStringParseValue((char *) "-2147483660", (px_t) &x64Val, vfIXX, vs32B, " ") ;
+	pcStringParseValue((char *) "2147483660", (px_t) &x64Val, cvI32, " ") ;
+	pcStringParseValue((char *) "+2147483660", (px_t) &x64Val, cvI32, " ") ;
+	pcStringParseValue((char *) "-2147483660", (px_t) &x64Val, cvI32, " ") ;
 	// Float round down
 	P("F32 test\r\n") ;
-	pcStringParseValue((char *) "1.1", (px_t) &x64Val, vfFXX, vs32B, " ") ;
-	pcStringParseValue((char *) "123.123", (px_t) &x64Val, vfFXX, vs32B, " ") ;
-	pcStringParseValue((char *) "123456.123456", (px_t) &x64Val, vfFXX, vs32B, " ") ;
-	pcStringParseValue((char *) "123456789.123456", (px_t) &x64Val, vfFXX, vs32B, " ") ;
-	pcStringParseValue((char *) "1234567890.1234567", (px_t) &x64Val, vfFXX, vs32B, " ") ;
-	pcStringParseValue((char *) "+1234567890.1234567", (px_t) &x64Val, vfFXX, vs32B, " ") ;
-	pcStringParseValue((char *) "-1234567890.1234567", (px_t) &x64Val, vfFXX, vs32B, " ") ;
+	pcStringParseValue((char *) "1.1", (px_t) &x64Val, cvF32, " ") ;
+	pcStringParseValue((char *) "123.123", (px_t) &x64Val, cvF32, " ") ;
+	pcStringParseValue((char *) "123456.123456", (px_t) &x64Val, cvF32, " ") ;
+	pcStringParseValue((char *) "123456789.123456", (px_t) &x64Val, cvF32, " ") ;
+	pcStringParseValue((char *) "1234567890.1234567", (px_t) &x64Val, cvF32, " ") ;
+	pcStringParseValue((char *) "+1234567890.1234567", (px_t) &x64Val, cvF32, " ") ;
+	pcStringParseValue((char *) "-1234567890.1234567", (px_t) &x64Val, cvF32, " ") ;
 	// Double no round
 	P("F64 test\r\n") ;
-	pcStringParseValue((char *) "12345678901234567.123456789", (px_t) &x64Val, vfFXX, vs64B, " ") ;
+	pcStringParseValue((char *) "12345678901234567.123456789", (px_t) &x64Val, cvF64, " ") ;
 	// Version format
 	P("4x U8 test\r\n") ;
-	pcStringParseValues((char *) "11.22.33.44", (px_t) &x64Val, vfUXX, vs08B, " .", 4) ;
+	pcStringParseValues((char *) "11.22.33.44", (px_t) &x64Val, cvU08, " .", 4) ;
 }
