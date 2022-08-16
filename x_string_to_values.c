@@ -281,7 +281,7 @@ char * pcStringParseValueRange(char * pSrc, px_t pX, cvi_e cvI, const char * pDe
 			IF_myASSERT(debugPARAM, 0);
 			return pcFAILURE ;
 		}
-		IF_P(debugPARSE_VALUE, "\r\n");
+		IF_P(debugPARSE_VALUE, strCRLF);
 		vx64ValueStore(x64Val, pX, cvI);
 	}
 	return pTmp ;

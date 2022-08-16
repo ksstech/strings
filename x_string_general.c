@@ -577,7 +577,7 @@ int	xBitMapDecodeChanges(u32_t Val1, u32_t Val2, u32_t Mask, const char * const 
 		}
 	}
 	if (Flag & bmdcNEWLINE)
-		BufLen += snprintfx(pcBuf+BufLen, BufSize-BufLen, "\r\n");
+		BufLen += snprintfx(pcBuf+BufLen, BufSize-BufLen, strCRLF);
 
 	return BufLen ;
 }
@@ -643,7 +643,7 @@ void vBitMapReport(char * pName, u32_t Value, u32_t Mask, const char * pMesArray
 		P(" %s 0x%02x:", pName, Value) ;
 	vBitMapDecode(Value, Mask, pMesArray) ;
 	if (pName != NULL)
-		P("\r\n") ;
+		P(strCRLF) ;
 }
 
 /**
