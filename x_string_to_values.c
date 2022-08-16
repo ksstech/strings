@@ -206,27 +206,27 @@ char * pcStringParseF64(char *pSrc, double * pDst, int * pSign, const char * pDe
  * @param[out]	x64Ptr - pointer to the location where value is to be stored
  * @return		FAILPTR if no valid value or keyword found else updated pointer to next character to be parsed
  */
-	char *	pTmp ;
-	int	Sign ;
-	px_t pX ;
-	pX.px64	= px64Val ;
 char * pcStringParseX64(char * pSrc, x64_t * px64Val, cvi_e cvI, const char * pDel) {
+	char * pTmp;
+	int	Sign;
+	px_t pX;
+	pX.px64	= px64Val;
 	vf_e cvF = xIndex2Form(cvI);
 	if (cvF == vfFXX)
-		pTmp = pcStringParseF64(pSrc, pX.pf64, &Sign, pDel) ;
+		pTmp = pcStringParseF64(pSrc, pX.pf64, &Sign, pDel);
 	else
-		pTmp = pcStringParseU64(pSrc, pX.pu64, &Sign, pDel) ;
+		pTmp = pcStringParseU64(pSrc, pX.pu64, &Sign, pDel);
 	IF_RETURN_X(pTmp == pcFAILURE, pTmp);
 
 	// ensure NO SIGN is specified if unsigned is requested, and no error returned
 	if (Sign && (cvF == vfUXX)) {
-		*pX.pu64	= 0ULL ;
-		P("  Uxx cannot have +/- sign") ;
-		return pcFAILURE ;
+		*pX.pu64	= 0ULL;
+		P("  Uxx cannot have +/- sign");
+		return pcFAILURE;
 	}
 	if ((cvF == vfIXX) && (Sign == -1))
-		*pX.pi64 *= Sign ;
-	return pTmp ;
+		*pX.pi64 *= Sign;
+	return pTmp;
 }
 
 char * pcStringParseValue(char * pSrc, px_t pX, cvi_e cvI, const char * pDel) {
@@ -291,8 +291,8 @@ char * pcStringParseValues(char * pSrc, px_t pX, cvi_e cvI, const char * pDel, i
 	while(Count--) {
 		char * pTmp	= pcStringParseValue(pSrc, pX, cvI, pDel) ;
 		IF_RETURN_X(pTmp == pcFAILURE, pTmp);
-		pSrc	= pTmp ;								// set starting pointer ready for the next
 		pX = pxAddrNextWithIndex(pX, cvI);
+		pSrc = pTmp ;									// set starting pointer ready for the next
 	}
 	return pSrc ;
 }
