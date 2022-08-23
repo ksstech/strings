@@ -125,7 +125,7 @@ void xstrrev(char * pStr) { xmemrev(pStr, strlen(pStr)); }
  */
 int	strchr_i(const char * pStr, char cChr) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pStr));
-	char * pTmp = strchr(pStr,cChr);
+	char * pTmp = strchr(pStr, cChr);
 	return (pTmp != NULL) ? (pTmp - pStr) : erFAILURE;
 }
 
