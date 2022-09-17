@@ -331,8 +331,7 @@ int	xStringFindDelim(char * pSrc, const char * pDlm, size_t xMax) {
  * @return	pointer to next character to be processed...
  */
 char * pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag, size_t sDst) {
-	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pDst) && halCONFIG_inMEM(pSrc) && halCONFIG_inMEM(pDel) && *pDel && sDst);
-	pSrc += xStringSkipDelim(pSrc, pDel, 0);			// skip over leading delims
+	pSrc += xStringCountSpaces(pSrc);					// skip over leading "spaces"
 	char * pTmp = pDst;
 	do {
 		if ((*pSrc == 0) || strchr(pDel, *pSrc) != NULL) 			// end of string OR delimiter?
