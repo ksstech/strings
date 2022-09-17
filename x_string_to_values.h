@@ -16,17 +16,7 @@ extern "C" {
 u64_t char2u64(char *, u64_t *, int) ;
 u64_t xStringParseX64(char *, char *, int) ;
 int	xHexCharToValue(char, int) ;
-char * pcStringParseU64(char * pSrc, u64_t * pVal, int * pSign, const char * pDel) ;
-char * pcStringParseF64(char *pSrc, double * pDst, int * pSign, const char * pDel) ;
-char * pcStringParseX64(char * pSrc, x64_t * px64Val, cvi_e cvI, const char * pDel) ;
-char * pcStringParseValue(char * pSrc, px_t pX, cvi_e cvI, const char * pDel);
-char * pcStringParseParam(char * pSrc, px_t pX, cvi_e cvI) ;
-char * pcStringParseValueRange(char * pSrc, px_t px, cvi_e cvI, const char * pDel, x32_t x32Lo, x32_t x32Hi) ;
-char * pcStringParseValues(char * pSrc, px_t px, cvi_e cvI, const char * pDel, int Count) ;
-char * pcStringParseNumber(char * pSrc, px_t px) ;
-char * pcStringParseNumberRange(char * pSrc, px_t px, int Min, int Max) ;
 char * pcStringParseIpAddr(char * pStr, px_t px) ;
-void x_string_values_test(void) ;
 
 #ifdef __cplusplus
 }
