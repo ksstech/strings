@@ -382,8 +382,8 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 	NPact = (TPact > 0) ? xStringFindDelim(pSrc+TPact+1, delimDATE1, sizeof("MM")) : 0 ;
 	IF_P(debugTRACK && ioB1GET(dbgSyntax), "C: TPact=%d  NPact=%d", TPact, NPact) ;
 	if (NPact >= 1) {
-		pSrc = pcStringParseValueRange(pSrc, (px_t) &Value, cvI32, NULL, (x32_t) 0, (x32_t) YEAR_BASE_MAX) ;
 		IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Yr '%.*s'", TPact, pSrc) ;
+		pSrc = cvParseRangeX32(pSrc, (px_t) &Value, cvI32, (x32_t) 0, (x32_t) YEAR_BASE_MAX) ;
 		IF_RETURN_X(pSrc == pcFAILURE, pSrc);
 		// Cater for CCYY vs YY form
 		psTM->tm_year = INRANGE(YEAR_BASE_MIN, Value, YEAR_BASE_MAX) ? Value - YEAR_BASE_MIN : Value ;
@@ -398,8 +398,8 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 	IF_P(debugTRACK && ioB1GET(dbgSyntax), "M: TPact=%d  NPact=%d", TPact, NPact) ;
 
 	if ((flag & DATETIME_YEAR_OK) || (NPact == 2) || (NPact == 0 && TPact > 0 && pSrc[TPact+3] == 0)) {
-		pSrc = pcStringParseValueRange(pSrc, (px_t) &Value, cvI32, NULL, (x32_t) 1, (x32_t) MONTHS_IN_YEAR) ;
 		IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Mon '%.*s'", TPact, pSrc) ;
+		pSrc = cvParseRangeX32(pSrc, (px_t) &Value, cvI32, (x32_t) 1, (x32_t) MONTHS_IN_YEAR) ;
 		IF_RETURN_X(pSrc == pcFAILURE, pSrc);
 		psTM->tm_mon = Value - 1 ;						// make 0 relative
 		flag |= DATETIME_MON_OK ;						// mark as done
@@ -419,8 +419,8 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 	IF_P(debugTRACK && ioB1GET(dbgSyntax), "D: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
 
 	if ((flag & DATETIME_MON_OK) || (TPact > 0 && tolower((int) pSrc[TPact]) == CHR_t)) {
-		pSrc = pcStringParseValueRange(pSrc, (px_t) &Value, cvI32, NULL, (x32_t) 1, (x32_t) TPlim) ;
 		IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Day '%.*s'", TPact, pSrc) ;
+		pSrc = cvParseRangeX32(pSrc, (px_t) &Value, cvI32, (x32_t) 1, (x32_t) TPlim) ;
 		IF_RETURN_X(pSrc == pcFAILURE, pSrc);
 		psTM->tm_mday = Value ;
 		flag |= DATETIME_MDAY_OK ;						// mark as done
@@ -449,8 +449,8 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 	IF_P(debugTRACK && ioB1GET(dbgSyntax), "H: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
 
 	if (NPact > 0) {
-		pSrc = pcStringParseValueRange(pSrc, (px_t) &Value, cvI32, NULL, (x32_t) 0, (x32_t) TPlim) ;
 		IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Hr '%.*s'", TPact, pSrc) ;
+		pSrc = cvParseRangeX32(pSrc, (px_t) &Value, cvI32, (x32_t) 0, (x32_t) TPlim) ;
 		IF_RETURN_X(pSrc == pcFAILURE, pSrc);
 		psTM->tm_hour = Value ;
 		flag	|= DATETIME_HOUR_OK ;					// mark as done
@@ -472,8 +472,8 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 	IF_P(debugTRACK && ioB1GET(dbgSyntax), "M: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
 
 	if ((flag & DATETIME_HOUR_OK) || (NPact == 2) || (NPact == 0 && TPact > 0 && pSrc[TPact+3] == 0)) {
-		pSrc = pcStringParseValueRange(pSrc, (px_t) &Value, cvI32, NULL, (x32_t) 0, (x32_t) TPlim) ;
 		IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Min '%.*s'", TPact, pSrc) ;
+		pSrc = cvParseRangeX32(pSrc, (px_t) &Value, cvI32, (x32_t) 0, (x32_t) TPlim) ;
 		IF_RETURN_X(pSrc == pcFAILURE, pSrc);
 		psTM->tm_min = Value ;
 		flag	|= DATETIME_MIN_OK ;					// mark as done
@@ -501,8 +501,8 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 	IF_P(debugTRACK && ioB1GET(dbgSyntax), "S: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
 
 	if ((flag & DATETIME_MIN_OK) || (TPact > 0) || (INRANGE(1, NPact, --TPmax))) {
-		pSrc = pcStringParseValueRange(pSrc, (px_t) &Value, cvI32, NULL, (x32_t) 0, (x32_t) TPlim) ;
 		IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Sec '%.*s'", TPact, pSrc) ;
+		pSrc = cvParseRangeX32(pSrc, (px_t) &Value, cvI32, (x32_t) 0, (x32_t) TPlim) ;
 		IF_RETURN_X(pSrc == pcFAILURE, pSrc);
 		psTM->tm_sec = Value ;
 		flag	|= DATETIME_SEC_OK ;					// mark as done
@@ -524,8 +524,8 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 				return pcFAILURE;
 			TPact = NPact ;
 		}
-		pSrc = pcStringParseValueRange(pSrc, (px_t) &uSecs, cvI32, NULL, (x32_t) 0, (x32_t) (MICROS_IN_SECOND-1)) ;
 		IF_P(debugTRACK && ioB1GET(dbgSyntax), " uS '%.*s'", TPact, pSrc) ;
+		pSrc = cvParseRangeX32(pSrc, (px_t) &uSecs, cvI32, (x32_t) 0, (x32_t) (MICROS_IN_SECOND-1)) ;
 		IF_RETURN_X(pSrc == pcFAILURE, pSrc);
 		TPact = 6 - TPact ;
 		while (TPact--) uSecs *= 10;
