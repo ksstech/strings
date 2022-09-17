@@ -96,11 +96,15 @@ u64_t xStringParseX64(char *pSrc, char * pDst, int xLen) {
 }
 
 /**
-/**
- * pcStringParseIpAddr() - parse a string and return an IP address in NETWORK byte order
+ * @brief	parse a string and return an IP address in NETWORK byte order
  * @param	pStr
  * @param	pVal
  * @return	pcFAILURE or pointer to 1st char after the IP address
  */
 char * pcStringParseIpAddr(char * pSrc, px_t pX) {
+	int Len;
+	int iRV = sscanf(pSrc, "%hhu.%hhu.%hhu.%hhu %n", pX.pu8+3, pX.pu8+2, pX.pu8+1, pX.pu8, &Len);
+	IF_RETURN_MX(iRV != 4, pSrc, pcFAILURE);
+	IF_P(debugTRACK && ioB1GET(dbgSyntax), " '%s' -> %I", Len, pSrc, *pX.pu32);
+	return pSrc += Len;
 }
