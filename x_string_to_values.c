@@ -3,17 +3,17 @@
  * Copyright 2014-22 (c) Andre M. Maree / KSS Technologies (Pty) Ltd.
  */
 
-#include	<netinet/in.h>
-#include	<math.h>
+#include <netinet/in.h>
+#include <math.h>
 
-#include	"hal_config.h"
-#include	"x_string_general.h"
-#include	"x_string_to_values.h"
-#include	"printfx.h"									// +x_definitions +stdarg +stdint +stdio
-#include	"syslog.h"
-#include	"x_errors_events.h"
+#include "hal_variables.h"
+#include "x_string_general.h"
+#include "x_string_to_values.h"
+#include "printfx.h"									// +x_definitions +stdarg +stdint +stdio
+#include "syslog.h"
+#include "x_errors_events.h"
 
-#define	debugFLAG					0x4000
+#define	debugFLAG					0x6000
 
 #define	debugPARSE_U64				(debugFLAG & 0x0001)
 #define	debugPARSE_F64				(debugFLAG & 0x0002)
