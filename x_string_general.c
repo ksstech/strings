@@ -341,7 +341,6 @@ char * pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag,
 		++pSrc;
 	} while (--sDst > 1);			// leave space for terminator
 	*pTmp = 0;
-	IF_P(debugTRACK && ioB1GET(dbgToken), " -> '%s'  pDst='%s'\r\n", pSrc, pDst);
 	return pSrc;					// pointer to NULL or next char [delimiter?] to be processed..
 }
 
@@ -367,7 +366,6 @@ char * pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag,
  *					Fri Dec 31 23:59:59 1999
  */
 char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
-	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inSRAM(pTStamp) && halCONFIG_inSRAM(psTM)) ;
 	u32_t flag = 0;
 	/* TPmax	= ThisPar max length+1
 	 * TPact	= ThisPar actual length ( <0=error  0=not found  >0=length )
