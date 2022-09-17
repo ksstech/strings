@@ -334,7 +334,7 @@ char * pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag,
 	pSrc += xStringCountSpaces(pSrc);					// skip over leading "spaces"
 	char * pTmp = pDst;
 	do {
-		if ((*pSrc == 0) || strchr(pDel, *pSrc) != NULL) 			// end of string OR delimiter?
+		if (*pSrc == 0 || strchr(pDel, *pSrc) != NULL)	// end of string OR delimiter?
 			break;
 		*pTmp = (flag < 0) ? tolower((int)*pSrc) : (flag > 0) ? toupper((int)*pSrc) : *pSrc;
 		++pTmp;
