@@ -530,7 +530,7 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 		TPact = 6 - TPact ;
 		while (TPact--) uSecs *= 10;
 		flag |= DATETIME_MSEC_OK ;						// mark as done
-		IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Val=%d\r\n", uSecs) ;
+		IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Val=%ld\r\n", uSecs);
 	}
 
 	if (pSrc[0] == CHR_Z || pSrc[0] == CHR_z)
@@ -545,9 +545,9 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 		Secs = xTimeCalcSeconds(psTM, 1) ;
 	}
 	*pTStamp = xTimeMakeTimestamp(Secs, uSecs);
-	IF_P(debugTRACK && ioB1GET(dbgSyntax), "flag=%p  uS=%`llu  wday=%d  yday=%d  y=%d  m=%d  d=%d  %dh%02dm%02ds\r\n",
-			flag, *pTStamp, psTM->tm_wday, psTM->tm_yday, psTM->tm_year, psTM->tm_mon,
-			psTM->tm_mday, psTM->tm_hour, psTM->tm_min, psTM->tm_sec);
+	IF_P(debugTRACK && ioB1GET(dbgSyntax), "flag=%p  uS=%'llu  wday=%d  yday=%d  y=%d  m=%d  d=%d  %dh%02dm%02ds\r\n",
+			(void *) flag, *pTStamp, psTM->tm_wday, psTM->tm_yday, psTM->tm_year,
+			psTM->tm_mon, psTM->tm_mday, psTM->tm_hour, psTM->tm_min, psTM->tm_sec);
 	return pSrc;
 }
 
@@ -622,7 +622,7 @@ void vBitMapDecode(u32_t Value, u32_t Mask, const char * const pMesArray[]) {
 	if (Mask) {
 		for (pos = 31, idx = 0, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos) {
 			if (CurMask & Mask & Value)
-				P(" |%02d|%s|", pos, pMesArray[idx]) ;
+				printf(" |%02d|%s|", pos, pMesArray[idx]) ;
 			if (CurMask & Mask)
 				idx++ ;
 		}
@@ -641,10 +641,10 @@ void vBitMapDecode(u32_t Value, u32_t Mask, const char * const pMesArray[]) {
 void vBitMapReport(char * pName, u32_t Value, u32_t Mask, const char * pMesArray[]) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pMesArray)) ;
 	if (pName != NULL)
-		P(" %s 0x%02x:", pName, Value) ;
 	vBitMapDecode(Value, Mask, pMesArray) ;
+		printf(" %s 0x%lX:", pName, Value);
 	if (pName != NULL)
-		P(strCRLF) ;
+		printf(strCRLF);
 }
 
 /**

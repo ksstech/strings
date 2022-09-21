@@ -105,6 +105,6 @@ char * pcStringParseIpAddr(char * pSrc, px_t pX) {
 	int Len;
 	int iRV = sscanf(pSrc, "%hhu.%hhu.%hhu.%hhu %n", pX.pu8+3, pX.pu8+2, pX.pu8+1, pX.pu8, &Len);
 	IF_RETURN_MX(iRV != 4, pSrc, pcFAILURE);
-	IF_P(debugTRACK && ioB1GET(dbgSyntax), " '%s' -> %I", Len, pSrc, *pX.pu32);
+	IF_PX(debugTRACK && ioB1GET(dbgSyntax), " '%s' -> %I", pSrc, *pX.pu32);
 	return pSrc += Len;
 }
