@@ -69,6 +69,57 @@ int	xHexCharToValue(char cChr, int xBase) {
 	return erFAILURE ;
 }
 
+/**
+ * @brief	Convert hex character to hex value and [add+]store it at the location specified.
+ * @param	cChr - hex character to be converted
+ * @param	pU8 - pointer to location to store the value
+ * @return
+ */
+int xSumHexCharToValue(char cChr, u8_t * pU8) {
+	int xVal = xHexCharToValue(cChr, BASE16);
+	if (xVal == erFAILURE)
+		return erFAILURE;
+	if (*pU8)
+		*pU8 <<= 4;
+	return *pU8 += xVal;
+}
+
+/**
+ * @brief
+ * @param
+ * @param
+ * @param
+ * @return
+ */
+int xParseHexString(char * pSrc, u8_t * pU8, size_t sU8) {
+	char * pTmp = strchr(pSrc, CHR_SPACE);				// ' '  somewhere in string?
+	size_t Len = pTmp ? (pTmp - pSrc) : strlen(pSrc);	// determine input string length
+	if (Len == 0)
+		return 0;
+	memset(pU8, 0, sU8);								// clear destination buffer
+	sU8 = Len;											// save source length
+	if (Len & 1) {										// odd input length?
+		if (xSumHexCharToValue(*pSrc++, pU8++) < 0)		// convert a single char
+			return erFAILURE;
+		--Len;
+	}
+	while(Len) {
+		if (xSumHexCharToValue(*pSrc++, pU8) < 0)
+			return erFAILURE;
+		if (xSumHexCharToValue(*pSrc++, pU8++) < 0)
+			return erFAILURE;
+		Len -= 2;
+	}
+	return sU8;
+}
+
+/**
+ * @brief
+ * @param
+ * @param
+ * @param
+ * @return
+ */
 u64_t xStringParseX64(char *pSrc, char * pDst, int xLen) {
 	IF_P(debugPARSE_X64, "%.*s", xLen, pSrc);
 	u64_t xTemp = 0;
