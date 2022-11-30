@@ -10,7 +10,6 @@
 #include "FreeRTOS_Support.h"
 #include "printfx.h"									// +x_definitions +stdarg +stdint +stdio
 #include "syslog.h"
-#include "options.h"
 
 #include "x_errors_events.h"
 #include "x_time.h"
