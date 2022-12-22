@@ -553,7 +553,8 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 // ############################## Bitmap to string decode functions ################################
 
 int	xBitMapDecodeChanges(u32_t Val1, u32_t Val2, u32_t Mask, const char * const pMesArray[], int Flag, char * pcBuf, size_t BufSize) {
-	int	pos, idx, BufLen = 0;
+	int	pos, idx;
+	size_t BufLen = BufSize;
 	u32_t CurMask, C1, C2;
 	const char * pFormat = (Flag & bmdcCOLOUR) ? " %C%s%C" : " %c%s%c";
 	for (pos = 31, idx = 31, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos, --idx) {
@@ -571,15 +572,21 @@ int	xBitMapDecodeChanges(u32_t Val1, u32_t Val2, u32_t Mask, const char * const 
 				C1 = 0;
 			}
 			if (C1)	{							// only show if true or changed
-				BufLen += snprintfx(pcBuf+BufLen, BufSize-BufLen, pFormat,
-					C1, pMesArray[idx], C2);
+				char caTmp[16];
+				const char * pccTmp;
+				if (pMesArray && pMesArray[idx])
+					pccTmp = pMesArray[idx];
+				else {
+					snprintfx(caTmp, sizeof(caTmp), "%d/0x%X", idx, 1 << idx);
+					pccTmp = caTmp;
+				}
+				wsnprintfx(&pcBuf, &BufLen, pFormat, C1, pccTmp, C2);
 			}
 		}
 	}
 	if (Flag & bmdcNEWLINE)
-		BufLen += snprintfx(pcBuf+BufLen, BufSize-BufLen, strCRLF);
-
-	return BufLen ;
+		wsnprintfx(&pcBuf, &BufLen, strCRLF);
+	return BufSize - BufLen;
 }
 
 char * pcBitMapDecodeChanges(u32_t Val1, u32_t Val2, u32_t Mask, const char * const pMesArray[], int Flag) {
@@ -588,17 +595,26 @@ char * pcBitMapDecodeChanges(u32_t Val1, u32_t Val2, u32_t Mask, const char * co
 	return pcBuf ;
 }
 
-int	xBitMapDecode(u32_t Value, u32_t Mask, const char * const pMesArray[], char * pBuf, size_t BufSize) {
-	int	pos, idx, BufLen = 0;
+int	xBitMapDecode(u32_t Value, u32_t Mask, const char * const pMesArray[], char * pcBuf, size_t BufSize) {
+	int	pos, idx;
+	size_t BufLen = BufSize;
 	u32_t CurMask;
 	u8_t Pad = CHR_NUL;
 	for (pos = 31, idx = 31, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos, --idx) {
 		if ((Mask & CurMask) && (Value & CurMask)) {
-			BufLen += snprintfx(pBuf + BufLen, BufSize - BufLen, "%c%s", Pad, pMesArray[idx]);
+			char caTmp[16];
+			const char * pccTmp;
+			if (pMesArray && pMesArray[idx]) {
+				pccTmp = pMesArray[idx];
+			} else {
+				snprintfx(caTmp, sizeof(caTmp), "%d/0x%X", idx, 1 << idx);
+				pccTmp = caTmp;
+			}
+			wsnprintfx(&pcBuf, &BufLen, "%c%s", Pad, pccTmp);
 			Pad = CHR_SPACE;
 		}
 	}
-	return BufLen ;
+	return BufSize - BufLen;
 }
 
 char * pcBitMapDecode(u32_t Value, u32_t Mask, const char * const pMesArray[]) {
