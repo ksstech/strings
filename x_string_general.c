@@ -3,7 +3,7 @@
  * Copyright (c) 2014-22 Andre M. Maree / KSS Technologies (Pty) Ltd.
  */
 
-#include "hal_variables.h"
+#include "main.h"
 
 #include "x_string_general.h"
 #include "x_string_to_values.h"
