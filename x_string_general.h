@@ -40,7 +40,7 @@ enum {
 // ##################################### string operations #########################################
 
 int	xstrverify(char * pStr, char cMin, char cMax, char cNum);
-int	xstrnlen(const char * s, int len);
+size_t xstrnlen(const char * s, size_t len);
 int	xstrncpy(char * s1, char * s2, int len);
 
 int	xmemrev(char * pMem, size_t Size);

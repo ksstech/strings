@@ -61,10 +61,14 @@ int	xstrverify(char * pStr, char cMin, char cMax, char cNum) {
  * @param	len		maximum length to check for/return
  * @return	length of the string excl the terminating '\0'
  */
-int	xstrnlen(const char * s, int len) {
-	int l ;
-	for (l = 0; *s != 0 && l < len; ++s, ++l) ;
-	return l ;
+size_t xstrnlen(const char * pStr, size_t uMax) {
+	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pStr));
+	IF_myASSERT(debugPARAM, uMax > 0);
+//	RP("\n %p '%s' %lu", pStr, pStr, uMax);
+	size_t uNow;
+	for (uNow = 0; (*pStr != 0) && (uNow < uMax); ++pStr, ++uNow);
+//	RP(" %lu]", uNow);
+	return uNow;
 }
 
 /**
