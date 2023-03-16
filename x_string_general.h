@@ -50,6 +50,7 @@ int	strchr_i(const char * pStr, char cChr);
 int xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact);
 int	xstrcmp(const char * s1, const char * s2, bool Exact);
 int	xstrindex(char *, char * *);
+int xstrishex(char *);
 
 int	xStringParseEncoded(char * pDst, char * pSrc);
 int	xStringParseUnicode(char * pDst, char * pSrc, size_t sDst);
