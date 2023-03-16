@@ -196,6 +196,21 @@ int	xstrindex(char * key, char * array[]) {
 	return erFAILURE ;
 }
 
+int xstrishex(char * pStr) {
+	int iRV = 0;
+	while (*pStr == CHR_SPACE) {						// leading ' '
+		++pStr;
+		++iRV;
+	}
+	if (*pStr == CHR_0) {								// leading '0' ?
+		++pStr;
+		++iRV;
+	}
+	if (*pStr == CHR_X || *pStr == CHR_x)				// leading 'X' or 'x' ?
+		return ++iRV;
+	return 0;
+}
+
 // ############################### string parsing routines #########################################
 
 /**
