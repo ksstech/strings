@@ -571,7 +571,8 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 
 // ############################## Bitmap to string decode functions ################################
 
-int	xBitMapDecodeChanges(u32_t Val1, u32_t Val2, u32_t Mask, const char * const pMesArray[], int Flag, char * pcBuf, size_t BufSize) {
+int	xBitMapDecodeChanges(u32_t Val1, u32_t Val2, u32_t Mask,
+		const char * const pMesArray[], int Flag, char * pcBuf, size_t BufSize) {
 	int	pos, idx;
 	size_t BufLen = BufSize;
 	u32_t CurMask, C1, C2;
@@ -579,23 +580,20 @@ int	xBitMapDecodeChanges(u32_t Val1, u32_t Val2, u32_t Mask, const char * const 
 	for (pos = 31, idx = 31, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos, --idx) {
 		if (Mask & CurMask) {
 			if ((Val1 & CurMask) && (Val2 & CurMask)) {	// No change, was 1 still 1
-				C1 = (Flag & bmdcCOLOUR) ? colourFG_WHITE : CHR_TILDE;
-				C2 = (Flag & bmdcCOLOUR) ? attrRESET : CHR_TILDE;
+				if (Flag & bmdcCOLOUR) { C1 = colourFG_WHITE; C2 = attrRESET; } else C1 = C2 = CHR_TILDE;
 			} else if (Val1 & CurMask) {				// 1 -> 0
-				C1 = (Flag & bmdcCOLOUR) ? colourFG_RED : CHR_UNDERSCORE;
-				C2 = (Flag & bmdcCOLOUR) ? attrRESET : CHR_UNDERSCORE;
+				if (Flag & bmdcCOLOUR) { C1 = colourFG_RED; C2 = attrRESET; } else C1 = C2 = CHR_UNDERSCORE;
 			} else if (Val2 & CurMask) {				// 0 -> 1
-				C1 = (Flag & bmdcCOLOUR) ? colourFG_GREEN : CHR_CARET ;
-				C2 = (Flag & bmdcCOLOUR) ? attrRESET : CHR_CARET;
+				if (Flag & bmdcCOLOUR) { C1 = colourFG_GREEN; C2 = attrRESET; } else C1 = C2 = CHR_CARET;
 			} else {									// No change, was 0 still 0
 				C1 = 0;
 			}
-			if (C1)	{							// only show if true or changed
+			if (C1)	{									// only show if true or changed
 				char caTmp[16];
 				const char * pccTmp;
-				if (pMesArray && pMesArray[idx])
+				if (pMesArray && pMesArray[idx]) {
 					pccTmp = pMesArray[idx];
-				else {
+				} else {
 					snprintfx(caTmp, sizeof(caTmp), "%d/0x%X", idx, 1 << idx);
 					pccTmp = caTmp;
 				}
