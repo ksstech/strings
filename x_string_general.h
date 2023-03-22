@@ -56,7 +56,9 @@ int	xStringParseEncoded(char * pDst, char * pSrc);
 int	xStringParseUnicode(char * pDst, char * pSrc, size_t sDst);
 int	xStringSkipDelim(char * pSrc, const char * pDel, size_t sDst);
 int xStringCountSpaces(char * pSrc);
+int xStringCountCRLF(char * pSrc);
 int	xStringFindDelim(char * pSrc, const char * pDlm, size_t xMax);
+
 char * pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag, size_t sDst);
 char * pcStringParseDateTime(char * buf, u64_t * pTStamp, tm_t * psTM);
 

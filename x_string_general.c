@@ -318,6 +318,12 @@ int xStringCountSpaces(char * pSrc) {
 	return iRV;
 }
 
+int xStringCountCRLF(char * pSrc) {
+	int iRV = 0;
+	while (*pSrc == CHR_CR || *pSrc == CHR_LF) { ++pSrc; ++iRV; }
+	return iRV;
+}
+
 int	xStringFindDelim(char * pSrc, const char * pDlm, size_t xMax) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inFLASH(pDlm)) ;
 	int xPos = 0 ;
