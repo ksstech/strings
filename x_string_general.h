@@ -64,12 +64,6 @@ char * pcStringParseDateTime(char * buf, u64_t * pTStamp, tm_t * psTM);
 
 int	xBitMapDecodeChanges(u32_t Val1, u32_t Val2, u32_t Mask, const char * const pMesArray[], int Flag, char * pBuf, size_t BufSize);
 char * pcBitMapDecodeChanges(u32_t Val1, u32_t Val2, u32_t Mask, const char * const pMesArray[], int Flag);
-
-int	xBitMapDecode(u32_t Value, u32_t Mask, const char * const pMesArray[], char * pBuf, size_t BufSize);
-char * pcBitMapDecode(u32_t Value, u32_t Mask, const char * const pMesArray[]);
-
-void vBitMapDecode(u32_t Value, u32_t Mask, const char * const pMesArray[]);
-void vBitMapReport(char * Name, u32_t Value, u32_t Width, const char ** pMesArray);
 int	xStringValueMap(const char * pString, char * pBuf, u32_t uValue, int iWidth);
 
 void  x_string_general_test(void);
