@@ -31,13 +31,6 @@ extern "C" {
 #define	DATETIME_HMS_MASK			(DATETIME_HOUR_OK | DATETIME_MIN_OK | DATETIME_SEC_OK)
 #define	DATETIME_YMDHMS_MASK		(DATETIME_YMD_MASK | DATETIME_HMS_MASK)
 
-// ####################################### enumeration #############################################
-
-enum {
-	bmdcCOLOUR	= (1 << 0),
-	bmdcNEWLINE = (1 << 1),
-};
-
 // ##################################### string operations #########################################
 
 int	xstrverify(char * pStr, char cMin, char cMax, char cNum);
