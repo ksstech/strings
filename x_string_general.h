@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "struct_union.h"
 #include "x_time.h"
 
 #ifdef __cplusplus
@@ -62,7 +63,7 @@ int	xStringFindDelim(char * pSrc, const char * pDlm, size_t xMax);
 char * pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag, size_t sDst);
 char * pcStringParseDateTime(char * buf, u64_t * pTStamp, tm_t * psTM);
 
-int	xBitMapDecodeChanges(u32_t Val1, u32_t Val2, u32_t Mask, const char * const pMesArray[], int Flag, char * pBuf, size_t BufSize);
+int	xBitMapDecodeChanges(report_t * psRprt, u32_t Val1, u32_t Val2, u32_t Mask, const char * const pMesArray[]);
 char * pcBitMapDecodeChanges(u32_t Val1, u32_t Val2, u32_t Mask, const char * const pMesArray[], int Flag);
 int	xStringValueMap(const char * pString, char * pBuf, u32_t uValue, int iWidth);
 

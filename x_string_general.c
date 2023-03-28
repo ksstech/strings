@@ -577,20 +577,28 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 
 // ############################## Bitmap to string decode functions ################################
 
-int	xBitMapDecodeChanges(u32_t Val1, u32_t Val2, u32_t Mask,
-		const char * const pMesArray[], int Flag, char * pcBuf, size_t BufSize) {
+/**
+ * @brief	report bit-level changes in variable
+ * @param	psRprt - pointer to report buffer/flag structure
+ * @param	Val1 - old bit-mapped flag value
+ * @param	Val2 - new bit-mapped flag value
+ * @param	Mask - mask controlling bit positions to report
+ * @param	pMesArray - pointer to array of message pointers
+ * @return	number of characters stored in array or error (< 0)
+ */
+int	xBitMapDecodeChanges(report_t * psRprt, u32_t Val1, u32_t Val2, u32_t Mask, const char * const pMesArray[]) {
 	int	pos, idx;
-	size_t BufLen = BufSize;
+	size_t OriSize = psRprt->Size;
 	u32_t CurMask, C1, C2;
-	const char * pFormat = (Flag & bmdcCOLOUR) ? " %C%s%C" : " %c%s%c";
+	const char * pFormat = (psRprt->sFM.h) ? " %C%s%C" : " %c%s%c";
 	for (pos = 31, idx = 31, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos, --idx) {
 		if (Mask & CurMask) {
 			if ((Val1 & CurMask) && (Val2 & CurMask)) {	// No change, was 1 still 1
-				if (Flag & bmdcCOLOUR) { C1 = colourFG_WHITE; C2 = attrRESET; } else C1 = C2 = CHR_TILDE;
+				if (psRprt->sFM.h) { C1 = colourFG_WHITE; C2 = attrRESET; } else C1 = C2 = CHR_TILDE;
 			} else if (Val1 & CurMask) {				// 1 -> 0
-				if (Flag & bmdcCOLOUR) { C1 = colourFG_RED; C2 = attrRESET; } else C1 = C2 = CHR_UNDERSCORE;
+				if (psRprt->sFM.h) { C1 = colourFG_RED; C2 = attrRESET; } else C1 = C2 = CHR_UNDERSCORE;
 			} else if (Val2 & CurMask) {				// 0 -> 1
-				if (Flag & bmdcCOLOUR) { C1 = colourFG_GREEN; C2 = attrRESET; } else C1 = C2 = CHR_CARET;
+				if (psRprt->sFM.h) { C1 = colourFG_GREEN; C2 = attrRESET; } else C1 = C2 = CHR_CARET;
 			} else {									// No change, was 0 still 0
 				C1 = 0;
 			}
@@ -603,16 +611,20 @@ int	xBitMapDecodeChanges(u32_t Val1, u32_t Val2, u32_t Mask,
 					snprintfx(caTmp, sizeof(caTmp), "%d/0x%X", idx, 1 << idx);
 					pccTmp = caTmp;
 				}
-				wsnprintfx(&pcBuf, &BufLen, pFormat, C1, pccTmp, C2);
+				wprintfx(psRprt, pFormat, C1, pccTmp, C2);
 			}
 		}
 	}
-	if (Flag & bmdcNEWLINE)
-		wsnprintfx(&pcBuf, &BufLen, strCRLF);
-	return BufSize - BufLen;
+	if (psRprt->sFM.b)
+		wprintfx(psRprt, strCRLF);
+	return OriSize - psRprt->Size;
 }
 
 char * pcBitMapDecodeChanges(u32_t Val1, u32_t Val2, u32_t Mask, const char * const pMesArray[], int Flag) {
+	char * pcBuf = pvRtosMalloc(controlSIZE_FLAGS_BUF);
+	report_t sRprt = { .pcBuf = pcBuf, .Size = controlSIZE_FLAGS_BUF, .sFM.u32Val = Flag };
+	xBitMapDecodeChanges(&sRprt, Val1, Val2, Mask, pMesArray);
+	return pcBuf;
 }
 
 /**
