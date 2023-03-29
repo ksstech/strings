@@ -3,15 +3,15 @@
  * Copyright (c) 2014-22 Andre M. Maree / KSS Technologies (Pty) Ltd.
  */
 
-#include "main.h"
+#include "hal_variables.h"			// required by options.h
 
-#include "x_string_general.h"
-#include "x_string_to_values.h"
 #include "FreeRTOS_Support.h"
+#include "options.h"
 #include "printfx.h"									// +x_definitions +stdarg +stdint +stdio
 #include "syslog.h"
-
 #include "x_errors_events.h"
+#include "x_string_general.h"
+#include "x_string_to_values.h"
 #include "x_time.h"
 
 #define	debugFLAG					0xF000
