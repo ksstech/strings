@@ -16,11 +16,6 @@
 
 #define	debugFLAG					0xF000
 
-#define	debugXSTRCMP				(debugFLAG & 0x0001)
-#define	debugPARSE_U64				(debugFLAG & 0x0002)
-#define	debugPARSE_F64				(debugFLAG & 0x0004)
-#define	debugPARSE_X64				(debugFLAG & 0x0008)
-
 #define	debugPARSE_ENCODED			(debugFLAG & 0x0100)
 #define	debugDELIM					(debugFLAG & 0x0200)
 

@@ -16,11 +16,6 @@
 
 #define	debugFLAG					0x6000
 
-#define	debugPARSE_U64				(debugFLAG & 0x0001)
-#define	debugPARSE_F64				(debugFLAG & 0x0002)
-#define	debugPARSE_X64				(debugFLAG & 0x0004)
-#define	debugPARSE_VALUE			(debugFLAG & 0x0008)
-
 #define	debugTIMING					(debugFLAG_GLOBAL & debugFLAG & 0x1000)
 #define	debugTRACK					(debugFLAG_GLOBAL & debugFLAG & 0x2000)
 #define	debugPARAM					(debugFLAG_GLOBAL & debugFLAG & 0x4000)
@@ -122,7 +117,6 @@ int xParseHexString(char * pSrc, u8_t * pU8, size_t sU8) {
  * @return
  */
 u64_t xStringParseX64(char *pSrc, char * pDst, int xLen) {
-	IF_P(debugPARSE_X64, "%.*s", xLen, pSrc);
 	u64_t xTemp = 0;
 	u8_t x8Value = 0;
 	int iRV;
@@ -157,6 +151,5 @@ char * pcStringParseIpAddr(char * pSrc, px_t pX) {
 	int Len;
 	int iRV = sscanf(pSrc, "%hhu.%hhu.%hhu.%hhu %n", pX.pu8+3, pX.pu8+2, pX.pu8+1, pX.pu8, &Len);
 	IF_RETURN_MX(iRV != 4, pSrc, pcFAILURE);
-	IF_PX(debugTRACK && ioB1GET(dbgSyntax), " '%s' -> %I", pSrc, *pX.pu32);
 	return pSrc += Len;
 }
