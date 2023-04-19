@@ -94,6 +94,7 @@ int xParseHexString(char * pSrc, u8_t * pU8, size_t sU8) {
 		return 0;
 	memset(pU8, 0, sU8);								// clear destination buffer
 	sU8 = Len;											// save source length
+	PX("pSrc='%s' ",pSrc);
 	if (Len & 1) {										// odd input length?
 		if (xSumHexCharToValue(*pSrc++, pU8++) < 0)		// convert a single char
 			return erFAILURE;
@@ -106,6 +107,7 @@ int xParseHexString(char * pSrc, u8_t * pU8, size_t sU8) {
 			return erFAILURE;
 		Len -= 2;
 	}
+	PX("-> '%s' Val=%hhu", pSrc, *pU8);
 	return sU8;
 }
 
