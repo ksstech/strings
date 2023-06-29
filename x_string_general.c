@@ -1,13 +1,12 @@
 /*
- * x_string_general.c
- * Copyright (c) 2014-22 Andre M. Maree / KSS Technologies (Pty) Ltd.
+ * x_string_general.c - Copyright (c) 2014-23 Andre M. Maree / KSS Technologies (Pty) Ltd.
  */
 
 #include "hal_variables.h"			// required by options.h
 
 #include "FreeRTOS_Support.h"
 #include "options.h"
-#include "printfx.h"									// +x_definitions +stdarg +stdint +stdio
+#include "printfx.h"				// +x_definitions +stdarg +stdint +stdio
 #include "syslog.h"
 #include "x_errors_events.h"
 #include "x_string_general.h"
@@ -75,36 +74,36 @@ size_t xstrnlen(const char * pStr, size_t uMax) {
  * @return	Actual number of chars copied (x <= n) excluding possible NULL
  */
 int	xstrncpy(char * pDst, char * pSrc, int xLen ) {
-	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pDst) && halCONFIG_inMEM(pSrc) && xLen) ;
-	int Cnt = 0 ;
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pDst) && halCONFIG_inMEM(pSrc) && xLen);
+	int Cnt = 0;
 	while (*pSrc != 0 && Cnt < xLen) {
-		*pDst++ = *pSrc++ ;								// copy across and adjust both pointers
-		Cnt++ ;											// adjust length copied
+		*pDst++ = *pSrc++;								// copy across and adjust both pointers
+		Cnt++;											// adjust length copied
 	}
 	if (Cnt < xLen)
 		*pDst = 0;										// if space left, terminate
-	return Cnt ;
+	return Cnt;
 }
 
 int	xmemrev(char * pMem, size_t Size) {
-	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pMem) && Size > 1) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pMem) && Size > 1);
 	if (pMem == NULL || *pMem == 0 || Size < 2)
 		return erFAILURE;
-	char * pRev = pMem + Size - 1 ;
+	char * pRev = pMem + Size - 1;
 	#if (stringXMEMREV_XOR == 1)
 	for (char * pFwd = pMem; pRev > pFwd; ++pFwd, --pRev) {
-		*pFwd ^= *pRev ;
-		*pRev ^= *pFwd ;
-		*pFwd ^= *pRev ;
+		*pFwd ^= *pRev;
+		*pRev ^= *pFwd;
+		*pFwd ^= *pRev;
 	}
 	#else
 	while (pMem < pRev) {
-		char cTemp = *pMem ;
-		*pMem++	= *pRev ;
-		*pRev--	= cTemp ;
+		char cTemp = *pMem;
+		*pMem++	= *pRev;
+		*pRev--	= cTemp;
 	}
 	#endif
-	return erSUCCESS ;
+	return erSUCCESS;
 }
 
 /**
@@ -116,10 +115,10 @@ void xstrrev(char * pStr) { xmemrev(pStr, strlen(pStr)); }
 
 /**
  * @brief	determine position of character in string (if at all)
- * @param		pStr - pointer to string to scan
- * 				cChr - the character match to find
- * @return		0 -> n the index into the string where the char is found
- * 				FAILURE if no match found, or cChr is NULL
+ * @param	pStr - pointer to string to scan
+ * 			cChr - the character match to find
+ * @return	0 -> n the index into the string where the char is found
+ * 			FAILURE if no match found, or cChr is NULL
  */
 int	strchr_i(const char * pStr, char cChr) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pStr));
@@ -144,11 +143,11 @@ int	xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) {
 			if (toupper((int)*s1) != toupper((int)*s2))
 				break;
 		}
-		++s1 ;
-		++s2 ;
-		--xLen ;
+		++s1;
+		++s2;
+		--xLen;
 	}
-	return (*s1 == 0 && *s2 == 0) ? 1 : (xLen == 0) ? 1 : 0 ;
+	return (*s1 == 0 && *s2 == 0) ? 1 : (xLen == 0) ? 1 : 0;
 }
 
 /**
@@ -158,7 +157,7 @@ int	xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) {
  * @return	true or false based on comparison
  */
 int	xstrcmp(const char * s1, const char * s2, bool Exact) {
-	IF_myASSERT(debugPARAM, halCONFIG_inMEM(s1) && halCONFIG_inMEM(s2)) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inMEM(s1) && halCONFIG_inMEM(s2));
 	while (*s1 && *s2) {
 		if (Exact) {
 			if (*s1 != *s2)
@@ -167,10 +166,10 @@ int	xstrcmp(const char * s1, const char * s2, bool Exact) {
 			if (toupper((int)*s1) != toupper((int)*s2))
 				break;
 		}
-		++s1 ;
-		++s2 ;
+		++s1;
+		++s2;
 	}
-	return (*s1 == 0 && *s2 == 0) ? 1 : 0 ;
+	return (*s1 == 0 && *s2 == 0) ? 1 : 0;
 }
 
 /**
@@ -182,13 +181,13 @@ int	xstrcmp(const char * s1, const char * s2, bool Exact) {
  * @return	if match found, index into array else FAILURE
  */
 int	xstrindex(char * key, char * array[]) {
-	int	i = 0 ;
+	int	i = 0;
 	while (array[i]) {
 		if (strcasecmp(key, array[i]) == 0)
 			return i;									// strings match, return index
-		++i ;
+		++i;
 	}
-	return erFAILURE ;
+	return erFAILURE;
 }
 
 int xstrishex(char * pStr) {
@@ -215,32 +214,32 @@ int xstrishex(char * pStr) {
  * 			1 or greater = length of the parsed string
  */
 int	xStringParseEncoded(char * pDst, char * pSrc) {
-	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pSrc)) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pSrc));
 	IF_myASSERT(debugPARAM && (pDst != NULL), halCONFIG_inSRAM(pDst));
-	int iRV = 0 ;
+	int iRV = 0;
 	if (pDst == NULL) {
-		pDst = pSrc ;
+		pDst = pSrc;
 	}
-	IF_P(debugPARSE_ENCODED, "%s  ", pSrc) ;
+	IF_P(debugPARSE_ENCODED, "%s  ", pSrc);
 	while(*pSrc != 0) {
 		if (*pSrc == CHR_PERCENT) {						// escape char?
-			int Val1 = xHexCharToValue(*++pSrc, BASE16) ;	// yes, parse 1st value
+			int Val1 = xHexCharToValue(*++pSrc, BASE16);	// yes, parse 1st value
 			if (Val1 == erFAILURE)
 				return erFAILURE;
-			int Val2 = xHexCharToValue(*++pSrc, BASE16) ;	// parse 2nd value
+			int Val2 = xHexCharToValue(*++pSrc, BASE16);	// parse 2nd value
 			if (Val2 == erFAILURE)
-				return erFAILURE ;
-			IF_P(debugPARSE_ENCODED, "[%d+%d=%d]  ", Val1, Val2, (Val1 << 4) + Val2) ;
-			*pDst++ = (Val1 << 4) + Val2 ;				// calc & store final value
-			++pSrc ;									// step to next char
+				return erFAILURE;
+			IF_P(debugPARSE_ENCODED, "[%d+%d=%d]  ", Val1, Val2, (Val1 << 4) + Val2);
+			*pDst++ = (Val1 << 4) + Val2;				// calc & store final value
+			++pSrc;									// step to next char
 		} else {
-			*pDst++ = *pSrc++ ;							// copy as is to (new) position
+			*pDst++ = *pSrc++;							// copy as is to (new) position
 		}
-		++iRV ;											// & adjust count...
+		++iRV;											// & adjust count...
 	}
 	*pDst = 0;
-	IF_P(debugPARSE_ENCODED, "%s\r\n", pSrc-iRV) ;
-	return iRV ;
+	IF_P(debugPARSE_ENCODED, "%s\r\n", pSrc-iRV);
+	return iRV;
 }
 
 int	xStringParseUnicode(char * pDst, char * pSrc, size_t Len) {
@@ -294,17 +293,17 @@ int	xStringSkipDelim(char * pSrc, const char * pDel, size_t MaxLen) {
 	// If no length supplied
 	if (MaxLen == 0) {
 		MaxLen = xstrnlen(pSrc, stringMAX_LEN);	// assume NULL terminated and calculate length
-		IF_myASSERT(debugRESULT, MaxLen < stringMAX_LEN) ;		// just a check to verify not understated
+		IF_myASSERT(debugRESULT, MaxLen < stringMAX_LEN);		// just a check to verify not understated
 	}
-	IF_P(debugDELIM, " '%.4s'", pSrc) ;
+	IF_P(debugDELIM, " '%.4s'", pSrc);
 	// continue skipping over valid terminator characters
-	int	CurLen = 0 ;
+	int	CurLen = 0;
 	while (strchr(pDel, *pSrc) && (CurLen < MaxLen)) {
-		++pSrc ;
-		++CurLen ;
+		++pSrc;
+		++CurLen;
 	}
-	IF_P(debugDELIM, "->'%.4s'", pSrc) ;
-	return CurLen ;								// number of delimiters skipped over
+	IF_P(debugDELIM, "->'%.4s'", pSrc);
+	return CurLen;								// number of delimiters skipped over
 }
 
 int xStringCountSpaces(char * pSrc) {
@@ -320,24 +319,24 @@ int xStringCountCRLF(char * pSrc) {
 }
 
 int	xStringFindDelim(char * pSrc, const char * pDlm, size_t xMax) {
-	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inFLASH(pDlm)) ;
-	int xPos = 0 ;
+	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inFLASH(pDlm));
+	int xPos = 0;
 	if (xMax == 0)
 		xMax = strlen(pSrc);
 	while (*pSrc && xMax) {
-		int	xSrc = isupper((int) *pSrc) ? tolower((int) *pSrc) : (int) *pSrc ;
-		const char * pTmp = pDlm ;
+		int	xSrc = isupper((int) *pSrc) ? tolower((int) *pSrc) : (int) *pSrc;
+		const char * pTmp = pDlm;
 		while (*pTmp) {
-			int	xDlm = isupper((int) *pTmp) ? tolower((int) *pTmp) : (int) *pTmp ;
+			int	xDlm = isupper((int) *pTmp) ? tolower((int) *pTmp) : (int) *pTmp;
 			if (xSrc == xDlm)
-				return xPos ;
-			++pTmp ;
+				return xPos;
+			++pTmp;
 		}
-		++xPos ;
-		++pSrc ;
-		--xMax ;
+		++xPos;
+		++pSrc;
+		--xMax;
 	}
-	return erFAILURE ;
+	return erFAILURE;
 }
 
 /**
@@ -397,59 +396,59 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 		++pSrc;											// make sure no leading spaces ....
 
 	// check CCYY?MM? ahead
-	TPact = xStringFindDelim(pSrc, delimDATE1, sizeof("CCYY")) ;
-	NPact = (TPact > 0) ? xStringFindDelim(pSrc+TPact+1, delimDATE1, sizeof("MM")) : 0 ;
-	IF_P(debugTRACK && ioB1GET(dbgSyntax), "C: TPact=%d  NPact=%d", TPact, NPact) ;
+	TPact = xStringFindDelim(pSrc, delimDATE1, sizeof("CCYY"));
+	NPact = (TPact > 0) ? xStringFindDelim(pSrc+TPact+1, delimDATE1, sizeof("MM")) : 0;
+	IF_P(debugTRACK && ioB1GET(dbgSyntax), "C: TPact=%d  NPact=%d", TPact, NPact);
 	if (NPact >= 1) {
-		IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Yr '%.*s'", TPact, pSrc) ;
-		pSrc = cvParseRangeX32(pSrc, (px_t) &Value, cvI32, (x32_t) 0, (x32_t) YEAR_BASE_MAX) ;
+		IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Yr '%.*s'", TPact, pSrc);
+		pSrc = cvParseRangeX32(pSrc, (px_t) &Value, cvI32, (x32_t) 0, (x32_t) YEAR_BASE_MAX);
 		IF_RETURN_X(pSrc == pcFAILURE, pSrc);
 		// Cater for CCYY vs YY form
-		psTM->tm_year = INRANGE(YEAR_BASE_MIN, Value, YEAR_BASE_MAX) ? Value - YEAR_BASE_MIN : Value ;
-		flag |= DATETIME_YEAR_OK ;						// mark as done
-		++pSrc ;										// skip over separator
+		psTM->tm_year = INRANGE(YEAR_BASE_MIN, Value, YEAR_BASE_MAX) ? Value - YEAR_BASE_MIN : Value;
+		flag |= DATETIME_YEAR_OK;						// mark as done
+		++pSrc;										// skip over separator
 	}
-	IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Val=%d\r\n", psTM->tm_year) ;
+	IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Val=%d\r\n", psTM->tm_year);
 
 	// check for MM?DD? ahead
-	TPact = xStringFindDelim(pSrc, delimDATE1, sizeof("MM")) ;
-	NPact = (TPact > 0) ? xStringFindDelim(pSrc+TPact+1, delimDATE2, sizeof("DD")) : 0 ;
-	IF_P(debugTRACK && ioB1GET(dbgSyntax), "M: TPact=%d  NPact=%d", TPact, NPact) ;
+	TPact = xStringFindDelim(pSrc, delimDATE1, sizeof("MM"));
+	NPact = (TPact > 0) ? xStringFindDelim(pSrc+TPact+1, delimDATE2, sizeof("DD")) : 0;
+	IF_P(debugTRACK && ioB1GET(dbgSyntax), "M: TPact=%d  NPact=%d", TPact, NPact);
 
 	if ((flag & DATETIME_YEAR_OK) || (NPact == 2) || (NPact == 0 && TPact > 0 && pSrc[TPact+3] == 0)) {
-		IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Mon '%.*s'", TPact, pSrc) ;
-		pSrc = cvParseRangeX32(pSrc, (px_t) &Value, cvI32, (x32_t) 1, (x32_t) MONTHS_IN_YEAR) ;
+		IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Mon '%.*s'", TPact, pSrc);
+		pSrc = cvParseRangeX32(pSrc, (px_t) &Value, cvI32, (x32_t) 1, (x32_t) MONTHS_IN_YEAR);
 		IF_RETURN_X(pSrc == pcFAILURE, pSrc);
-		psTM->tm_mon = Value - 1 ;						// make 0 relative
-		flag |= DATETIME_MON_OK ;						// mark as done
-		++pSrc ;										// skip over separator
+		psTM->tm_mon = Value - 1;						// make 0 relative
+		flag |= DATETIME_MON_OK;						// mark as done
+		++pSrc;										// skip over separator
 	}
-	IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Val=%d\r\n", psTM->tm_mon) ;
+	IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Val=%d\r\n", psTM->tm_mon);
 
 	if (flag & (DATETIME_YEAR_OK | DATETIME_MON_OK)) {
-		TPmax = sizeof("DD") ;
-		TPlim = xTimeCalcDaysInMonth(psTM) ;
+		TPmax = sizeof("DD");
+		TPlim = xTimeCalcDaysInMonth(psTM);
 	} else {
-		TPmax = sizeof("365") ;
-		TPlim = DAYS_IN_YEAR ;
+		TPmax = sizeof("365");
+		TPlim = DAYS_IN_YEAR;
 	}
-	TPact = xStringFindDelim(pSrc, delimDATE2, TPmax) ;
-	NPact = (TPact < 1 && pSrc[1] == 0) ? 1 : (TPact < 1 && pSrc[2] == 0) ? 2 : 0 ;
-	IF_P(debugTRACK && ioB1GET(dbgSyntax), "D: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
+	TPact = xStringFindDelim(pSrc, delimDATE2, TPmax);
+	NPact = (TPact < 1 && pSrc[1] == 0) ? 1 : (TPact < 1 && pSrc[2] == 0) ? 2 : 0;
+	IF_P(debugTRACK && ioB1GET(dbgSyntax), "D: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim);
 
 	if ((flag & DATETIME_MON_OK) || (TPact > 0 && tolower((int) pSrc[TPact]) == CHR_t)) {
-		IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Day '%.*s'", TPact, pSrc) ;
-		pSrc = cvParseRangeX32(pSrc, (px_t) &Value, cvI32, (x32_t) 1, (x32_t) TPlim) ;
+		IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Day '%.*s'", TPact, pSrc);
+		pSrc = cvParseRangeX32(pSrc, (px_t) &Value, cvI32, (x32_t) 1, (x32_t) TPlim);
 		IF_RETURN_X(pSrc == pcFAILURE, pSrc);
-		psTM->tm_mday = Value ;
-		flag |= DATETIME_MDAY_OK ;						// mark as done
+		psTM->tm_mday = Value;
+		flag |= DATETIME_MDAY_OK;						// mark as done
 	}
-	IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Val=%d\r\n", psTM->tm_mday) ;
+	IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Val=%d\r\n", psTM->tm_mday);
 
 	// calculate day of year ONLY if yyyy-mm-dd read in...
 	if (flag == (DATETIME_YEAR_OK | DATETIME_MON_OK | DATETIME_MDAY_OK)) {
-		psTM->tm_yday = xTimeCalcDaysYTD(psTM) ;
-		flag |= DATETIME_YDAY_OK ;
+		psTM->tm_yday = xTimeCalcDaysYTD(psTM);
+		flag |= DATETIME_YDAY_OK;
 	}
 
 	// skip over 'T' if there
@@ -457,48 +456,48 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 		++pSrc;
 	// check for HH?MM?
 	if (flag & (DATETIME_YEAR_OK | DATETIME_MON_OK | DATETIME_MDAY_OK)) {
-		TPmax = sizeof("HH") ;
-		TPlim = HOURS_IN_DAY - 1 ;
+		TPmax = sizeof("HH");
+		TPlim = HOURS_IN_DAY - 1;
 	} else {
-		TPmax = sizeof("8760") ;
-		TPlim = HOURS_IN_YEAR ;
+		TPmax = sizeof("8760");
+		TPlim = HOURS_IN_YEAR;
 	}
-	TPact = xStringFindDelim(pSrc, delimTIME1, TPmax) ;
-	NPact = (TPact > 0) ? xStringFindDelim(pSrc+TPact+1, delimTIME2, sizeof("HH")) : 0 ;
-	IF_P(debugTRACK && ioB1GET(dbgSyntax), "H: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
+	TPact = xStringFindDelim(pSrc, delimTIME1, TPmax);
+	NPact = (TPact > 0) ? xStringFindDelim(pSrc+TPact+1, delimTIME2, sizeof("HH")) : 0;
+	IF_P(debugTRACK && ioB1GET(dbgSyntax), "H: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim);
 
 	if (NPact > 0) {
-		IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Hr '%.*s'", TPact, pSrc) ;
-		pSrc = cvParseRangeX32(pSrc, (px_t) &Value, cvI32, (x32_t) 0, (x32_t) TPlim) ;
+		IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Hr '%.*s'", TPact, pSrc);
+		pSrc = cvParseRangeX32(pSrc, (px_t) &Value, cvI32, (x32_t) 0, (x32_t) TPlim);
 		IF_RETURN_X(pSrc == pcFAILURE, pSrc);
-		psTM->tm_hour = Value ;
-		flag	|= DATETIME_HOUR_OK ;					// mark as done
-		++pSrc ;										// skip over separator
+		psTM->tm_hour = Value;
+		flag	|= DATETIME_HOUR_OK;					// mark as done
+		++pSrc;										// skip over separator
 	}
-	IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Val=%d\r\n", psTM->tm_hour) ;
+	IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Val=%d\r\n", psTM->tm_hour);
 
 	// check for MM?SS?
 	// [M..]M{m:}[S]S{s.Zz }
 	if (flag & (DATETIME_YEAR_OK | DATETIME_MON_OK | DATETIME_MDAY_OK | DATETIME_HOUR_OK)) {
-		TPmax = sizeof("MM") ;
-		TPlim = MINUTES_IN_HOUR-1 ;
+		TPmax = sizeof("MM");
+		TPlim = MINUTES_IN_HOUR-1;
 	} else {
-		TPmax = sizeof("525600") ;
-		TPlim = MINUTES_IN_YEAR ;
+		TPmax = sizeof("525600");
+		TPlim = MINUTES_IN_YEAR;
 	}
-	TPact = xStringFindDelim(pSrc, delimTIME2, TPmax) ;
-	NPact = (TPact > 0) ? xStringFindDelim(pSrc+TPact+1, delimTIME3, sizeof("SS")) : 0 ;
-	IF_P(debugTRACK && ioB1GET(dbgSyntax), "M: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
+	TPact = xStringFindDelim(pSrc, delimTIME2, TPmax);
+	NPact = (TPact > 0) ? xStringFindDelim(pSrc+TPact+1, delimTIME3, sizeof("SS")) : 0;
+	IF_P(debugTRACK && ioB1GET(dbgSyntax), "M: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim);
 
 	if ((flag & DATETIME_HOUR_OK) || (NPact == 2) || (NPact == 0 && TPact > 0 && pSrc[TPact+3] == 0)) {
-		IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Min '%.*s'", TPact, pSrc) ;
-		pSrc = cvParseRangeX32(pSrc, (px_t) &Value, cvI32, (x32_t) 0, (x32_t) TPlim) ;
+		IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Min '%.*s'", TPact, pSrc);
+		pSrc = cvParseRangeX32(pSrc, (px_t) &Value, cvI32, (x32_t) 0, (x32_t) TPlim);
 		IF_RETURN_X(pSrc == pcFAILURE, pSrc);
-		psTM->tm_min = Value ;
-		flag	|= DATETIME_MIN_OK ;					// mark as done
-		++pSrc ;										// skip over separator
+		psTM->tm_min = Value;
+		flag	|= DATETIME_MIN_OK;					// mark as done
+		++pSrc;										// skip over separator
 	}
-	IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Val=%d\r\n", psTM->tm_min) ;
+	IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Val=%d\r\n", psTM->tm_min);
 
 	/*
 	 * To support parsing of long (>60s) RELATIVE time period we must support values
@@ -509,59 +508,59 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 	 * 		SSSSSSSS[s.Zz ]
 	 */
 	if (flag & (DATETIME_YEAR_OK | DATETIME_MON_OK | DATETIME_MDAY_OK | DATETIME_HOUR_OK | DATETIME_MIN_OK)) {
-		TPmax = sizeof("SS") ;
-		TPlim = SECONDS_IN_MINUTE - 1 ;
+		TPmax = sizeof("SS");
+		TPlim = SECONDS_IN_MINUTE - 1;
 	} else {
-		TPmax = sizeof("31622399") ;
-		TPlim = SECONDS_IN_LEAPYEAR - 1 ;
+		TPmax = sizeof("31622399");
+		TPlim = SECONDS_IN_LEAPYEAR - 1;
 	}
-	TPact = xStringFindDelim(pSrc, delimTIME3, TPmax) ;
-	NPact = (TPact < 1) ? strlen(pSrc) : 0 ;
-	IF_P(debugTRACK && ioB1GET(dbgSyntax), "S: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim) ;
+	TPact = xStringFindDelim(pSrc, delimTIME3, TPmax);
+	NPact = (TPact < 1) ? strlen(pSrc) : 0;
+	IF_P(debugTRACK && ioB1GET(dbgSyntax), "S: TPmax=%d  TPact=%d  NPact=%d  TPlim=%d", TPmax, TPact, NPact, TPlim);
 
 	if ((flag & DATETIME_MIN_OK) || (TPact > 0) || (INRANGE(1, NPact, --TPmax))) {
-		IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Sec '%.*s'", TPact, pSrc) ;
-		pSrc = cvParseRangeX32(pSrc, (px_t) &Value, cvI32, (x32_t) 0, (x32_t) TPlim) ;
+		IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Sec '%.*s'", TPact, pSrc);
+		pSrc = cvParseRangeX32(pSrc, (px_t) &Value, cvI32, (x32_t) 0, (x32_t) TPlim);
 		IF_RETURN_X(pSrc == pcFAILURE, pSrc);
-		psTM->tm_sec = Value ;
-		flag	|= DATETIME_SEC_OK ;					// mark as done
+		psTM->tm_sec = Value;
+		flag	|= DATETIME_SEC_OK;					// mark as done
 	}
-	IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Val=%d\r\n", psTM->tm_sec) ;
+	IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Val=%d\r\n", psTM->tm_sec);
 
 	// check for [.0{...}Z] and skip as appropriate
-	int32_t uSecs = 0 ;
-	TPact = xStringFindDelim(pSrc, ".s", 1) ;
-	TPmax = sizeof("999999") ;
+	int32_t uSecs = 0;
+	TPact = xStringFindDelim(pSrc, ".s", 1);
+	TPmax = sizeof("999999");
 	if (TPact == 0) {
-		++pSrc ;										// skip over '.'
-		TPact = xStringFindDelim(pSrc, "z ", TPmax) ;	// find position of Z/z in buffer
+		++pSrc;										// skip over '.'
+		TPact = xStringFindDelim(pSrc, "z ", TPmax);	// find position of Z/z in buffer
 		if (OUTSIDE(1, TPact, TPmax)) {
 		/* XXX valid terminator not found, but maybe a NUL ?
 		 * still a problem, what about junk after the last number ? */
 			NPact = strlen(pSrc);
 			if (OUTSIDE(1, NPact, --TPmax))
 				return pcFAILURE;
-			TPact = NPact ;
+			TPact = NPact;
 		}
-		IF_P(debugTRACK && ioB1GET(dbgSyntax), " uS '%.*s'", TPact, pSrc) ;
-		pSrc = cvParseRangeX32(pSrc, (px_t) &uSecs, cvI32, (x32_t) 0, (x32_t) (MICROS_IN_SECOND-1)) ;
+		IF_P(debugTRACK && ioB1GET(dbgSyntax), " uS '%.*s'", TPact, pSrc);
+		pSrc = cvParseRangeX32(pSrc, (px_t) &uSecs, cvI32, (x32_t) 0, (x32_t) (MICROS_IN_SECOND-1));
 		IF_RETURN_X(pSrc == pcFAILURE, pSrc);
-		TPact = 6 - TPact ;
+		TPact = 6 - TPact;
 		while (TPact--) uSecs *= 10;
-		flag |= DATETIME_MSEC_OK ;						// mark as done
+		flag |= DATETIME_MSEC_OK;						// mark as done
 		IF_P(debugTRACK && ioB1GET(dbgSyntax), "  Val=%ld\r\n", uSecs);
 	}
 
 	if (pSrc[0] == CHR_Z || pSrc[0] == CHR_z)
 		++pSrc;											// skip over trailing 'Z'
 
-	u32_t Secs ;
+	u32_t Secs;
 	if (flag & DATETIME_YEAR_OK) {						// full timestamp data found?
-		psTM->tm_wday = (xTimeCalcDaysToDate(psTM) + timeEPOCH_DAY_0_NUM) % DAYS_IN_WEEK ;
-		psTM->tm_yday = xTimeCalcDaysYTD(psTM) ;
-		Secs = xTimeCalcSeconds(psTM, 0) ;
+		psTM->tm_wday = (xTimeCalcDaysToDate(psTM) + timeEPOCH_DAY_0_NUM) % DAYS_IN_WEEK;
+		psTM->tm_yday = xTimeCalcDaysYTD(psTM);
+		Secs = xTimeCalcSeconds(psTM, 0);
 	} else {
-		Secs = xTimeCalcSeconds(psTM, 1) ;
+		Secs = xTimeCalcSeconds(psTM, 1);
 	}
 	*pTStamp = xTimeMakeTimestamp(Secs, uSecs);
 	IF_P(debugTRACK && ioB1GET(dbgSyntax), "flag=%p  uS=%'llu  wday=%d  yday=%d  y=%d  m=%d  d=%d  %dh%02dm%02ds\r\n",
@@ -586,7 +585,7 @@ int	xBitMapDecodeChanges(report_t * psRprt, u32_t Val1, u32_t Val2, u32_t Mask, 
 	size_t OriSize = psRprt->Size;
 	u32_t CurMask, C1, C2;
 	const char * pFormat = (psRprt->sFM.h) ? " %C%s%C" : " %c%s%c";
-	for (pos = 31, idx = 31, CurMask = 0x80000000 ; pos >= 0; CurMask >>= 1, --pos, --idx) {
+	for (pos = 31, idx = 31, CurMask = 0x80000000; pos >= 0; CurMask >>= 1, --pos, --idx) {
 		if (Mask & CurMask) {
 			if ((Val1 & CurMask) && (Val2 & CurMask)) {	// No change, was 1 still 1
 				if (psRprt->sFM.h) { C1 = colourFG_WHITE; C2 = attrRESET; } else C1 = C2 = CHR_TILDE;
@@ -632,13 +631,13 @@ char * pcBitMapDecodeChanges(u32_t Val1, u32_t Val2, u32_t Mask, const char * co
  * @return
  */
 int	xStringValueMap(const char * pString, char * pBuf, u32_t uValue, int iWidth) {
-	IF_myASSERT(debugPARAM, halCONFIG_inFLASH(pString) && halCONFIG_inSRAM(pBuf) && (iWidth <= 32) && (strnlen(pString, 33) <= iWidth)) ;
-	u32_t uMask = 0x8000 >> (32 - iWidth) ;
-	int Idx ;
+	IF_myASSERT(debugPARAM, halCONFIG_inFLASH(pString) && halCONFIG_inSRAM(pBuf) && (iWidth <= 32) && (strnlen(pString, 33) <= iWidth));
+	u32_t uMask = 0x8000 >> (32 - iWidth);
+	int Idx;
 	for (Idx = 0; Idx < iWidth; ++Idx, ++pString, ++pBuf, uMask >>= 1)
 		*pBuf = (uValue | uMask) ? *pString : CHR_MINUS;
-	*pBuf = 0 ;
-	return Idx ;
+	*pBuf = 0;
+	return Idx;
 }
 
 // #################################################################################################
@@ -671,91 +670,91 @@ void x_string_general_test(void) {
 #endif
 
 #if	(stringTEST_EPOCH)
-	chartest[64] ;
-	sTSZ.usecs	= xTimeMakeTimestamp(SECONDS_IN_EPOCH_PAST, 0) ;
-	xsnprintf(test, sizeof(test), "%.6Z", &sTSZ) ;
-	pcStringParseDateTime(test, &sTSZ.usecs, &sTM) ;
+	chartest[64];
+	sTSZ.usecs	= xTimeMakeTimestamp(SECONDS_IN_EPOCH_PAST, 0);
+	xsnprintf(test, sizeof(test), "%.6Z", &sTSZ);
+	pcStringParseDateTime(test, &sTSZ.usecs, &sTM);
 	printfx("Input: %s => Date: %s %02d %s %04d Time: %02d:%02d:%02d Day# %d\r\n",
 			test, xTime_GetDayName(sTM.tm_wday), sTM.tm_mday, xTime_GetMonthName(sTM.tm_mon), sTM.tm_year + YEAR_BASE_MIN,
-			sTM.tm_hour, sTM.tm_min, sTM.tm_sec, sTM.tm_yday) ;
+			sTM.tm_hour, sTM.tm_min, sTM.tm_sec, sTM.tm_yday);
 
-	sTSZ.usecs	= xTimeMakeTimestamp(SECONDS_IN_EPOCH_FUTURE, 999999) ;
-	xsnprintf(test, sizeof(test), "%.6Z", &sTSZ) ;
-	pcStringParseDateTime(test, &sTSZ.usecs, &sTM) ;
+	sTSZ.usecs	= xTimeMakeTimestamp(SECONDS_IN_EPOCH_FUTURE, 999999);
+	xsnprintf(test, sizeof(test), "%.6Z", &sTSZ);
+	pcStringParseDateTime(test, &sTSZ.usecs, &sTM);
 	printfx("Input: %s => Date: %s %02d %s %04d Time: %02d:%02d:%02d Day# %d\r\n",
 			test, xTime_GetDayName(sTM.tm_wday), sTM.tm_mday, xTime_GetMonthName(sTM.tm_mon), sTM.tm_year + YEAR_BASE_MIN,
-			sTM.tm_hour, sTM.tm_min, sTM.tm_sec, sTM.tm_yday) ;
+			sTM.tm_hour, sTM.tm_min, sTM.tm_sec, sTM.tm_yday);
 #endif
 
 #if	(stringTEST_DATES)
-	pcStringParseDateTime((char *) "2019/04/15", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
-	pcStringParseDateTime((char *) "2019/04/15 ", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
-	pcStringParseDateTime((char *) "2019/04/15T", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
-	pcStringParseDateTime((char *) "2019/04/15t", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
+	pcStringParseDateTime((char *) "2019/04/15", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
+	pcStringParseDateTime((char *) "2019/04/15 ", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
+	pcStringParseDateTime((char *) "2019/04/15T", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
+	pcStringParseDateTime((char *) "2019/04/15t", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
 
-	pcStringParseDateTime((char *) "2019-04-15", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
-	pcStringParseDateTime((char *) "2019-04-15 ", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
-	pcStringParseDateTime((char *) "2019-04-15T", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
-	pcStringParseDateTime((char *) "2019-04-15t", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
+	pcStringParseDateTime((char *) "2019-04-15", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
+	pcStringParseDateTime((char *) "2019-04-15 ", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
+	pcStringParseDateTime((char *) "2019-04-15T", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
+	pcStringParseDateTime((char *) "2019-04-15t", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
 #endif
 
 #if	(stringTEST_TIMES)
-	pcStringParseDateTime((char *) "1", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
-	pcStringParseDateTime((char *) "1 ", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
-	pcStringParseDateTime((char *) "01", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
-	pcStringParseDateTime((char *) "01Z", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
-	pcStringParseDateTime((char *) "1z", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
+	pcStringParseDateTime((char *) "1", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
+	pcStringParseDateTime((char *) "1 ", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
+	pcStringParseDateTime((char *) "01", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
+	pcStringParseDateTime((char *) "01Z", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
+	pcStringParseDateTime((char *) "1z", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
 
-	pcStringParseDateTime((char *) "1.1", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 || sTSZ.usecs != 1100000 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
-	pcStringParseDateTime((char *) "1.1 ", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 || sTSZ.usecs != 1100000 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
-	pcStringParseDateTime((char *) "1.1Z", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 || sTSZ.usecs != 1100000 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
-	pcStringParseDateTime((char *) "1.1z", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 || sTSZ.usecs != 1100000 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
+	pcStringParseDateTime((char *) "1.1", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 || sTSZ.usecs != 1100000 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
+	pcStringParseDateTime((char *) "1.1 ", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 || sTSZ.usecs != 1100000 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
+	pcStringParseDateTime((char *) "1.1Z", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 || sTSZ.usecs != 1100000 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
+	pcStringParseDateTime((char *) "1.1z", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 || sTSZ.usecs != 1100000 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
 
-	pcStringParseDateTime((char *) "1.000001", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 || sTSZ.usecs != 1000001 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
-	pcStringParseDateTime((char *) "1.000001 ", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 || sTSZ.usecs != 1000001 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
-	pcStringParseDateTime((char *) "1.000001Z", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 || sTSZ.usecs != 1000001 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
-	pcStringParseDateTime((char *) "1.000001z", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 || sTSZ.usecs != 1000001 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
+	pcStringParseDateTime((char *) "1.000001", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 || sTSZ.usecs != 1000001 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
+	pcStringParseDateTime((char *) "1.000001 ", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 || sTSZ.usecs != 1000001 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
+	pcStringParseDateTime((char *) "1.000001Z", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 || sTSZ.usecs != 1000001 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
+	pcStringParseDateTime((char *) "1.000001z", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 || sTSZ.usecs != 1000001 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
 #endif
 
 #if	(stringTEST_DTIME)
-	pcStringParseDateTime((char *) "2019/04/15T1:23:45.678901Z", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=1 || sTM.tm_min!=23 || sTM.tm_sec!=45 || (sTSZ.usecs % MILLION) != 678901 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
+	pcStringParseDateTime((char *) "2019/04/15T1:23:45.678901Z", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=1 || sTM.tm_min!=23 || sTM.tm_sec!=45 || (sTSZ.usecs % MILLION) != 678901 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
 
-	pcStringParseDateTime((char *) "2019-04-15t01h23m45s678901z", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=1 || sTM.tm_min!=23 || sTM.tm_sec!=45 || (sTSZ.usecs % MILLION) != 678901 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
+	pcStringParseDateTime((char *) "2019-04-15t01h23m45s678901z", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=1 || sTM.tm_min!=23 || sTM.tm_sec!=45 || (sTSZ.usecs % MILLION) != 678901 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
 
-	pcStringParseDateTime((char *) "2019/04-15 1:23m45.678901", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=1 || sTM.tm_min!=23 || sTM.tm_sec!=45 || (sTSZ.usecs % MILLION) != 678901 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
+	pcStringParseDateTime((char *) "2019/04-15 1:23m45.678901", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=1 || sTM.tm_min!=23 || sTM.tm_sec!=45 || (sTSZ.usecs % MILLION) != 678901 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
 
-	pcStringParseDateTime((char *) "2019-04/15t01h23:45s678901", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=1 || sTM.tm_min!=23 || sTM.tm_sec!=45 || (sTSZ.usecs % MILLION) != 678901 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
+	pcStringParseDateTime((char *) "2019-04/15t01h23:45s678901", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=1 || sTM.tm_min!=23 || sTM.tm_sec!=45 || (sTSZ.usecs % MILLION) != 678901 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
 #endif
 
 #if	(stringTEST_RELDAT)
-	pcStringParseDateTime((char *) "1/1-1", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=1 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
-	pcStringParseDateTime((char *) "1-1/1", &sTSZ.usecs, &sTM) ;
-	printfx(sTM.tm_year!=1 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__) ;
+	pcStringParseDateTime((char *) "1/1-1", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=1 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
+	pcStringParseDateTime((char *) "1-1/1", &sTSZ.usecs, &sTM);
+	printfx(sTM.tm_year!=1 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
 #endif
 }
