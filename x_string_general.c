@@ -581,11 +581,10 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
  * @return	number of characters stored in array or error (< 0)
  */
 int	xBitMapDecodeChanges(report_t * psRprt, u32_t Val1, u32_t Val2, u32_t Mask, const char * const pMesArray[]) {
-	int	pos, idx;
-	size_t OriSize = psRprt->Size;
+	int	pos, idx, iRV = 0, iFS = 31 - __builtin_clzl(Mask);
 	u32_t CurMask, C1, C2;
 	const char * pFormat = (psRprt->sFM.h) ? " %C%s%C" : " %c%s%c";
-	for (pos = 31, idx = 31, CurMask = 0x80000000; pos >= 0; CurMask >>= 1, --pos, --idx) {
+	for (pos = iFS, idx = iFS, CurMask = 1 << iFS; pos >= 0; CurMask >>= 1, --pos, --idx) {
 		if (Mask & CurMask) {
 			if ((Val1 & CurMask) && (Val2 & CurMask)) {	// No change, was 1 still 1
 				if (psRprt->sFM.h) { C1 = colourFG_WHITE; C2 = attrRESET; } else C1 = C2 = CHR_TILDE;
@@ -605,13 +604,14 @@ int	xBitMapDecodeChanges(report_t * psRprt, u32_t Val1, u32_t Val2, u32_t Mask, 
 					snprintfx(caTmp, sizeof(caTmp), "%d/0x%X", idx, 1 << idx);
 					pccTmp = caTmp;
 				}
-				wprintfx(psRprt, pFormat, C1, pccTmp, C2);
+				iRV += wprintfx(psRprt, pFormat, C1, pccTmp, C2);
 			}
 		}
 	}
+	iRV += wprintfx(psRprt, "%C (0x%0.*X)", attrRESET, iFS+1, Val2);
 	if (psRprt->sFM.b)
 		wprintfx(psRprt, strCRLF);
-	return OriSize - psRprt->Size;
+	return iRV;
 }
 
 char * pcBitMapDecodeChanges(u32_t Val1, u32_t Val2, u32_t Mask, const char * const pMesArray[], int Flag) {
