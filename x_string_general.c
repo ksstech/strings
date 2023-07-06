@@ -133,9 +133,16 @@ int	strchr_i(const char * pStr, char cChr) {
  * @param	flag - true for exact match, else upper/lower case difference ignored
  * @return			true or false based on comparison
  */
-int	xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) {
-	IF_myASSERT(debugPARAM, halCONFIG_inMEM(s1) && halCONFIG_inMEM(s2) && xLen < 1024) ;
-	while (*s1 && *s2 && xLen) {
+int	xstrncmp(const char * s1, const char * s2, size_t xL, bool Exact) {
+	if (xL == 0) {
+		size_t sz1 = strlen(s1);
+		size_t sz2 = strlen(s2);
+		if (sz1 != sz2)
+			return 0;
+		xL = sz1;
+	}
+	IF_myASSERT(debugPARAM, halCONFIG_inMEM(s1) && halCONFIG_inMEM(s2));
+	while (*s1 && *s2 && xL) {
 		if (Exact == true) {
 			if (*s1 != *s2)
 				break;
@@ -145,9 +152,9 @@ int	xstrncmp(const char * s1, const char * s2, size_t xLen, bool Exact) {
 		}
 		++s1;
 		++s2;
-		--xLen;
+		--xL;
 	}
-	return (*s1 == 0 && *s2 == 0) ? 1 : (xLen == 0) ? 1 : 0;
+	return (*s1 == 0 && *s2 == 0) ? 1 : (xL == 0) ? 1 : 0;
 }
 
 /**
