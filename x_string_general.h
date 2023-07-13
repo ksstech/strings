@@ -14,6 +14,7 @@ extern "C" {
 
 // ########################################### MACROS ##############################################
 
+#define	controlSIZE_FLAGS_BUF		(24 * 10)
 
 // ############################## Used for String <> DATETIME conversions ##########################
 
@@ -56,8 +57,7 @@ int	xStringFindDelim(char * pSrc, const char * pDlm, size_t xMax);
 char * pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag, size_t sDst);
 char * pcStringParseDateTime(char * buf, u64_t * pTStamp, tm_t * psTM);
 
-int	xBitMapDecodeChanges(report_t * psRprt, u32_t Val1, u32_t Val2, u32_t Mask, const char * const pMesArray[]);
-char * pcBitMapDecodeChanges(u32_t Val1, u32_t Val2, u32_t Mask, const char * const pMesArray[], int Flag);
+int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const char * const pMesArray[]);
 int	xStringValueMap(const char * pString, char * pBuf, u32_t uValue, int iWidth);
 
 void  x_string_general_test(void);

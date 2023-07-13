@@ -27,8 +27,6 @@
 	#define	stringMAX_LEN			2048
 #endif
 
-#define	controlSIZE_FLAGS_BUF		(24 * 10)
-
 #define	delimDATE1	"-/"
 #define	delimDATE2	"t "
 #define	delimTIME1	"h:"
@@ -587,45 +585,53 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
  * @param	pMesArray - pointer to array of message pointers
  * @return	number of characters stored in array or error (< 0)
  */
-int	xBitMapDecodeChanges(report_t * psRprt, u32_t Val1, u32_t Val2, u32_t Mask, const char * const pMesArray[]) {
-	int	pos, idx, iRV = 0, iFS = 31 - __builtin_clzl(Mask);
+int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const char * const paM[]) {
+	if (Mask == 0)
+		return 0;
+	int	iRV, pos, idx, iFS = 31 - __builtin_clzl(Mask);
 	u32_t CurMask, C1, C2;
-	const char * pFormat = (psRprt->sFM.h) ? " %C%s%C" : " %c%s%c";
+	const char * pccTmp, * pFormat;
+	char caTmp[16];
+	bool aColor = psR && psR->sFM.aColor ? 1 : 0;
+	if (aColor) {
+		iRV = wprintfx(psR, "%C", attrRESET);
+		pFormat = "%C%s%C ";
+	} else {
+		iRV = 0;
+		pFormat = "%c%s%c ";
+	}
 	for (pos = iFS, idx = iFS, CurMask = 1 << iFS; pos >= 0; CurMask >>= 1, --pos, --idx) {
 		if (Mask & CurMask) {
-			if ((Val1 & CurMask) && (Val2 & CurMask)) {	// No change, was 1 still 1
-				if (psRprt->sFM.h) { C1 = colourFG_WHITE; C2 = attrRESET; } else C1 = C2 = CHR_TILDE;
-			} else if (Val1 & CurMask) {				// 1 -> 0
-				if (psRprt->sFM.h) { C1 = colourFG_RED; C2 = attrRESET; } else C1 = C2 = CHR_UNDERSCORE;
-			} else if (Val2 & CurMask) {				// 0 -> 1
-				if (psRprt->sFM.h) { C1 = colourFG_GREEN; C2 = attrRESET; } else C1 = C2 = CHR_CARET;
+			bool B1 = V1 & CurMask ? 1 : 0;
+			bool B2 = V2 & CurMask ? 1 : 0;
+			if (B1 && B2) {								// No change, was 1 still 1
+				if (aColor) { C1 = colourFG_WHITE; C2 = attrRESET; } else C1 = C2 = CHR_TILDE;
+			} else if (B1) {							// 1 -> 0
+				if (aColor) { C1 = attrULINE_ON; C2 = attrULINE_OFF; } else C1 = C2 = CHR_UNDERSCORE;
+//				if (aColor) { C1 = colourFG_RED; C2 = attrRESET; } else C1 = C2 = CHR_UNDERSCORE;
+//				if (aColor) { C1 = attrULINE_ON; C2 = attrULINE_OFF; } else C1 = C2 = CHR_UNDERSCORE;
+			} else if (B2) {							// 0 -> 1
+				if (aColor) { C1 = attrREV_ON; C2 = attrREV_OFF; } else C1 = C2 = CHR_CARET;
+//				if (aColor) { C1 = colourFG_GREEN; C2 = attrRESET; } else C1 = C2 = CHR_CARET;
+//				if (aColor) { C1 = attrREV_ON; C2 = attrREV_OF; } else C1 = C2 = CHR_CARET;
 			} else {									// No change, was 0 still 0
 				C1 = 0;
 			}
 			if (C1)	{									// only show if true or changed
-				char caTmp[16];
-				const char * pccTmp;
-				if (pMesArray && pMesArray[idx]) {
-					pccTmp = pMesArray[idx];
+				if (paM && paM[idx]) {
+					pccTmp = paM[idx];
 				} else {
 					snprintfx(caTmp, sizeof(caTmp), "%d/0x%X", idx, 1 << idx);
 					pccTmp = caTmp;
 				}
-				iRV += wprintfx(psRprt, pFormat, C1, pccTmp, C2);
+				iRV += wprintfx(psR, pFormat, C1, pccTmp, C2);
 			}
 		}
 	}
-	iRV += wprintfx(psRprt, "%C (0x%0.*X)", attrRESET, iFS+1, Val2);
-	if (psRprt->sFM.b)
-		wprintfx(psRprt, strCRLF);
+	iRV += wprintfx(psR, "%C(0x%0.*X)", attrRESET, iFS+1, V2);
+	if (psR == NULL || psR->sFM.aNL)
+		iRV += wprintfx(psR, strCRLF);
 	return iRV;
-}
-
-char * pcBitMapDecodeChanges(u32_t Val1, u32_t Val2, u32_t Mask, const char * const pMesArray[], int Flag) {
-	char * pcBuf = pvRtosMalloc(controlSIZE_FLAGS_BUF);
-	report_t sRprt = { .pcBuf = pcBuf, .Size = controlSIZE_FLAGS_BUF, .sFM.u32Val = Flag };
-	xBitMapDecodeChanges(&sRprt, Val1, Val2, Mask, pMesArray);
-	return pcBuf;
 }
 
 /**
