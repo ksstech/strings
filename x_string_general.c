@@ -56,10 +56,8 @@ int	xstrverify(char * pStr, char cMin, char cMax, char cNum) {
 size_t xstrnlen(const char * pStr, size_t uMax) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pStr));
 	IF_myASSERT(debugPARAM, uMax > 0);
-//	RP("\n %p '%s' %lu", pStr, pStr, uMax);
 	size_t uNow;
 	for (uNow = 0; (*pStr != 0) && (uNow < uMax); ++pStr, ++uNow);
-//	RP(" %lu]", uNow);
 	return uNow;
 }
 
@@ -254,13 +252,13 @@ int	xStringParseUnicode(char * pDst, char * pSrc, size_t Len) {
 	if (pDst == NULL) {
 		pDst = pSrc;
 	}
-	IF_RP(debugPARSE_ENCODED, "%s  ", pSrc);
+	IF_CP(debugPARSE_ENCODED, "%s  ", pSrc);
 	while(*pSrc != 0 && (iRV < Len)) {
 		if (*pSrc == CHR_BACKSLASH && *(pSrc+1) == CHR_u) {		// escape chars?
 			int Val = 0;
 			for (int i = 2; i < 6; ++i) {
 				int iRV2 = xHexCharToValue(pSrc[i], BASE16);
-				IF_RP(debugPARSE_ENCODED, "%c/%d/%d  ",pSrc[i], iRV2, Val);
+				IF_CP(debugPARSE_ENCODED, "%c/%d/%d  ",pSrc[i], iRV2, Val);
 				if (iRV2 == erFAILURE)
 					return iRV2;
 				Val <<= 4;
@@ -272,7 +270,7 @@ int	xStringParseUnicode(char * pDst, char * pSrc, size_t Len) {
 			}
 			*pDst++ = Val & 0xFF;
 			pSrc += 6;
-			IF_RP(debugPARSE_ENCODED, "%d  ", Val);
+			IF_CP(debugPARSE_ENCODED, "%d  ", Val);
 		} else {
 			*pDst++ = *pSrc++;							// copy as is to (new) position
 		}
@@ -280,7 +278,7 @@ int	xStringParseUnicode(char * pDst, char * pSrc, size_t Len) {
 	}
 	if (iRV < Len)
 		*pDst = 0;
-	IF_RP(debugPARSE_ENCODED, "%.*s\r\n", iRV, pDst-iRV);
+	IF_CP(debugPARSE_ENCODED, "%.*s\r\n", iRV, pDst-iRV);
 	return iRV;
 }
 
