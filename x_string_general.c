@@ -606,12 +606,8 @@ int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const c
 				if (aColor) { C1 = colourFG_WHITE; C2 = attrRESET; } else C1 = C2 = CHR_TILDE;
 			} else if (B1) {							// 1 -> 0
 				if (aColor) { C1 = attrULINE_ON; C2 = attrULINE_OFF; } else C1 = C2 = CHR_UNDERSCORE;
-//				if (aColor) { C1 = colourFG_RED; C2 = attrRESET; } else C1 = C2 = CHR_UNDERSCORE;
-//				if (aColor) { C1 = attrULINE_ON; C2 = attrULINE_OFF; } else C1 = C2 = CHR_UNDERSCORE;
 			} else if (B2) {							// 0 -> 1
 				if (aColor) { C1 = attrREV_ON; C2 = attrREV_OFF; } else C1 = C2 = CHR_CARET;
-//				if (aColor) { C1 = colourFG_GREEN; C2 = attrRESET; } else C1 = C2 = CHR_CARET;
-//				if (aColor) { C1 = attrREV_ON; C2 = attrREV_OF; } else C1 = C2 = CHR_CARET;
 			} else {									// No change, was 0 still 0
 				C1 = 0;
 			}
