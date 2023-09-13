@@ -584,8 +584,7 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
  * @return	number of characters stored in array or error (< 0)
  */
 int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const char * const paM[]) {
-	if (Mask == 0)
-		return 0;
+	if (Mask == 0) return 0;
 	int	iRV, pos, idx, iFS = 31 - __builtin_clzl(Mask);
 	u32_t CurMask, C1, C2;
 	const char * pccTmp, * pFormat;
@@ -623,7 +622,7 @@ int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const c
 		}
 	}
 	iRV += wprintfx(psR, "%C(x%0.*X)", attrRESET, iFS+1, V2);
-	if (psR == NULL || psR->sFM.aNL) iRV += wprintfx(psR, strCRLF);
+	if (!psR || psR->sFM.aNL) iRV += wprintfx(psR, strCRLF);
 	return iRV;
 }
 
