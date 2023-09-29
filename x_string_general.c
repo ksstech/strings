@@ -2,16 +2,15 @@
  * x_string_general.c - Copyright (c) 2014-23 Andre M. Maree / KSS Technologies (Pty) Ltd.
  */
 
-#include "hal_variables.h"			// required by options.h
+#include "hal_config.h"
 
 #include "FreeRTOS_Support.h"
-#include "options.h"
+#include "hal_options.h"
 #include "printfx.h"				// +x_definitions +stdarg +stdint +stdio
 #include "syslog.h"
 #include "x_errors_events.h"
 #include "x_string_general.h"
 #include "x_string_to_values.h"
-#include "x_time.h"
 
 #define	debugFLAG					0xF000
 
@@ -38,11 +37,9 @@
  * @return	erSUCCESS if cNum or fewer chars tested OK and a NUL is reached
  */
 int	xstrverify(char * pStr, char cMin, char cMax, char cNum) {
-	if (*pStr == 0)
-		return erFAILURE;
+	if (*pStr == 0) return erFAILURE;
 	while (cNum--) {
-		if (OUTSIDE(cMin, *pStr, cMax))
-			return erFAILURE;
+		if (OUTSIDE(cMin, *pStr, cMax)) return erFAILURE;
 	}
 	return erSUCCESS;
 }
@@ -76,15 +73,13 @@ int	xstrncpy(char * pDst, char * pSrc, int xLen ) {
 		*pDst++ = *pSrc++;								// copy across and adjust both pointers
 		Cnt++;											// adjust length copied
 	}
-	if (Cnt < xLen)
-		*pDst = 0;										// if space left, terminate
+	if (Cnt < xLen) *pDst = 0;							// if space left, terminate
 	return Cnt;
 }
 
 int	xmemrev(char * pMem, size_t Size) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pMem) && Size > 1);
-	if (pMem == NULL || *pMem == 0 || Size < 2)
-		return erFAILURE;
+	if (pMem == NULL || *pMem == 0 || Size < 2) return erFAILURE;
 	char * pRev = pMem + Size - 1;
 	#if (stringXMEMREV_XOR == 1)
 	for (char * pFwd = pMem; pRev > pFwd; ++pFwd, --pRev) {
@@ -133,18 +128,15 @@ int	xstrncmp(const char * s1, const char * s2, size_t xL, bool Exact) {
 	if (xL == 0) {
 		size_t sz1 = strlen(s1);
 		size_t sz2 = strlen(s2);
-		if (sz1 != sz2)
-			return 0;
+		if (sz1 != sz2) return 0;
 		xL = sz1;
 	}
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(s1) && halCONFIG_inMEM(s2));
 	while (*s1 && *s2 && xL) {
 		if (Exact == true) {
-			if (*s1 != *s2)
-				break;
+			if (*s1 != *s2) break;
 		} else {
-			if (toupper((int)*s1) != toupper((int)*s2))
-				break;
+			if (toupper((int)*s1) != toupper((int)*s2)) break;
 		}
 		++s1;
 		++s2;
@@ -163,11 +155,9 @@ int	xstrcmp(const char * s1, const char * s2, bool Exact) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(s1) && halCONFIG_inMEM(s2));
 	while (*s1 && *s2) {
 		if (Exact) {
-			if (*s1 != *s2)
-				break;
+			if (*s1 != *s2) break;
 		} else {
-			if (toupper((int)*s1) != toupper((int)*s2))
-				break;
+			if (toupper((int)*s1) != toupper((int)*s2)) break;
 		}
 		++s1;
 		++s2;
@@ -186,8 +176,7 @@ int	xstrcmp(const char * s1, const char * s2, bool Exact) {
 int	xstrindex(char * key, char * array[]) {
 	int	i = 0;
 	while (array[i]) {
-		if (strcasecmp(key, array[i]) == 0)
-			return i;									// strings match, return index
+		if (strcasecmp(key, array[i]) == 0) return i;	// strings match, return index
 		++i;
 	}
 	return erFAILURE;
@@ -195,16 +184,9 @@ int	xstrindex(char * key, char * array[]) {
 
 int xstrishex(char * pStr) {
 	int iRV = 0;
-	while (*pStr == CHR_SPACE) {						// leading ' '
-		++pStr;
-		++iRV;
-	}
-	if (*pStr == CHR_0) {								// leading '0' ?
-		++pStr;
-		++iRV;
-	}
-	if (*pStr == CHR_X || *pStr == CHR_x)				// leading 'X' or 'x' ?
-		return ++iRV;
+	while (*pStr == CHR_SPACE) { ++pStr; ++iRV; }		// leading ' '
+	if (*pStr == CHR_0) { ++pStr; ++iRV; }				// leading '0' ?
+	if (*pStr == CHR_X || *pStr == CHR_x) return ++iRV;	// leading 'X' or 'x' ?
 	return 0;
 }
 
@@ -220,18 +202,14 @@ int	xStringParseEncoded(char * pDst, char * pSrc) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pSrc));
 	IF_myASSERT(debugPARAM && (pDst != NULL), halCONFIG_inSRAM(pDst));
 	int iRV = 0;
-	if (pDst == NULL) {
-		pDst = pSrc;
-	}
+	if (pDst == NULL) pDst = pSrc;
 	IF_P(debugPARSE_ENCODED, "%s  ", pSrc);
 	while(*pSrc != 0) {
 		if (*pSrc == CHR_PERCENT) {						// escape char?
 			int Val1 = xHexCharToValue(*++pSrc, BASE16);	// yes, parse 1st value
-			if (Val1 == erFAILURE)
-				return erFAILURE;
+			if (Val1 == erFAILURE) return erFAILURE;
 			int Val2 = xHexCharToValue(*++pSrc, BASE16);	// parse 2nd value
-			if (Val2 == erFAILURE)
-				return erFAILURE;
+			if (Val2 == erFAILURE) return erFAILURE;
 			IF_P(debugPARSE_ENCODED, "[%d+%d=%d]  ", Val1, Val2, (Val1 << 4) + Val2);
 			*pDst++ = (Val1 << 4) + Val2;				// calc & store final value
 			++pSrc;									// step to next char
@@ -249,9 +227,7 @@ int	xStringParseUnicode(char * pDst, char * pSrc, size_t Len) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pSrc));
 	IF_myASSERT(debugPARAM && (pDst != NULL), halCONFIG_inSRAM(pDst));
 	int iRV = 0;
-	if (pDst == NULL) {
-		pDst = pSrc;
-	}
+	if (pDst == NULL) pDst = pSrc;
 	IF_CP(debugPARSE_ENCODED, "%s  ", pSrc);
 	while(*pSrc != 0 && (iRV < Len)) {
 		if (*pSrc == CHR_BACKSLASH && *(pSrc+1) == CHR_u) {		// escape chars?
@@ -259,8 +235,7 @@ int	xStringParseUnicode(char * pDst, char * pSrc, size_t Len) {
 			for (int i = 2; i < 6; ++i) {
 				int iRV2 = xHexCharToValue(pSrc[i], BASE16);
 				IF_CP(debugPARSE_ENCODED, "%c/%d/%d  ",pSrc[i], iRV2, Val);
-				if (iRV2 == erFAILURE)
-					return iRV2;
+				if (iRV2 == erFAILURE) return iRV2;
 				Val <<= 4;
 				Val += iRV2;
 			}
@@ -276,8 +251,7 @@ int	xStringParseUnicode(char * pDst, char * pSrc, size_t Len) {
 		}
 		++iRV;											// & adjust count...
 	}
-	if (iRV < Len)
-		*pDst = 0;
+	if (iRV < Len) *pDst = 0;
 	IF_CP(debugPARSE_ENCODED, "%.*s\r\n", iRV, pDst-iRV);
 	return iRV;
 }
@@ -324,15 +298,13 @@ int xStringCountCRLF(char * pSrc) {
 int	xStringFindDelim(char * pSrc, const char * pDlm, size_t xMax) {
 	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inFLASH(pDlm));
 	int xPos = 0;
-	if (xMax == 0)
-		xMax = strlen(pSrc);
+	if (xMax == 0) xMax = strlen(pSrc);
 	while (*pSrc && xMax) {
 		int	xSrc = isupper((int) *pSrc) ? tolower((int) *pSrc) : (int) *pSrc;
 		const char * pTmp = pDlm;
 		while (*pTmp) {
 			int	xDlm = isupper((int) *pTmp) ? tolower((int) *pTmp) : (int) *pTmp;
-			if (xSrc == xDlm)
-				return xPos;
+			if (xSrc == xDlm) return xPos;
 			++pTmp;
 		}
 		++xPos;
@@ -355,8 +327,7 @@ char * pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag,
 	pSrc += xStringCountSpaces(pSrc);					// skip over leading "spaces"
 	char * pTmp = pDst;
 	do {
-		if (*pSrc == 0 || strchr(pDel, *pSrc))			// end of string OR delimiter?
-			break;
+		if (*pSrc == 0 || strchr(pDel, *pSrc)) break;	// end of string OR delimiter?
 		*pTmp = (flag < 0) ? tolower((int)*pSrc) : (flag > 0) ? toupper((int)*pSrc) : *pSrc;
 		++pTmp;
 		++pSrc;
@@ -395,8 +366,7 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 	int	Value, TPlim, TPact, NPact;
 	size_t TPmax;
 	memset(psTM, 0, sizeof(struct tm));					// ensure all start as 0
-	while (*pSrc == CHR_SPACE)
-		++pSrc;											// make sure no leading spaces ....
+	while (*pSrc == CHR_SPACE) ++pSrc;					// make sure no leading spaces ....
 
 	// check CCYY?MM? ahead
 	TPact = xStringFindDelim(pSrc, delimDATE1, sizeof("CCYY"));
