@@ -1,12 +1,13 @@
 /*
- * Copyright (c) 2014-22 Andre M. Maree / KSS Technologies (Pty) Ltd.
- * x_string_general.h
+ * x_string_general.h - Copyright (c) 2014-23 Andre M. Maree / KSS Technologies (Pty) Ltd.
  */
 
 #pragma once
 
 #include "struct_union.h"
+#include "definitions.h"
 #include "x_time.h"
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,7 +58,8 @@ int	xStringFindDelim(char * pSrc, const char * pDlm, size_t xMax);
 char * pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag, size_t sDst);
 char * pcStringParseDateTime(char * buf, u64_t * pTStamp, tm_t * psTM);
 
-int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const char * const pMesArray[]);
+struct report_t;
+int	xBitMapDecodeChanges(struct report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const char * const pMesArray[]);
 int	xStringValueMap(const char * pString, char * pBuf, u32_t uValue, int iWidth);
 
 void  x_string_general_test(void);
