@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2014-22 Andre M. Maree / KSS Technologies (Pty) Ltd.
- * x_string_to_values.h
+ * x_string_to_values.h - Copyright (c) 2014-23 Andre M. Maree / KSS Technologies (Pty) Ltd.
  */
 
 #pragma once
 
-#include	"complex_vars.h"		// struct_union x_time definitions stdint time
+#include "complex_vars.h"		// struct_union x_time definitions stdint time
+#include "definitions.h"
 
 #ifdef __cplusplus
 extern "C" {
