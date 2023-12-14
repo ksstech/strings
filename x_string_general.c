@@ -12,6 +12,9 @@
 #include "x_string_general.h"
 #include "x_string_to_values.h"
 
+#include <string.h>
+#include <ctype.h>
+
 #define	debugFLAG					0xF000
 
 #define	debugPARSE_ENCODED			(debugFLAG & 0x0100)
