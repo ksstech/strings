@@ -594,7 +594,9 @@ int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const c
 			}
 		}
 	}
-	iRV += wprintfx(psR, "%C(x%0.*X)", attrRESET, iFS+1, V2);
+	if (aColor) iRV += wprintfx(psR, "%C", attrRESET);
+	iRV += wprintfx(psR, "(x%0.*X)", iFS+1, V2);
+
 	if (!psR || psR->sFM.aNL) iRV += wprintfx(psR, strCRLF);
 	return iRV;
 }
