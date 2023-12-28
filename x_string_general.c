@@ -633,12 +633,12 @@ int	xStringValueMap(const char * pString, char * pBuf, u32_t uValue, int iWidth)
 #define	stringTEST_PARSE		(stringTEST_FLAG & 0x0020)
 
 void x_string_general_test(void) {
-#if	(stringTEST_FLAG & (stringTEST_EPOCH|stringTEST_DATES|stringTEST_TIMES|stringTEST_DTIME|stringTEST_RELDAT))
+	#if	(stringTEST_FLAG & (stringTEST_EPOCH|stringTEST_DATES|stringTEST_TIMES|stringTEST_DTIME|stringTEST_RELDAT))
 	struct	tm	sTM;
 	tsz_t	sTSZ;
-#endif
+	#endif
 
-#if (stringTEST_PARSE)
+	#if (stringTEST_PARSE)
 	char caSrc[] = ";,Twenty*Two*Character_s ,;Twenty_Three_Characters, ;_Twenty_Four_Characters_, ; _Twenty_Five_Character[s] ;,";
 	char caBuf[24];
 	ioB1SET(dbgSyntax,1);
@@ -647,9 +647,9 @@ void x_string_general_test(void) {
 	pTmp = pcStringParseToken(caBuf, pTmp, " ,;", 0, sizeof(caBuf));
 	pTmp = pcStringParseToken(caBuf, pTmp, " ,;", 0, sizeof(caBuf));
 	pTmp = pcStringParseToken(caBuf, pTmp, " ,;", 0, sizeof(caBuf));
-#endif
+	#endif
 
-#if	(stringTEST_EPOCH)
+	#if	(stringTEST_EPOCH)
 	chartest[64];
 	sTSZ.usecs	= xTimeMakeTimestamp(SECONDS_IN_EPOCH_PAST, 0);
 	xsnprintf(test, sizeof(test), "%.6Z", &sTSZ);
@@ -664,9 +664,9 @@ void x_string_general_test(void) {
 	printfx("Input: %s => Date: %s %02d %s %04d Time: %02d:%02d:%02d Day# %d\r\n",
 			test, xTime_GetDayName(sTM.tm_wday), sTM.tm_mday, xTime_GetMonthName(sTM.tm_mon), sTM.tm_year + YEAR_BASE_MIN,
 			sTM.tm_hour, sTM.tm_min, sTM.tm_sec, sTM.tm_yday);
-#endif
+	#endif
 
-#if	(stringTEST_DATES)
+	#if	(stringTEST_DATES)
 	pcStringParseDateTime((char *) "2019/04/15", &sTSZ.usecs, &sTM);
 	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
 	pcStringParseDateTime((char *) "2019/04/15 ", &sTSZ.usecs, &sTM);
@@ -684,9 +684,9 @@ void x_string_general_test(void) {
 	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
 	pcStringParseDateTime((char *) "2019-04-15t", &sTSZ.usecs, &sTM);
 	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
-#endif
+	#endif
 
-#if	(stringTEST_TIMES)
+	#if	(stringTEST_TIMES)
 	pcStringParseDateTime((char *) "1", &sTSZ.usecs, &sTM);
 	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
 	pcStringParseDateTime((char *) "1 ", &sTSZ.usecs, &sTM);
@@ -715,9 +715,9 @@ void x_string_general_test(void) {
 	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 || sTSZ.usecs != 1000001 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
 	pcStringParseDateTime((char *) "1.000001z", &sTSZ.usecs, &sTM);
 	printfx(sTM.tm_year!=0 || sTM.tm_mon!=0 || sTM.tm_mday!=0 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=1 || sTSZ.usecs != 1000001 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
-#endif
+	#endif
 
-#if	(stringTEST_DTIME)
+	#if	(stringTEST_DTIME)
 	pcStringParseDateTime((char *) "2019/04/15T1:23:45.678901Z", &sTSZ.usecs, &sTM);
 	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=1 || sTM.tm_min!=23 || sTM.tm_sec!=45 || (sTSZ.usecs % MILLION) != 678901 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
 
@@ -729,12 +729,12 @@ void x_string_general_test(void) {
 
 	pcStringParseDateTime((char *) "2019-04/15t01h23:45s678901", &sTSZ.usecs, &sTM);
 	printfx(sTM.tm_year!=49 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=1 || sTM.tm_min!=23 || sTM.tm_sec!=45 || (sTSZ.usecs % MILLION) != 678901 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
-#endif
+	#endif
 
-#if	(stringTEST_RELDAT)
+	#if	(stringTEST_RELDAT)
 	pcStringParseDateTime((char *) "1/1-1", &sTSZ.usecs, &sTM);
 	printfx(sTM.tm_year!=1 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
 	pcStringParseDateTime((char *) "1-1/1", &sTSZ.usecs, &sTM);
 	printfx(sTM.tm_year!=1 || sTM.tm_mon!=3 || sTM.tm_mday!=15 || sTM.tm_hour!=0 || sTM.tm_min!=0 || sTM.tm_sec!=0 ? " #%d Failed\r\n" : " #%d Passed\r\n", __LINE__);
-#endif
+	#endif
 }
