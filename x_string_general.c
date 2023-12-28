@@ -82,7 +82,7 @@ int	xstrncpy(char * pDst, char * pSrc, int xLen ) {
 
 int	xmemrev(char * pMem, size_t Size) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pMem) && Size > 1);
-	if (pMem == NULL || *pMem == 0 || Size < 2) return erFAILURE;
+	if (pMem == NULL || Size < 2) return erFAILURE;
 	char * pRev = pMem + Size - 1;
 	#if (stringXMEMREV_XOR == 1)
 	for (char * pFwd = pMem; pRev > pFwd; ++pFwd, --pRev) {
