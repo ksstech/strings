@@ -89,8 +89,8 @@ int xSumHexCharToValue(char cChr, u8_t * pU8) {
 int xParseHexString(char * pSrc, u8_t * pU8, size_t sU8) {
 	char * pTmp = strchr(pSrc, CHR_SPACE);				// ' '  somewhere in string?
 	size_t Len = pTmp ? (pTmp - pSrc) : strlen(pSrc);	// determine input string length
-	if (Len == 0)
-		return 0;
+	if (Len == 0) return 0;
+
 	memset(pU8, 0, sU8);								// clear destination buffer
 	sU8 = Len;											// save source length
 	PX("pSrc='%s' ",pSrc);
