@@ -570,7 +570,7 @@ int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const c
 		iRV = 0;
 		pFormat = "%c%s%c ";
 	}
-	for (pos = iFS, idx = iFS, CurMask = 1 << iFS; pos >= 0; CurMask >>= 1, --pos, --idx) {
+	for (pos = iFS, idx = iFS, CurMask = (1<<iFS); pos >= 0; CurMask >>= 1, --pos, --idx) {
 		if (Mask & CurMask) {
 			bool B1 = V1 & CurMask ? 1 : 0;
 			bool B2 = V2 & CurMask ? 1 : 0;
@@ -595,7 +595,7 @@ int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const c
 		}
 	}
 	if (aColor) iRV += wprintfx(psR, "%C", attrRESET);
-	iRV += wprintfx(psR, "(x%0.*X)", iFS+1, V2);
+	iRV += wprintfx(psR, "(x%0.*X)", iFS+2, V2);
 
 	if (!psR || psR->sFM.aNL) iRV += wprintfx(psR, strCRLF);
 	return iRV;
