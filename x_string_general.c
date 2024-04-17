@@ -562,7 +562,7 @@ int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const c
 	u32_t CurMask, C1, C2;
 	const char * pccTmp, * pFormat;
 	char caTmp[16];
-	bool aColor = psR && psR->sFM.aColor ? 1 : 0;
+	bool aColor = (psR && psR->sgr) ? 1 : 0;
 	if (aColor) {
 		iRV = wprintfx(psR, "%C", attrRESET);
 		pFormat = "%C%s%C ";
