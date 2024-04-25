@@ -1,9 +1,6 @@
-/*
- * x_string_general.c - Copyright (c) 2014-24 Andre M. Maree / KSS Technologies (Pty) Ltd.
- */
+// x_string_general.c - Copyright (c) 2014-24 Andre M. Maree / KSS Technologies (Pty) Ltd.
 
 #include "hal_platform.h"
-
 #include "FreeRTOS_Support.h"
 #include "hal_options.h"
 #include "printfx.h"				// +x_definitions +stdarg +stdint +stdio
@@ -11,15 +8,14 @@
 #include "x_errors_events.h"
 #include "x_string_general.h"
 #include "x_string_to_values.h"
-
 #include <string.h>
 #include <ctype.h>
 
-#define	debugFLAG					0xF000
+// ########################################### Macros ##############################################
 
+#define	debugFLAG					0xF000
 #define	debugPARSE_ENCODED			(debugFLAG & 0x0100)
 #define	debugDELIM					(debugFLAG & 0x0200)
-
 #define	debugTIMING					(debugFLAG_GLOBAL & debugFLAG & 0x1000)
 #define	debugTRACK					(debugFLAG_GLOBAL & debugFLAG & 0x2000)
 #define	debugPARAM					(debugFLAG_GLOBAL & debugFLAG & 0x4000)
@@ -34,6 +30,8 @@
 #define	delimTIME1	"h:"
 #define	delimTIME2	"m:"
 #define	delimTIME3	"sz. "
+
+// ###################################### Public functions #########################################
 
 /**
  * @brief	verify to a maximum number of characters that each character is within a range
@@ -575,11 +573,23 @@ int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const c
 			bool B1 = V1 & CurMask ? 1 : 0;
 			bool B2 = V2 & CurMask ? 1 : 0;
 			if (B1 && B2) {								// No change, was 1 still 1
-				if (aColor) { C1 = colourFG_WHITE; C2 = attrRESET; } else C1 = C2 = CHR_TILDE;
+				if (aColor) {
+					C1 = xpfSGR(0, 0, 0, colourFG_WHITE);
+					C2 = attrRESET; 
+				} else 
+					C1 = C2 = CHR_TILDE;
 			} else if (B1) {							// 1 -> 0
-				if (aColor) { C1 = attrULINE_ON; C2 = attrULINE_OFF; } else C1 = C2 = CHR_UNDERSCORE;
+				if (aColor) {
+					C1 = xpfSGR(0, 0, attrBRIGHT, colourFG_RED); 
+					C2 = attrRESET; 
+				} else
+					C1 = C2 = CHR_UNDERSCORE;
 			} else if (B2) {							// 0 -> 1
-				if (aColor) { C1 = attrREV_ON; C2 = attrREV_OFF; } else C1 = C2 = CHR_CARET;
+				if (aColor) {
+					C1 = xpfSGR(0, 0, attrBRIGHT, colourFG_BLUE);
+					C2 = attrRESET;
+				} else 
+					C1 = C2 = CHR_CARET;
 			} else {									// No change, was 0 still 0
 				C1 = 0;
 			}
@@ -587,7 +597,7 @@ int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const c
 				if (paM && paM[idx]) {
 					pccTmp = paM[idx];
 				} else {
-					snprintfx(caTmp, sizeof(caTmp), "%d/0x%X", idx, 1 << idx);
+					snprintfx(caTmp, sizeof(caTmp), "%d/x%X", idx, 1 << idx);
 					pccTmp = caTmp;
 				}
 				iRV += wprintfx(psR, pFormat, C1, pccTmp, C2);
@@ -623,12 +633,10 @@ int	xStringValueMap(const char * pString, char * pBuf, u32_t uValue, int iWidth)
 // #################################################################################################
 
 #define	stringTEST_FLAG			0x0000
-
 #define	stringTEST_EPOCH		(stringTEST_FLAG & 0x0001)
 #define	stringTEST_DATES		(stringTEST_FLAG & 0x0002)
 #define	stringTEST_TIMES		(stringTEST_FLAG & 0x0004)
 #define	stringTEST_DTIME		(stringTEST_FLAG & 0x0008)
-
 #define	stringTEST_RELDAT		(stringTEST_FLAG & 0x0010)
 #define	stringTEST_PARSE		(stringTEST_FLAG & 0x0020)
 
