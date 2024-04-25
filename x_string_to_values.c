@@ -1,24 +1,22 @@
-/*
- * x_string_to_values.c
- * Copyright 2014-22 (c) Andre M. Maree / KSS Technologies (Pty) Ltd.
- */
+// x_string_to_values.c - Copyright 2014-24 (c) Andre M. Maree / KSS Technologies (Pty) Ltd.
 
 #include "hal_platform.h"
-
 #include "printfx.h"									// +x_definitions +stdarg +stdint +stdio
 #include "syslog.h"
 #include "x_errors_events.h"
 #include "x_string_general.h"
 #include "x_string_to_values.h"
-
 #include <netinet/in.h>
 
-#define	debugFLAG					0x6000
+// ########################################### Macros ##############################################
 
+#define	debugFLAG					0x6000
 #define	debugTIMING					(debugFLAG_GLOBAL & debugFLAG & 0x1000)
 #define	debugTRACK					(debugFLAG_GLOBAL & debugFLAG & 0x2000)
 #define	debugPARAM					(debugFLAG_GLOBAL & debugFLAG & 0x4000)
 #define	debugRESULT					(debugFLAG_GLOBAL & debugFLAG & 0x8000)
+
+// ###################################### Public functions #########################################
 
 /*
  * char2u64 - Convert n chars to a unsigned 64 bit value
@@ -52,16 +50,14 @@ int	xHexCharToValue(char cChr, int xBase) {
 	if (INRANGE(CHR_0, cChr, CHR_9))
 		return cChr - CHR_0;
 	if (xBase == BASE16) {
-		if (INRANGE(CHR_A, cChr, CHR_F))
-			return cChr - CHR_A + 10;
-		if (INRANGE(CHR_a, cChr, CHR_f))
-			return cChr - CHR_a + 10;
+		if (INRANGE(CHR_A, cChr, CHR_F)) return cChr - CHR_A + 10;
+		if (INRANGE(CHR_a, cChr, CHR_f)) return cChr - CHR_a + 10;
 		if (cChr == CHR_O || cChr == CHR_o) {			// XXX TEMP fix for capture error
 			P("chr= 0x%x '%c'", cChr, cChr);
 			return 0;
 		}
 	}
-	return erFAILURE ;
+	return erFAILURE;
 }
 
 /**
@@ -72,10 +68,8 @@ int	xHexCharToValue(char cChr, int xBase) {
  */
 int xSumHexCharToValue(char cChr, u8_t * pU8) {
 	int xVal = xHexCharToValue(cChr, BASE16);
-	if (xVal == erFAILURE)
-		return erFAILURE;
-	if (*pU8)
-		*pU8 <<= 4;
+	if (xVal == erFAILURE) return erFAILURE;
+	if (*pU8) *pU8 <<= 4;
 	return *pU8 += xVal;
 }
 
