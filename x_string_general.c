@@ -536,7 +536,7 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 	} else {
 		Secs = xTimeCalcSeconds(psTM, 1);
 	}
-	*pTStamp = xTimeMakeTimestamp(Secs, uSecs);
+	*pTStamp = xTimeMakeTimeStamp(Secs, uSecs);
 	IF_P(debugTRACK && ioB1GET(dbgSyntax), "flag=%p  uS=%'llu  wday=%d  yday=%d  y=%d  m=%d  d=%d  %dh%02dm%02ds\r\n",
 			(void *) flag, *pTStamp, psTM->tm_wday, psTM->tm_yday, psTM->tm_year,
 			psTM->tm_mon, psTM->tm_mday, psTM->tm_hour, psTM->tm_min, psTM->tm_sec);
@@ -659,14 +659,14 @@ void x_string_general_test(void) {
 
 	#if	(stringTEST_EPOCH)
 	chartest[64];
-	sTSZ.usecs	= xTimeMakeTimestamp(SECONDS_IN_EPOCH_PAST, 0);
+	sTSZ.usecs	= xTimeMakeTimeStamp(SECONDS_IN_EPOCH_PAST, 0);
 	xsnprintf(test, sizeof(test), "%.6Z", &sTSZ);
 	pcStringParseDateTime(test, &sTSZ.usecs, &sTM);
 	printfx("Input: %s => Date: %s %02d %s %04d Time: %02d:%02d:%02d Day# %d\r\n",
 			test, xTime_GetDayName(sTM.tm_wday), sTM.tm_mday, xTime_GetMonthName(sTM.tm_mon), sTM.tm_year + YEAR_BASE_MIN,
 			sTM.tm_hour, sTM.tm_min, sTM.tm_sec, sTM.tm_yday);
 
-	sTSZ.usecs	= xTimeMakeTimestamp(SECONDS_IN_EPOCH_FUTURE, 999999);
+	sTSZ.usecs	= xTimeMakeTimeStamp(SECONDS_IN_EPOCH_FUTURE, 999999);
 	xsnprintf(test, sizeof(test), "%.6Z", &sTSZ);
 	pcStringParseDateTime(test, &sTSZ.usecs, &sTM);
 	printfx("Input: %s => Date: %s %02d %s %04d Time: %02d:%02d:%02d Day# %d\r\n",
