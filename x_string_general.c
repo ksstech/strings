@@ -2,6 +2,7 @@
 
 #include "hal_platform.h"
 #include "FreeRTOS_Support.h"
+#include "hal_memory.h"
 #include "hal_options.h"
 #include "printfx.h"				// +x_definitions +stdarg +stdint +stdio
 #include "syslog.h"
@@ -52,7 +53,7 @@ int	xstrverify(char * pStr, char cMin, char cMax, char cNum) {
  * @return	length of the string excl the terminating '\0'
  */
 size_t xstrnlen(const char * pStr, size_t uMax) {
-	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pStr));
+	IF_myASSERT(debugPARAM, halMEM_AddrInANY((void *)pStr));
 	IF_myASSERT(debugPARAM, uMax > 0);
 	size_t uNow;
 	for (uNow = 0; (*pStr != 0) && (uNow < uMax); ++pStr, ++uNow);
@@ -68,7 +69,7 @@ size_t xstrnlen(const char * pStr, size_t uMax) {
  * @return	Actual number of chars copied (x <= n) excluding possible NULL
  */
 int	xstrncpy(char * pDst, char * pSrc, int xLen ) {
-	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pDst) && halCONFIG_inMEM(pSrc) && xLen);
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pDst) && halMEM_AddrInANY(pSrc) && xLen);
 	int Cnt = 0;
 	while (*pSrc != 0 && Cnt < xLen) {
 		*pDst++ = *pSrc++;								// copy across and adjust both pointers
@@ -113,7 +114,7 @@ void xstrrev(char * pStr) { xmemrev(pStr, strlen(pStr)); }
  * 			FAILURE if no match found, or cChr is NULL
  */
 int	strchr_i(const char * pStr, char cChr) {
-	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pStr));
+	IF_myASSERT(debugPARAM, halMEM_AddrInANY((void *)pStr));
 	char * pTmp = strchr(pStr, cChr);
 	return (pTmp != NULL) ? (pTmp - pStr) : erFAILURE;
 }
@@ -132,7 +133,7 @@ int	xstrncmp(const char * s1, const char * s2, size_t xL, bool Exact) {
 		if (sz1 != sz2) return 0;
 		xL = sz1;
 	}
-	IF_myASSERT(debugPARAM, halCONFIG_inMEM(s1) && halCONFIG_inMEM(s2));
+	IF_myASSERT(debugPARAM, halMEM_AddrInANY((void *)s1) && halMEM_AddrInANY((void *)s2));
 	while (*s1 && *s2 && xL) {
 		if (Exact == true) {
 			if (*s1 != *s2) break;
@@ -153,7 +154,7 @@ int	xstrncmp(const char * s1, const char * s2, size_t xL, bool Exact) {
  * @return	true or false based on comparison
  */
 int	xstrcmp(const char * s1, const char * s2, bool Exact) {
-	IF_myASSERT(debugPARAM, halCONFIG_inMEM(s1) && halCONFIG_inMEM(s2));
+	IF_myASSERT(debugPARAM, halMEM_AddrInANY((void *)s1) && halMEM_AddrInANY((void *)s2));
 	while (*s1 && *s2) {
 		if (Exact) {
 			if (*s1 != *s2) break;
@@ -267,7 +268,7 @@ int	xStringParseUnicode(char * pDst, char * pSrc, size_t Len) {
  * @return		number of delimiters (to be) skipped
  */
 int	xStringSkipDelim(char * pSrc, const char * pDel, size_t MaxLen) {
-	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inMEM(pDel));
+	IF_myASSERT(debugPARAM, halMEM_AddrInANY(pSrc) && halMEM_AddrInANY((void *)pDel));
 	// If no length supplied
 	if (MaxLen == 0) {
 		MaxLen = xstrnlen(pSrc, stringMAX_LEN);	// assume NULL terminated and calculate length
@@ -297,7 +298,7 @@ int xStringCountCRLF(char * pSrc) {
 }
 
 int	xStringFindDelim(char * pSrc, const char * pDlm, size_t xMax) {
-	IF_myASSERT(debugPARAM, halCONFIG_inMEM(pSrc) && halCONFIG_inFLASH(pDlm));
+	IF_myASSERT(debugPARAM, halMEM_AddrInANY(pSrc));
 	int xPos = 0;
 	if (xMax == 0) xMax = strlen(pSrc);
 	while (*pSrc && xMax) {
