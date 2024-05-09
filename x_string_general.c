@@ -556,59 +556,41 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
  * @return	number of characters stored in array or error (< 0)
  */
 int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const char * const paM[]) {
-	if (Mask == 0) return 0;
-	int	iRV, pos, idx, iFS = 31 - __builtin_clzl(Mask);
-	u32_t CurMask, C1, C2;
-	const char * pccTmp, * pFormat;
-	char caTmp[16];
-	bool aColor = (psR && psR->sgr) ? 1 : 0;
-	if (aColor) {
-		iRV = wprintfx(psR, "%C", attrRESET);
-		pFormat = "%C%s%C ";
-	} else {
-		iRV = 0;
-		pFormat = "%c%s%c ";
-	}
+	if (Mask == 0)
+		return 0;
+	int	pos, idx, iFS = 31 - __builtin_clzl(Mask);
+	u32_t CurMask;
+	bool aColor = repFLAG_TST(psR,uSGR);
+	const char * pFormat = aColor ? "%C%s%C " : "%c%s%c ";
+	int iRV = 0;
 	for (pos = iFS, idx = iFS, CurMask = (1<<iFS); pos >= 0; CurMask >>= 1, --pos, --idx) {
 		if (Mask & CurMask) {
 			bool B1 = V1 & CurMask ? 1 : 0;
 			bool B2 = V2 & CurMask ? 1 : 0;
+			u32_t Col;
 			if (B1 && B2) {								// No change, was 1 still 1
-				if (aColor) {
-					C1 = xpfSGR(0, 0, 0, colourFG_WHITE);
-					C2 = attrRESET; 
-				} else 
-					C1 = C2 = CHR_TILDE;
+				Col = aColor ? xpfSGR(0,0,attrRESET, colourFG_WHITE) : CHR_TILDE;
 			} else if (B1) {							// 1 -> 0
-				if (aColor) {
-					C1 = xpfSGR(0, 0, attrBRIGHT, colourFG_RED); 
-					C2 = attrRESET; 
-				} else
-					C1 = C2 = CHR_UNDERSCORE;
+				Col = aColor ? xpfSGR(0,0,attrRESET, colourFG_RED) : CHR_UNDERSCORE;
 			} else if (B2) {							// 0 -> 1
-				if (aColor) {
-					C1 = xpfSGR(0, 0, attrBRIGHT, colourFG_BLUE);
-					C2 = attrRESET;
-				} else 
-					C1 = C2 = CHR_CARET;
+				Col = aColor ? xpfSGR(0,0,attrRESET, colourFG_BLUE) : CHR_CARET;
 			} else {									// No change, was 0 still 0
-				C1 = 0;
+				Col = 0;
 			}
-			if (C1)	{									// only show if true or changed
-				if (paM && paM[idx]) {
-					pccTmp = paM[idx];
-				} else {
+			if (Col) {									// only show if true or changed
+				const char * pccTmp;
+				char caTmp[16];
+				if (paM && paM[idx]) {					// pointer to string array supplied, entry avail?
+					pccTmp = paM[idx];					// yes, use that as label
+				} else {								// no,
 					snprintfx(caTmp, sizeof(caTmp), "%d/x%X", idx, 1 << idx);
-					pccTmp = caTmp;
+					pccTmp = caTmp;						// create a dynamic "label"
 				}
-				iRV += wprintfx(psR, pFormat, C1, pccTmp, C2);
+				iRV += wprintfx(psR, pFormat, Col, pccTmp, aColor ? xpfSGR(0,0,attrRESET, 0) : CHR_CARET);
 			}
 		}
 	}
-	if (aColor) iRV += wprintfx(psR, "%C", attrRESET);
-	iRV += wprintfx(psR, "(x%0.*X)", iFS+2, V2);
-
-	if (!psR || psR->sFM.aNL) iRV += wprintfx(psR, strCRLF);
+	iRV += wprintfx(psR, "(x%0.*X)%s", iFS+2, V2, repFORM_TST(psR,aNL) ? strCRLF : NULL);
 	return iRV;
 }
 
