@@ -53,7 +53,7 @@ int	xHexCharToValue(char cChr, int xBase) {
 		if (INRANGE(CHR_A, cChr, CHR_F)) return cChr - CHR_A + 10;
 		if (INRANGE(CHR_a, cChr, CHR_f)) return cChr - CHR_a + 10;
 		if (cChr == CHR_O || cChr == CHR_o) {			// XXX TEMP fix for capture error
-			P("chr= 0x%x '%c'", cChr, cChr);
+			IF_PX(debugTRACK, "chr= 0x%x '%c'", cChr, cChr);
 			return 0;
 		}
 	}
