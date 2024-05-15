@@ -604,7 +604,7 @@ int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const c
  * @return
  */
 int	xStringValueMap(const char * pString, char * pBuf, u32_t uValue, int iWidth) {
-	IF_myASSERT(debugPARAM, halCONFIG_inFLASH(pString) && halCONFIG_inSRAM(pBuf) && (iWidth <= 32) && (strnlen(pString, 33) <= iWidth));
+	IF_myASSERT(debugPARAM, halMEM_AddrInANY((void*) pString) && halCONFIG_inSRAM(pBuf) && (iWidth <= 32) && (strnlen(pString, 33) <= iWidth));
 	u32_t uMask = 0x8000 >> (32 - iWidth);
 	int Idx;
 	for (Idx = 0; Idx < iWidth; ++Idx, ++pString, ++pBuf, uMask >>= 1)
