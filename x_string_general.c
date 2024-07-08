@@ -571,9 +571,9 @@ int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const c
 			if (B1 && B2) {								// No change, was 1 still 1
 				Col = aColor ? xpfSGR(0,0,attrRESET, colourFG_WHITE) : CHR_TILDE;
 			} else if (B1) {							// 1 -> 0
-				Col = aColor ? xpfSGR(0,0,attrRESET, colourFG_RED) : CHR_UNDERSCORE;
+				Col = aColor ? xpfSGR(0,0,attrRESET, colourFG_RED) : CHR_US;	// CHR_UNDERSCORE
 			} else if (B2) {							// 0 -> 1
-				Col = aColor ? xpfSGR(0,0,attrRESET, colourFG_BLUE) : CHR_CARET;
+				Col = aColor ? xpfSGR(0,0,attrRESET, colourFG_BLUE) : CHR_RS;	// CHR_CARET
 			} else {									// No change, was 0 still 0
 				Col = 0;
 			}
