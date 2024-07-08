@@ -548,11 +548,11 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 
 /**
  * @brief	report bit-level changes in variable
- * @param	psRprt - pointer to report buffer/flag structure
- * @param	Val1 - old bit-mapped flag value
- * @param	Val2 - new bit-mapped flag value
+ * @param	psR - pointer to report buffer/flag structure
+ * @param	V1 - old bit-mapped flag value
+ * @param	V2 - new bit-mapped flag value
  * @param	Mask - mask controlling bit positions to report
- * @param	pMesArray - pointer to array of message pointers
+ * @param	paM - pointer to array of message pointers
  * @return	number of characters stored in array or error (< 0)
  */
 int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const char * const paM[]) {
@@ -590,7 +590,7 @@ int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const c
 			}
 		}
 	}
-	iRV += wprintfx(psR, "(x%0.*X)%s", iFS+2, V2, repFORM_TST(psR,aNL) ? strCRLF : NULL);
+	iRV += wprintfx(psR, "(x%0.*X)%s", iFS+2, V2, repFORM_TST(psR,aNL) ? strNL : strNUL);
 	return iRV;
 }
 
