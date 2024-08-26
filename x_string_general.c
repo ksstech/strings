@@ -569,15 +569,15 @@ int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const c
 			bool B2 = V2 & CurMask ? 1 : 0;
 			u32_t Col;
 			if (B1 && B2) {								// No change, was 1 still 1
-				Col = aColor ? xpfSGR(0,0,attrRESET, colourFG_WHITE) : CHR_TILDE;
+				Col = aColor ? xpfSGR(0,0,attrRESET, 0) : CHR_TILDE;
 			} else if (B1) {							// 1 -> 0
 				Col = aColor ? xpfSGR(0,0,attrRESET, colourFG_RED) : CHR_US;	// CHR_UNDERSCORE
 			} else if (B2) {							// 0 -> 1
 				Col = aColor ? xpfSGR(0,0,attrRESET, colourFG_BLUE) : CHR_RS;	// CHR_CARET
 			} else {									// No change, was 0 still 0
-				Col = 0;
+				Col = 0xFFFFFFFF;
 			}
-			if (Col) {									// only show if true or changed
+			if (Col != 0xFFFFFFFF) {					// only show if true or changed
 				const char * pccTmp;
 				char caTmp[16];
 				if (paM && paM[idx]) {					// pointer to string array supplied, entry avail?
