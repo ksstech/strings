@@ -69,7 +69,7 @@ size_t xstrnlen(const char * pStr, size_t uMax) {
  * @return	Actual number of chars copied (x <= n) excluding possible NULL
  */
 int	xstrncpy(char * pDst, char * pSrc, int xLen ) {
-	IF_myASSERT(debugPARAM, halMemorySRAM(pDst) && halMemoryANY(pSrc) && xLen);
+	IF_myASSERT(debugPARAM, halMemorySRAM((void*) pDst) && halMemoryANY((void*) pSrc) && xLen);
 	int Cnt = 0;
 	while (*pSrc != 0 && Cnt < xLen) {
 		*pDst++ = *pSrc++;								// copy across and adjust both pointers
@@ -80,7 +80,7 @@ int	xstrncpy(char * pDst, char * pSrc, int xLen ) {
 }
 
 int	xmemrev(char * pMem, size_t Size) {
-	IF_myASSERT(debugPARAM, halMemorySRAM(pMem) && Size > 1);
+	IF_myASSERT(debugPARAM, halMemorySRAM((void*) pMem) && Size > 1);
 	if (pMem == NULL || Size < 2) return erFAILURE;
 	char * pRev = pMem + Size - 1;
 	#if (stringXMEMREV_XOR == 1)
@@ -201,8 +201,8 @@ int xstrishex(char * pStr) {
  * 			1 or greater = length of the parsed string
  */
 int	xStringParseEncoded(char * pDst, char * pSrc) {
-	IF_myASSERT(debugPARAM, halMemorySRAM(pSrc));
-	IF_myASSERT(debugPARAM && (pDst != NULL), halMemorySRAM(pDst));
+	IF_myASSERT(debugPARAM, halMemorySRAM((void*) pSrc));
+	IF_myASSERT(debugPARAM && (pDst != NULL), halMemorySRAM((void*) pDst));
 	int iRV = 0;
 	if (pDst == NULL) pDst = pSrc;
 	IF_PX(debugPARSE_ENCODED, "%s  ", pSrc);
@@ -226,8 +226,8 @@ int	xStringParseEncoded(char * pDst, char * pSrc) {
 }
 
 int	xStringParseUnicode(char * pDst, char * pSrc, size_t Len) {
-	IF_myASSERT(debugPARAM, halMemorySRAM(pSrc));
-	IF_myASSERT(debugPARAM && (pDst != NULL), halMemorySRAM(pDst));
+	IF_myASSERT(debugPARAM, halMemorySRAM((void*) pSrc));
+	IF_myASSERT(debugPARAM && (pDst != NULL), halMemorySRAM((void*) pDst));
 	int iRV = 0;
 	if (pDst == NULL) pDst = pSrc;
 	IF_PX(debugPARSE_ENCODED, "%s  ", pSrc);
@@ -268,7 +268,7 @@ int	xStringParseUnicode(char * pDst, char * pSrc, size_t Len) {
  * @return		number of delimiters (to be) skipped
  */
 int	xStringSkipDelim(char * pSrc, const char * pDel, size_t MaxLen) {
-	IF_myASSERT(debugPARAM, halMemoryANY(pSrc) && halMemoryANY((void *)pDel));
+	IF_myASSERT(debugPARAM, halMemoryANY((void*) pSrc) && halMemoryANY((void *)pDel));
 	// If no length supplied
 	if (MaxLen == 0) {
 		MaxLen = xstrnlen(pSrc, stringMAX_LEN);	// assume NULL terminated and calculate length
@@ -604,7 +604,7 @@ int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const c
  * @return
  */
 int	xStringValueMap(const char * pString, char * pBuf, u32_t uValue, int iWidth) {
-	IF_myASSERT(debugPARAM, halMemoryANY((void*) pString) && halMemorySRAM(pBuf) && (iWidth <= 32) && (strnlen(pString, 33) <= iWidth));
+	IF_myASSERT(debugPARAM, halMemoryANY((void*) pString) && halMemorySRAM((void*) pBuf) && (iWidth <= 32) && (strnlen(pString, 33) <= iWidth));
 	u32_t uMask = 0x8000 >> (32 - iWidth);
 	int Idx;
 	for (Idx = 0; Idx < iWidth; ++Idx, ++pString, ++pBuf, uMask >>= 1)
