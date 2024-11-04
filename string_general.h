@@ -1,12 +1,12 @@
 /*
- * x_string_general.h - Copyright (c) 2014-24 Andre M. Maree / KSS Technologies (Pty) Ltd.
+ * string_general.h - Copyright (c) 2014-24 Andre M. Maree / KSS Technologies (Pty) Ltd.
  */
 
 #pragma once
 
 #include "struct_union.h"
 #include "definitions.h"
-#include "x_time.h"
+#include "timeX.h"
 #include <stddef.h>
 
 #ifdef __cplusplus

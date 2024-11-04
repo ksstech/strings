@@ -1,11 +1,12 @@
-// x_string_to_values.c - Copyright 2014-24 (c) Andre M. Maree / KSS Technologies (Pty) Ltd.
+// string_to_values.c - Copyright 2014-24 (c) Andre M. Maree / KSS Technologies (Pty) Ltd.
 
 #include "hal_platform.h"
 #include "printfx.h"									// +x_definitions +stdarg +stdint +stdio
 #include "syslog.h"
-#include "x_errors_events.h"
-#include "x_string_general.h"
-#include "x_string_to_values.h"
+#include "errors_events.h"
+#include "string_general.h"
+#include "string_to_values.h"
+
 #include <netinet/in.h>
 
 // ########################################### Macros ##############################################

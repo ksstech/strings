@@ -1,4 +1,4 @@
-// x_string_general.c - Copyright (c) 2014-24 Andre M. Maree / KSS Technologies (Pty) Ltd.
+// string_general.c - Copyright (c) 2014-24 Andre M. Maree / KSS Technologies (Pty) Ltd.
 
 #include "hal_platform.h"
 #include "FreeRTOS_Support.h"
@@ -6,9 +6,10 @@
 #include "hal_options.h"
 #include "printfx.h"				// +x_definitions +stdarg +stdint +stdio
 #include "syslog.h"
-#include "x_errors_events.h"
-#include "x_string_general.h"
-#include "x_string_to_values.h"
+#include "errors_events.h"
+#include "string_general.h"
+#include "string_to_values.h"
+
 #include <string.h>
 #include <ctype.h>
 
