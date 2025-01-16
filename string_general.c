@@ -563,7 +563,7 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
  * @return	number of characters stored in array or error (< 0)
  */
 int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const char * const paM[]) {
-	if (Mask == 0)									return 0;
+	if ((V1 == 0 && V2 == 0) || Mask == 0)			return 0;
 	int	pos, idx, iFS = 31 - __builtin_clzl(Mask);
 	u32_t CurMask;
 	bool aColor = repFLAG_TST(psR,uSGR);
