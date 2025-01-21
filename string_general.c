@@ -374,12 +374,7 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 	// check CCYY?MM? ahead
 	TPact = xStringFindDelim(pSrc, delimDATE1, sizeof("CCYY"));
 	NPact = (TPact > 0) ? xStringFindDelim(pSrc+TPact+1, delimDATE1, sizeof("MM")) : 0;
-	#if (appOPTIONS == 1)
-		u8_t Option = ioB1GET(dbgSyntax);
-	#else
-		#warning "Options support required for proper functioning!!!"
-		u8_t Option = 0;
-	#endif
+	u8_t Option = ioB1GET(dbgSyntax);
 	IF_PX(debugTRACK && Option, "C: TPact=%d  NPact=%d", TPact, NPact);
 	if (NPact >= 1) {
 		IF_PX(debugTRACK && Option, "  Yr '%.*s'", TPact, pSrc);
