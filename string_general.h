@@ -1,6 +1,4 @@
-/*
- * string_general.h - Copyright (c) 2014-24 Andre M. Maree / KSS Technologies (Pty) Ltd.
- */
+// string_general.h
 
 #pragma once
 

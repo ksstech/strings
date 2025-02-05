@@ -558,8 +558,9 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
  * @return	number of characters stored in array or error (< 0)
  */
 int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const char * const paM[]) {
-	if ((V1 == 0 && V2 == 0) || Mask == 0)			return 0;
-	int	pos, idx, iFS = 31 - __builtin_clzl(Mask);
+	if ((V1 == 0 && V2 == 0) || Mask == 0)				// if no bits set in both values, or no bits set in mask
+		return 0;										// nothing to do, return....
+	int	pos, idx, iFS = 31 - __builtin_clzl(Mask);		// determine index of first bit set
 	u32_t CurMask;
 	bool aColor = repFLAG_TST(psR,uSGR);
 	const char * pFormat = aColor ? "%C%s%C " : "%c%s%c ";
