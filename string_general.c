@@ -562,7 +562,7 @@ int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const c
 		return 0;										// nothing to do, return....
 	int	pos, idx, iFS = 31 - __builtin_clzl(Mask);		// determine index of first bit set
 	u32_t CurMask;
-	bool aColor = repFLAG_TST(psR,uSGR);
+	bool aColor = (psR && psR->uSGR) ? 1 : 0;
 	const char * pFormat = aColor ? "%C%s%C " : "%c%s%c ";
 	int iRV = 0;
 	for (pos = iFS, idx = iFS, CurMask = (1<<iFS); pos >= 0; CurMask >>= 1, --pos, --idx) {
