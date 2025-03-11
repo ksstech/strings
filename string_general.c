@@ -593,12 +593,13 @@ int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const c
 		}
 	}
 	iRV += wprintfx(psR, "(x%0.*X)", iFS+2, V2);
-	if (fmTST(aNL)) iRV += wprintfx(psR, strNL);
+	if (fmTST(aNL))
+		iRV += wprintfx(psR, strNL);
 	return iRV;
 }
 
 /**
- * xStringValueMap() - build an output string using bit-mapped mask to select characters from a source string
+ * @brief	build an output string using bit-mapped mask to select characters from a source string
  * @brief	with source string "ABCDEFGHIJKLMNOPQRST" and value 0x000AAAAA will build "A-C-E-G-I-K-M-O-Q-S-"
  * @param	pString
  * @param	pBuf
