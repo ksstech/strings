@@ -593,9 +593,11 @@ int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const c
 			}
 		}
 	}
-	iRV += wprintfx(psR, "(x%0.*X)", iFS+2, V2);
-	if (fmTST(aNL))
-		iRV += wprintfx(psR, strNL);
+	if (iRV) {
+		iRV += wprintfx(psR, "(x%0.*X)", iFS+2, V2);
+		if (fmTST(aNL))
+			iRV += wprintfx(psR, strNL);
+	}
 	return iRV;
 }
 
