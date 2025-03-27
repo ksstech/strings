@@ -654,7 +654,7 @@ void x_string_general_test(void) {
 	#if	(stringTEST_EPOCH)
 	char test[64];
 	sTSZ.usecs	= xTimeMakeTimeStamp(SECONDS_IN_EPOCH_PAST, 0);
-	xsnprintf(test, sizeof(test), "%.6Z", &sTSZ);
+	snprintfx(test, sizeof(test), "%.6Z", &sTSZ);
 	pcStringParseDateTime(test, &sTSZ.usecs, &sTM);
 	printfx("Input: %s => Date: %s %02d %s %04d Time: %02d:%02d:%02d Day# %d\r\n",
 			test, xTime_GetDayName(sTM.tm_wday), sTM.tm_mday, xTime_GetMonthName(sTM.tm_mon), sTM.tm_year + YEAR_BASE_MIN,
