@@ -631,9 +631,9 @@ int	xStringValueMap(const char * pString, char * pBuf, u32_t uValue, int iWidth)
 #define	stringTEST_PARSE		(stringTEST_FLAG & 0x0020)
 
 void x_string_general_test(void) {
-	#if	(stringTEST_FLAG & (stringTEST_EPOCH|stringTEST_DATES|stringTEST_TIMES|stringTEST_DTIME|stringTEST_RELDAT))
-	struct	tm	sTM;
-	tsz_t	sTSZ;
+	#if	(stringTEST_EPOCH || stringTEST_DATES || stringTEST_TIMES || stringTEST_DTIME || stringTEST_RELDAT)
+	struct tm sTM;
+	tsz_t sTSZ;
 	#endif
 
 	#if (stringTEST_PARSE)
@@ -652,7 +652,7 @@ void x_string_general_test(void) {
 	#endif
 
 	#if	(stringTEST_EPOCH)
-	chartest[64];
+	char test[64];
 	sTSZ.usecs	= xTimeMakeTimeStamp(SECONDS_IN_EPOCH_PAST, 0);
 	xsnprintf(test, sizeof(test), "%.6Z", &sTSZ);
 	pcStringParseDateTime(test, &sTSZ.usecs, &sTM);
