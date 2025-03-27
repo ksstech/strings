@@ -589,14 +589,14 @@ int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const c
 					snprintfx(caTmp, sizeof(caTmp), "%d/x%X", idx, 1 << idx);
 					pccTmp = caTmp;						// create a dynamic "label"
 				}
-				iRV += wprintfx(psR, pFormat, Col, pccTmp, 0);				// print string (with colour/char) then reset color
+				iRV += report(psR, pFormat, Col, pccTmp, 0);				// print string (with colour/char) then reset color
 			}
 		}
 	}
 	if (iRV) {
-		iRV += wprintfx(psR, "(x%0.*X)", iFS+2, V2);
+		iRV += report(psR, "(x%0.*X)", iFS+2, V2);
 		if (fmTST(aNL))
-			iRV += wprintfx(psR, strNL);
+			iRV += report(psR, strNL);
 	}
 	return iRV;
 }
