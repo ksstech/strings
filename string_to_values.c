@@ -37,7 +37,8 @@ u64_t char2u64(char * pSrc, u64_t * pDst, int Len) {
 		x64Val <<= 8 ;
 		x64Val += (u64_t) *pSrc++ ;
 	}
-	if (pDst) *pDst = x64Val ;
+	if (pDst)
+		*pDst = x64Val ;
 	return x64Val ;
 }
 
@@ -51,8 +52,10 @@ int	xHexCharToValue(char cChr, int xBase) {
 	if (INRANGE(CHR_0, cChr, CHR_9))
 		return cChr - CHR_0;
 	if (xBase == BASE16) {
-		if (INRANGE(CHR_A, cChr, CHR_F)) return cChr - CHR_A + 10;
-		if (INRANGE(CHR_a, cChr, CHR_f)) return cChr - CHR_a + 10;
+		if (INRANGE(CHR_A, cChr, CHR_F))
+			return cChr - CHR_A + 10;
+		if (INRANGE(CHR_a, cChr, CHR_f))
+			return cChr - CHR_a + 10;
 		if (cChr == CHR_O || cChr == CHR_o) {			// XXX TEMP fix for capture error
 			IF_PX(debugTRACK, "chr= 0x%x '%c'", cChr, cChr);
 			return 0;
@@ -69,8 +72,10 @@ int	xHexCharToValue(char cChr, int xBase) {
  */
 int xSumHexCharToValue(char cChr, u8_t * pU8) {
 	int xVal = xHexCharToValue(cChr, BASE16);
-	if (xVal == erFAILURE) return erFAILURE;
-	if (*pU8) *pU8 <<= 4;
+	if (xVal == erFAILURE)
+		return erFAILURE;
+	if (*pU8)
+		*pU8 <<= 4;
 	return *pU8 += xVal;
 }
 
@@ -84,8 +89,8 @@ int xSumHexCharToValue(char cChr, u8_t * pU8) {
 int xParseHexString(char * pSrc, u8_t * pU8, size_t sU8) {
 	char * pTmp = strchr(pSrc, CHR_SPACE);				// ' '  somewhere in string?
 	size_t Len = pTmp ? (pTmp - pSrc) : strlen(pSrc);	// determine input string length
-	if (Len == 0) return 0;
-
+	if (Len == 0)
+		return 0;
 	memset(pU8, 0, sU8);								// clear destination buffer
 	sU8 = Len;											// save source length
 	PX("pSrc='%s' ",pSrc);
@@ -146,6 +151,9 @@ u64_t xStringParseX64(char *pSrc, char * pDst, int xLen) {
 char * pcStringParseIpAddr(char * pSrc, px_t pX) {
 	int Len;
 	int iRV = sscanf(pSrc, "%hhu.%hhu.%hhu.%hhu %n", pX.pu8+3, pX.pu8+2, pX.pu8+1, pX.pu8, &Len);
-	IF_RETURN_MX(iRV != 4, pSrc, pcFAILURE);
+	if (iRV != 4) {
+		MARK_M(pSrc);
+		return pcFAILURE;
+	}
 	return pSrc += Len;
 }
