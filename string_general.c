@@ -1,11 +1,9 @@
 // string_general.c - Copyright (c) 2014-25 Andre M. Maree / KSS Technologies (Pty) Ltd.
 
 #include "hal_platform.h"
-#include "FreeRTOS_Support.h"
 #include "hal_memory.h"
+#include "printfx.h"
 #include "hal_options.h"
-#include "report.h"				// +x_definitions +stdarg +stdint +stdio
-#include "syslog.h"
 #include "errors_events.h"
 #include "string_general.h"
 #include "string_to_values.h"

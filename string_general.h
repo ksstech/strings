@@ -5,7 +5,9 @@
 #include "struct_union.h"
 #include "definitions.h"
 #include "timeX.h"
+
 #include <stddef.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
