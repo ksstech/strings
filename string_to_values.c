@@ -118,10 +118,8 @@ u64_t xStringParseX64(char *pSrc, char * pDst, int xLen) {
 	int iRV;
 	while (xLen && *pSrc) {
 		iRV = xHexCharToValue(*pSrc, BASE16);
-		if (iRV == erFAILURE) {							// invalid char
-			SL_ERR("Invalid source Src=%s  Dst=%s", pSrc, pDst) ;
+		if (iRV == erFAILURE)							// invalid char
 			break;										// yes, stop parsing
-		}
 		x8Value += iRV;									// nope, add to value
 		if (xLen % 2) {									// odd length boundary?
 			xTemp <<= 8;
