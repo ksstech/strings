@@ -169,8 +169,6 @@ char * pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag,
  */
 char * pcStringParseDateTime(char * buf, u64_t * pTStamp, tm_t * psTM);
 
-struct report_t;
-int	xBitMapDecodeChanges(struct report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const char * const pMesArray[]);
 /**
  * @brief	build an output string using bit-mapped mask to select characters from a source string
  * @brief	with source string "ABCDEFGHIJKLMNOPQRST" and value 0x000AAAAA will build "A-C-E-G-I-K-M-O-Q-S-"
