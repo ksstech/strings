@@ -31,6 +31,12 @@
 #define	delimTIME2	"m:"
 #define	delimTIME3	"sz. "
 
+#ifdef appOPTIONS
+	#define OPT_GET(opt)	xOptionGet(opt)
+#else
+	#define OPT_GET(opt)	0		
+#endif
+
 // ###################################### Public functions #########################################
 
 int	xstrverify(char * pStr, char cMin, char cMax, char cNum) {
@@ -308,7 +314,7 @@ char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 	// check CCYY?MM? ahead
 	TPact = xStringFindDelim(pSrc, delimDATE1, sizeof("CCYY"));
 	NPact = (TPact > 0) ? xStringFindDelim(pSrc+TPact+1, delimDATE1, sizeof("MM")) : 0;
-	u8_t Option = xOptionGet(dbgSyntax);
+	u8_t Option = OPT_GET(dbgSyntax);
 	IF_PX(debugTRACK && Option, "C: TPact=%d  NPact=%d", TPact, NPact);
 	if (NPact >= 1) {
 		IF_PX(debugTRACK && Option, "  Yr '%.*s'", TPact, pSrc);
