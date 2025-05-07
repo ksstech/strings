@@ -15,8 +15,6 @@ extern "C" {
 
 // ########################################### MACROS ##############################################
 
-#define	controlSIZE_FLAGS_BUF		(24 * 10)
-
 #define stringXMEMREV_XOR           0
 
 // ############################## Used for String <> DATETIME conversions ##########################
