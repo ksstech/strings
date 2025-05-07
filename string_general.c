@@ -85,10 +85,10 @@ int	xmemrev(char * pMem, size_t Size) {
 
 void xstrrev(char * pStr) { xmemrev(pStr, strlen(pStr)); }
 
-int	strchr_i(const char * pStr, char cChr) {
+int	strchr_i(const char * pStr, int iChr) {
 	IF_myASSERT(debugPARAM, halMemoryANY((void *)pStr));
-	char * pTmp = strchr(pStr, cChr);
-	return (pTmp != NULL) ? (pTmp - pStr) : erFAILURE;
+	char * pTmp = strchr(pStr, iChr);
+	return pTmp ? pTmp - pStr : erFAILURE;
 }
 
 int	xstrncmp(const char * s1, const char * s2, size_t xL, bool Exact) {
