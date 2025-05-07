@@ -33,10 +33,6 @@
 
 // ###################################### Public functions #########################################
 
-/**
- * @brief	verify to a maximum number of characters that each character is within a range
- * @return	erSUCCESS if cNum or fewer chars tested OK and a NUL is reached
- */
 int	xstrverify(char * pStr, char cMin, char cMax, char cNum) {
 	if (*pStr == 0)
 		return erFAILURE;
@@ -47,12 +43,6 @@ int	xstrverify(char * pStr, char cMin, char cMax, char cNum) {
 	return erSUCCESS;
 }
 
-/**
- * @brief	calculate the length of the string up to max len specified
- * @param	s		pointer to the string
- * @param	len		maximum length to check for/return
- * @return	length of the string excl the terminating '\0'
- */
 size_t xstrnlen(const char * pStr, size_t uMax) {
 	IF_myASSERT(debugPARAM, halMemoryANY((void *)pStr));
 	IF_myASSERT(debugPARAM, uMax > 0);
@@ -61,14 +51,6 @@ size_t xstrnlen(const char * pStr, size_t uMax) {
 	return uNow;
 }
 
-/**
- * @brief	Copies from s2 to s1 until either 'n' chars copied or '\000' reached in s2
- * 			String will ONLY be terminated if less than maximum characters copied.
- * @param	s1 - pointer to destination uint8_t array (string)
- *			s2 - pointer to source uint8_t array (string)
- *			n - maximum number of chars to copy
- * @return	Actual number of chars copied (x <= n) excluding possible NULL
- */
 int	xstrncpy(char * pDst, char * pSrc, int xLen ) {
 	IF_myASSERT(debugPARAM, halMemorySRAM((void*) pDst) && halMemoryANY((void*) pSrc) && xLen);
 	int Cnt = 0;
@@ -101,33 +83,14 @@ int	xmemrev(char * pMem, size_t Size) {
 	return erSUCCESS;
 }
 
-/**
- * @param  str is a pointer to the string to be reversed
- * @return none
- * @brief  perform 'in-place' start <-> end character reversal
- */
 void xstrrev(char * pStr) { xmemrev(pStr, strlen(pStr)); }
 
-/**
- * @brief	determine position of character in string (if at all)
- * @param	pStr - pointer to string to scan
- * 			cChr - the character match to find
- * @return	0 -> n the index into the string where the char is found
- * 			FAILURE if no match found, or cChr is NULL
- */
 int	strchr_i(const char * pStr, char cChr) {
 	IF_myASSERT(debugPARAM, halMemoryANY((void *)pStr));
 	char * pTmp = strchr(pStr, cChr);
 	return (pTmp != NULL) ? (pTmp - pStr) : erFAILURE;
 }
 
-/**
- * @brief	based on flag case in/sensitive
- * @param	s1/2 - pointers to strings to be compared
- * @param	xLen - maximum length to compare (non null terminated string)
- * @param	flag - true for exact match, else upper/lower case difference ignored
- * @return			true or false based on comparison
- */
 int	xstrncmp(const char * s1, const char * s2, size_t xL, bool Exact) {
 	if (xL == 0) {
 		size_t sz1 = strlen(s1);
@@ -152,12 +115,6 @@ int	xstrncmp(const char * s1, const char * s2, size_t xL, bool Exact) {
 	return (*s1 == 0 && *s2 == 0) ? 1 : (xL == 0) ? 1 : 0;
 }
 
-/**
- * @brief	compare two strings based on flag case in/sensitive
- * @param	s1, s2 - pointers to strings to be compared
- * 			flag - true for exact match, else upper/lower case difference ignored
- * @return	true or false based on comparison
- */
 int	xstrcmp(const char * s1, const char * s2, bool Exact) {
 	IF_myASSERT(debugPARAM, halMemoryANY((void *)s1) && halMemoryANY((void *)s2));
 	while (*s1 && *s2) {
@@ -174,14 +131,6 @@ int	xstrcmp(const char * s1, const char * s2, bool Exact) {
 	return (*s1 == 0 && *s2 == 0) ? 1 : 0;
 }
 
-/**
- * @brief	determine array index of specified string in specified string array
- * 			expects the array to be null terminated
- * @param	key	- pointer to key string to find
- * 			table - pointer to array of pointers to search in.
- * 			flag - true for exact match, else upper/lower case difference ignored
- * @return	if match found, index into array else FAILURE
- */
 int	xstrindex(char * key, char * array[]) {
 	int	i = 0;
 	while (array[i]) {
@@ -209,12 +158,6 @@ int xstrishex(char * pStr) {
 
 // ############################### string parsing routines #########################################
 
-/**
- * @brief	parse an encoded string (optionally in-place) to a non-encoded string
- * @return	erFAILURE if illegal/unexpected characters encountered
- * 			erSUCCESS if a zero length string encountered
- * 			1 or greater = length of the parsed string
- */
 int	xStringParseEncoded(char * pDst, char * pSrc) {
 	IF_myASSERT(debugPARAM, halMemorySRAM((void*) pSrc));
 	IF_myASSERT(debugPARAM && (pDst != NULL), halMemorySRAM((void*) pDst));
@@ -279,15 +222,6 @@ int	xStringParseUnicode(char * pDst, char * pSrc, size_t Len) {
 	return iRV;
 }
 
-/**
- * @brief	skips specified delimiters (if any)
- * @brief	does NOT automatically work on assumption that string is NULL terminated, hence requires MaxLen
- * @brief	ONLY if MaxLen specified as NULL, assume string is terminated and calculate length.
- * @param[in]	pSrc - pointer to source buffer
- * @param[in]	pDel - pointer to string of valid delimiters
- * @param[in]	MaxLen - maximum number of characters in buffer
- * @return		number of delimiters (to be) skipped
- */
 int	xStringSkipDelim(char * pSrc, const char * pDel, size_t MaxLen) {
 	IF_myASSERT(debugPARAM, halMemoryANY((void*) pSrc) && halMemoryANY((void *)pDel));
 	// If no length supplied
@@ -345,15 +279,6 @@ int	xStringFindDelim(char * pSrc, const char * pDlm, size_t xMax) {
 	return erFAILURE;
 }
 
-/**
- * @brief	Copies token from source buffer to destination buffer
- * @param	pDst - pointer to destination buffer
- * @param	pSrc - pointer to source buffer
- * @param	pDel - pointer to possible (leading) delimiters (to be skipped)
- * @param	flag - (< 0) force lower case, (= 0) no conversion (> 0) force upper case
- * @param	MaxLen - maximum number of characters in buffer
- * @return	pointer to next character to be processed...
- */
 char * pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag, size_t sDst) {
 	pSrc += xStringCountSpaces(pSrc);					// skip over leading "spaces"
 	char * pTmp = pDst;
@@ -368,27 +293,6 @@ char * pcStringParseToken(char * pDst, char * pSrc, const char * pDel, int flag,
 	return pSrc;					// pointer to NULL or next char [delimiter?] to be processed..
 }
 
-/**
- * pcStringParseDateTime()
- * @brief		parse a string with format	2015-04-01T12:34:56.789Z
- * 											2015/04/01T23:34:45.678Z
- * 											2015-04-01T12h34m56s789Z
- * 											2015/04/01T23h12m54s123Z
- * 											CCYY?MM?DD?hh?mm?ss?uuuuuu?
- * 				to extract the date/time components x.789Z mSec components are parsed and stored if found.
- * @param[in]	buf - pointer to the string to be parsed
- * @param[out]	pTStamp - pointer to structure for epoch seconds [+millisec]
- * @param[out]	ptm - pointer to structure of type tm
- * @return		updated buf pointing to next character to be processed
- * 				valid values (if found) in time structure
- * 				0 if no valid milli/second values found
- * @note		tm_isdst not yet calculated/set!!
- * 				Must also add support for following 3 formats as used
- * 				in HTTP1.1 onwards for "If-Modified-Since" option
- * 					Fri, 31 Dec 1999 23:59:59 GMT (standard going forward)
- *					Friday, 31-Dec-99 23:59:59 GMT
- *					Fri Dec 31 23:59:59 1999
- */
 char * pcStringParseDateTime(char * pSrc, u64_t * pTStamp, struct tm * psTM) {
 	u32_t flag = 0;
 	/* TPmax	= ThisPar max length+1
@@ -631,15 +535,6 @@ int	xBitMapDecodeChanges(report_t * psR, u32_t V1, u32_t V2, u32_t Mask, const c
 	return iRV;
 }
 
-/**
- * @brief	build an output string using bit-mapped mask to select characters from a source string
- * @brief	with source string "ABCDEFGHIJKLMNOPQRST" and value 0x000AAAAA will build "A-C-E-G-I-K-M-O-Q-S-"
- * @param	pString
- * @param	pBuf
- * @param	uValue
- * @param	iWidth
- * @return
- */
 int	xStringValueMap(const char * pString, char * pBuf, u32_t uValue, int iWidth) {
 	IF_myASSERT(debugPARAM, halMemoryANY((void*) pString) && halMemorySRAM((void*) pBuf) && (iWidth <= 32) && (strnlen(pString, 33) <= iWidth));
 	u32_t uMask = 0x8000 >> (32 - iWidth);
