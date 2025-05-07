@@ -28,8 +28,9 @@
  * 				If only converted value required as return, *d can be made NULL ;
  */
 u64_t char2u64(char * pSrc, u64_t * pDst, int Len) {
-	IF_myASSERT(debugPARAM, pSrc && INRANGE(1, Len, 8));
 	u64_t x64Val = 0ULL ;
+	if (pSrc == NULL || INRANGE(1, Len, 8) == 0)
+		return x64Val;
 	while (Len--) {
 		x64Val <<= 8 ;
 		x64Val += (u64_t) *pSrc++ ;
