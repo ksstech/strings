@@ -1,11 +1,8 @@
-/*
- * string_to_values.h - Copyright (c) 2014-24 Andre M. Maree / KSS Technologies (Pty) Ltd.
- */
+// string_to_values.h
 
 #pragma once
 
-#include "complex_vars.h"		// struct_union x_time definitions stdint time
-#include "definitions.h"
+#include "struct_union.h"
 
 #ifdef __cplusplus
 extern "C" {
