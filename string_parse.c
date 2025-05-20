@@ -3,7 +3,6 @@
 #include "hal_platform.h"
 #include "hal_memory.h"
 #include "printfx.h"
-#include "hal_options.h"
 #include "errors_events.h"
 #include "string_general.h"
 #include "string_to_values.h"
