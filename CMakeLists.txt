@@ -1,5 +1,5 @@
 # STRINGSX
-set( srcs "string_general.c" "string_to_values.c" )
+set( srcs "string_general.c" "string_to_values.c" "string_parse.c" )
 set( include_dirs "." )
 set( requires "hal_esp32" )
 set( priv_requires )
