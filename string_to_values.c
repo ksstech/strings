@@ -1,4 +1,4 @@
-// string_to_values.c - Copyright 2014-24 (c) Andre M. Maree / KSS Technologies (Pty) Ltd.
+// string_to_values.c - Copyright (c) 2014-25 Andre M. Maree / KSS Technologies (Pty) Ltd.
 
 #include "string_general.h"
 #include "string_to_values.h"
