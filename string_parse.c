@@ -132,15 +132,24 @@ char * cvParseRangeX32(char * pSrc, px_t pX, cvi_e cvI, x32_t Lo, x32_t Hi) {
 	vf_e cvF = xIndex2Form(cvI);
 	IF_myASSERT(debugPARAM, cvS <= vs32B);
 	char * pTmp = cvParseValue(pSrc, xFormSize2Index(cvF, vs32B), (px_t) &X32);
-	if (pTmp == pcFAILURE) return pTmp;
+	if (pTmp == pcFAILURE)
+		return pTmp;
 	switch(cvF) {
-	case vfUXX: if ((X32.u32 < Lo.u32) || (X32.u32 > Hi.u32)) return pcFAILURE;
+	case vfUXX:
+		if ((X32.u32 < Lo.u32) || (X32.u32 > Hi.u32))
+			return pcFAILURE;
 		break;
-	case vfIXX: if ((X32.i32 < Lo.i32) || (X32.i32 > Hi.i32)) return pcFAILURE;
+	case vfIXX:
+		if ((X32.i32 < Lo.i32) || (X32.i32 > Hi.i32))
+			return pcFAILURE;
 		break;
-	case vfFXX: if ((X32.f32 < Lo.f32) || (X32.f32 > Hi.f32)) return pcFAILURE;
+	case vfFXX:
+		if ((X32.f32 < Lo.f32) || (X32.f32 > Hi.f32))
+			return pcFAILURE;
 		break;
-	case vfSXX: IF_myASSERT(debugPARAM, 0); return pcFAILURE;
+	case vfSXX:
+		IF_myASSERT(debugPARAM, 0);
+		return pcFAILURE;
 	}
 	vx32ValueStore(X32, pX, cvI);
 	return pTmp;
